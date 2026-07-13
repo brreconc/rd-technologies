@@ -31,13 +31,27 @@
 
 ## App
 
-| Componente   | Ubicación               | Estado                                         |
-| ------------ | ----------------------- | ---------------------------------------------- |
-| `RootLayout` | `src/app/layout.tsx`    | Fuentes, tema, skip link, Header + Footer.     |
-| `Providers`  | `src/app/providers.tsx` | Theming (next-themes).                         |
-| `HomePage`   | `src/app/page.tsx`      | Hero provisional (secciones reales en Fase 2). |
+| Componente   | Ubicación               | Estado                                     |
+| ------------ | ----------------------- | ------------------------------------------ |
+| `RootLayout` | `src/app/layout.tsx`    | Fuentes, tema, skip link, Header + Footer. |
+| `Providers`  | `src/app/providers.tsx` | Theming (next-themes).                     |
+| `HomePage`   | `src/app/page.tsx`      | Compone las 9 secciones (one-page).        |
 
-## Próximos (Fase 2)
+## Secciones (`src/components/sections`) — Fase 2
 
-Secciones: `Hero`, `ValueProps`, `Services`, `Differentiators`, `Process`, `UseCases`,
-`Testimonials`, `FAQ`, `FinalCTA`.
+Contenido tipado en `src/lib/constants` (no hardcodeado). Helpers: `SectionHeading`, `IconBadge`.
+
+| Sección           | Ancla                 | Fuente de contenido                 |
+| ----------------- | --------------------- | ----------------------------------- |
+| `Hero`            | —                     | copy inline (oficial)               |
+| `ValueProps`      | `#propuesta-de-valor` | `constants/value-props`             |
+| `Services`        | `#servicios`          | `constants/services`                |
+| `Differentiators` | `#por-que-elegirnos`  | `constants/differentiators`         |
+| `Process`         | `#proceso`            | `constants/process`                 |
+| `UseCases`        | `#casos-de-uso`       | `constants/use-cases`               |
+| `Testimonials`    | `#testimonios`        | `constants/testimonials` (ejemplos) |
+| `FAQ`             | `#faq`                | `constants/faq` (Accordion)         |
+| `FinalCTA`        | `#contacto`           | copy inline (oficial)               |
+
+> Sin animaciones todavía (llegan en Fase 3). Todas las secciones usan HTML semántico
+> (`section` + `aria-labelledby`, listas, headings jerárquicos).

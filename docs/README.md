@@ -32,7 +32,8 @@
 - ✅ **Fase 1 — Sistema de diseño y primitivos:** tema claro+oscuro con tokens, primitivos `ui/`
   (Button, Card, Container, Input, Accordion), Header/Footer/Navegación accesibles y ThemeToggle.
   **Completada.**
-- ⬜ Fase 2 — Estructura y contenido estático (todas las secciones).
+- ✅ **Fase 2 — Estructura y contenido estático:** las 9 secciones de la landing con el copy
+  oficial, responsive y accesibles (contenido en `lib/constants`). **Completada.**
 - ⬜ Fase 3 — Capa de motion (animaciones).
 - ⬜ Fase 4 — Formularios y backend local.
 - ⬜ Fase 5 — SEO, metadata, pulido.

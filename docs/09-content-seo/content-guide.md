@@ -4,8 +4,9 @@
 
 - **Marca y datos globales:** [`src/config/site.ts`](../../src/config/site.ts) (nombre, tagline,
   descripción, navegación, contacto, redes, keywords).
-- **Contenido de secciones** (servicios, proceso, FAQ, testimonios): en `src/lib/constants`
-  (tipado) — se crea en las Fases 2–3.
+- **Contenido de secciones** (propuesta de valor, servicios, diferenciadores, proceso, casos de
+  uso, testimonios, FAQ): tipado en `src/lib/constants` (un archivo por sección). Editar ahí, no
+  en el JSX. Los iconos se referencian como componentes de Lucide dentro de cada constante.
 
 El copy oficial de las secciones proviene de `Prompt.md` (brief del cliente). **No inventar
 mensajes de marca**; ajustar solo con aprobación.
