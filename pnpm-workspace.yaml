@@ -1,0 +1,5 @@
+# Aprobación de scripts de build (pnpm >= 11). Ambas son dependencias de
+# confianza: sharp (next/image) y unrs-resolver (resolver de módulos).
+allowBuilds:
+  sharp: true
+  unrs-resolver: true
