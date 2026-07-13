@@ -1,11 +1,17 @@
 "use client";
 
 import { ThemeProvider } from "next-themes";
+import { LazyMotion } from "framer-motion";
+
+// Carga diferida del motor de animación (chunk aparte, fuera del JS inicial).
+const loadFeatures = () => import("@/lib/animations/motion-features").then((mod) => mod.default);
 
 /**
  * Proveedores globales de la aplicación (§7).
- * Por ahora solo el tema (oscuro por defecto). El toggle claro/oscuro se
- * añadirá en la Fase 1; la infraestructura ya queda lista aquí.
+ * - `ThemeProvider`: tema claro/oscuro (oscuro por defecto).
+ * - `LazyMotion`: carga solo las features `domAnimation` de Framer Motion y
+ *   habilita los componentes ligeros `m.*` (en vez de `motion.*`), reduciendo
+ *   mucho el bundle inicial (§11). `strict` obliga a usar `m` en todo el árbol.
  */
 export function Providers({ children }: { children: React.ReactNode }) {
   return (
@@ -15,7 +21,9 @@ export function Providers({ children }: { children: React.ReactNode }) {
       enableSystem={false}
       disableTransitionOnChange
     >
-      {children}
+      <LazyMotion features={loadFeatures} strict>
+        {children}
+      </LazyMotion>
     </ThemeProvider>
   );
 }

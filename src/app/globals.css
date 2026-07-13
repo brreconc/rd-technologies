@@ -144,3 +144,40 @@
   -webkit-background-clip: text;
   color: transparent;
 }
+
+/* --------------------------------------------------------------------------
+   Animaciones (Fase 3). Framer Motion es el motor principal; aquí solo van
+   efectos de fondo puramente decorativos y de bajo coste (§11).
+   -------------------------------------------------------------------------- */
+
+/* Fondo "aurora" del hero: gradiente cónico difuminado que gira lentamente.
+   Coste casi nulo (una capa con blur + transform), no bloquea nada. */
+@keyframes aurora-spin {
+  to {
+    transform: rotate(1turn);
+  }
+}
+
+.hero-aurora {
+  position: absolute;
+  inset: -30% -20% auto -20%;
+  z-index: -10;
+  height: 70%;
+  pointer-events: none;
+  background: conic-gradient(
+    from 0deg at 50% 50%,
+    color-mix(in srgb, var(--accent-cyan) 12%, transparent),
+    color-mix(in srgb, var(--accent-purple) 12%, transparent),
+    color-mix(in srgb, var(--accent-cyan) 12%, transparent)
+  );
+  filter: blur(90px);
+  opacity: 0.7;
+  animation: aurora-spin 24s linear infinite;
+  will-change: transform;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .hero-aurora {
+    animation: none;
+  }
+}

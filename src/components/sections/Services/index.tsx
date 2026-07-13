@@ -2,6 +2,8 @@ import { Container, Section } from "@/components/ui/container";
 import { Card } from "@/components/ui/card";
 import { SectionHeading } from "@/components/sections/SectionHeading";
 import { IconBadge } from "@/components/sections/IconBadge";
+import { Reveal } from "@/components/animations/Reveal";
+import { Stagger, StaggerItem } from "@/components/animations/Stagger";
 import { services } from "@/lib/constants/services";
 
 /** Sección "Servicios" — 3 pilares (§8.3). */
@@ -9,16 +11,18 @@ export function Services() {
   return (
     <Section id="servicios" aria-labelledby="services-title" className="border-border border-t">
       <Container>
-        <SectionHeading
-          id="services-title"
-          eyebrow="Servicios"
-          title="Tres pilares para tu producto digital"
-          description="Desarrollo, seguridad y soporte trabajando juntos en cada proyecto."
-        />
+        <Reveal>
+          <SectionHeading
+            id="services-title"
+            eyebrow="Servicios"
+            title="Tres pilares para tu producto digital"
+            description="Desarrollo, seguridad y soporte trabajando juntos en cada proyecto."
+          />
+        </Reveal>
 
-        <ul className="mt-12 grid gap-6 lg:grid-cols-3">
+        <Stagger className="mt-12 grid gap-6 lg:grid-cols-3">
           {services.map((service) => (
-            <li key={service.title}>
+            <StaggerItem key={service.title}>
               <Card className="flex h-full flex-col gap-4">
                 <IconBadge icon={service.icon} />
                 <h3 className="font-display text-foreground text-xl font-semibold">
@@ -36,9 +40,9 @@ export function Services() {
                   ))}
                 </ul>
               </Card>
-            </li>
+            </StaggerItem>
           ))}
-        </ul>
+        </Stagger>
       </Container>
     </Section>
   );

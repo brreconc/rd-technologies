@@ -34,7 +34,9 @@
   **Completada.**
 - ✅ **Fase 2 — Estructura y contenido estático:** las 9 secciones de la landing con el copy
   oficial, responsive y accesibles (contenido en `lib/constants`). **Completada.**
-- ⬜ Fase 3 — Capa de motion (animaciones).
+- ✅ **Fase 3 — Capa de motion:** reveals al scroll con stagger (Framer Motion optimizado con
+  LazyMotion), entrada del hero, aurora CSS y hover-lift; respeta `prefers-reduced-motion` y el
+  presupuesto de JS (~199 KB Brotli). **Completada.**
 - ⬜ Fase 4 — Formularios y backend local.
 - ⬜ Fase 5 — SEO, metadata, pulido.
 - ⬜ Fase 6 — QA final y hardening.

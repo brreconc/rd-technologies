@@ -34,6 +34,14 @@ export default function RootLayout({
       className={`${inter.variable} ${spaceGrotesk.variable} ${fraunces.variable} ${jetbrainsMono.variable}`}
     >
       <body className="flex min-h-dvh flex-col antialiased">
+        {/* Sin JS: forzar visibles los elementos con animación de entrada (progressive enhancement). */}
+        <noscript>
+          <style
+            dangerouslySetInnerHTML={{
+              __html: ".reveal{opacity:1!important;transform:none!important}",
+            }}
+          />
+        </noscript>
         <Providers>
           {/* Skip link accesible (§10) — visible solo al enfocar con teclado. */}
           <a

@@ -5,7 +5,10 @@ import { cn } from "@/lib/utils/cn";
 export function Card({ className, ...props }: React.ComponentProps<"div">) {
   return (
     <div
-      className={cn("border-border bg-surface rounded-xl border p-6 sm:p-8", className)}
+      className={cn(
+        "border-border bg-surface hover:border-accent-cyan/40 rounded-xl border p-6 transition-[transform,border-color] duration-300 hover:-translate-y-1 sm:p-8",
+        className,
+      )}
       {...props}
     />
   );

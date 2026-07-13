@@ -1,5 +1,6 @@
 import { Container, Section } from "@/components/ui/container";
 import { SectionHeading } from "@/components/sections/SectionHeading";
+import { Reveal } from "@/components/animations/Reveal";
 import {
   Accordion,
   AccordionItem,
@@ -16,20 +17,25 @@ export function FAQ() {
   return (
     <Section id="faq" aria-labelledby="faq-title" className="border-border border-t">
       <Container className="max-w-3xl">
-        <SectionHeading
-          id="faq-title"
-          centered
-          eyebrow="Preguntas frecuentes"
-          title="Resolvemos tus dudas"
-        />
-        <Accordion type="single" collapsible className="mt-10">
-          {faq.map((item, index) => (
-            <AccordionItem key={item.question} value={`faq-${index}`}>
-              <AccordionTrigger>{item.question}</AccordionTrigger>
-              <AccordionContent>{item.answer}</AccordionContent>
-            </AccordionItem>
-          ))}
-        </Accordion>
+        <Reveal className="text-center">
+          <SectionHeading
+            id="faq-title"
+            centered
+            eyebrow="Preguntas frecuentes"
+            title="Resolvemos tus dudas"
+          />
+        </Reveal>
+
+        <Reveal>
+          <Accordion type="single" collapsible className="mt-10">
+            {faq.map((item, index) => (
+              <AccordionItem key={item.question} value={`faq-${index}`}>
+                <AccordionTrigger>{item.question}</AccordionTrigger>
+                <AccordionContent>{item.answer}</AccordionContent>
+              </AccordionItem>
+            ))}
+          </Accordion>
+        </Reveal>
       </Container>
     </Section>
   );

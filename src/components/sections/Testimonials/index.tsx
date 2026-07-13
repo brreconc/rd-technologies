@@ -2,6 +2,8 @@ import { Quote } from "lucide-react";
 import { Container, Section } from "@/components/ui/container";
 import { Card } from "@/components/ui/card";
 import { SectionHeading } from "@/components/sections/SectionHeading";
+import { Reveal } from "@/components/animations/Reveal";
+import { Stagger, StaggerItem } from "@/components/animations/Stagger";
 import { testimonials } from "@/lib/constants/testimonials";
 
 function getInitials(name: string): string {
@@ -18,16 +20,19 @@ export function Testimonials() {
   return (
     <Section id="testimonios" aria-labelledby="testi-title" className="border-border border-t">
       <Container>
-        <SectionHeading
-          id="testi-title"
-          centered
-          eyebrow="Testimonios"
-          title="Historias de confianza"
-          description="Ejemplos ilustrativos — se reemplazarán por testimonios reales."
-        />
-        <ul className="mt-12 grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
+        <Reveal className="mx-auto max-w-2xl text-center">
+          <SectionHeading
+            id="testi-title"
+            centered
+            eyebrow="Testimonios"
+            title="Historias de confianza"
+            description="Ejemplos ilustrativos — se reemplazarán por testimonios reales."
+          />
+        </Reveal>
+
+        <Stagger className="mt-12 grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
           {testimonials.map((testimonial) => (
-            <li key={testimonial.role}>
+            <StaggerItem key={testimonial.role}>
               <Card className="flex h-full flex-col gap-4">
                 <Quote className="text-accent-cyan size-8" aria-hidden="true" />
                 <p className="text-foreground">“{testimonial.quote}”</p>
@@ -44,9 +49,9 @@ export function Testimonials() {
                   </div>
                 </div>
               </Card>
-            </li>
+            </StaggerItem>
           ))}
-        </ul>
+        </Stagger>
       </Container>
     </Section>
   );

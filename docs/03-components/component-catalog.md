@@ -53,5 +53,15 @@ Contenido tipado en `src/lib/constants` (no hardcodeado). Helpers: `SectionHeadi
 | `FAQ`             | `#faq`                | `constants/faq` (Accordion)         |
 | `FinalCTA`        | `#contacto`           | copy inline (oficial)               |
 
-> Sin animaciones todavía (llegan en Fase 3). Todas las secciones usan HTML semántico
-> (`section` + `aria-labelledby`, listas, headings jerárquicos).
+> Todas las secciones usan HTML semántico (`section` + `aria-labelledby`, listas, headings
+> jerárquicos) y animaciones de entrada (ver abajo).
+
+## Animaciones (`src/components/animations`) — Fase 3
+
+| Componente                | Uso                                                                                 |
+| ------------------------- | ----------------------------------------------------------------------------------- |
+| `Reveal`                  | Entrada fade+subida al hacer scroll (`mode="scroll"`) o al montar (`mode="mount"`). |
+| `Stagger` / `StaggerItem` | Lista con entrada escalonada de sus ítems.                                          |
+
+Detalle completo en [design-system/motion](../02-design-system/motion.md). Framer Motion
+optimizado con `LazyMotion` + `m.*` + carga diferida del motor (§11).

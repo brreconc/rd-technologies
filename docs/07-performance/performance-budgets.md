@@ -12,12 +12,23 @@ Requisito §11.
 ## Técnicas (aplicadas / previstas)
 
 - ✅ `next/font` self-host con `display: swap` (sin FOUT, sin peticiones externas).
-- ✅ Server Components por defecto (menos JS al cliente).
+- ✅ Server Components por defecto; los componentes de animación son el único cliente añadido.
 - ✅ `next/image` con AVIF/WebP configurado en [`next.config.ts`](../../next.config.ts).
-- ⬜ `next/dynamic` para animaciones pesadas (Fase 3).
-- ⬜ Auditoría con **Lighthouse CI** y `@next/bundle-analyzer` (Fases 3/6).
+- ✅ **Framer Motion optimizado** (§11, Fase 3): `LazyMotion` + componentes ligeros `m.*` +
+  **carga diferida del motor** `domAnimation` en un chunk aparte
+  ([`motion-features.ts`](../../src/lib/animations/motion-features.ts)) → fuera del JS crítico.
+- ✅ **El `<h1>` del hero no se anima** (elemento LCP): se pinta de inmediato.
+- ✅ Efectos de fondo por **CSS** (aurora del hero) en vez de JS.
+- ⬜ Auditoría con **Lighthouse CI** y `@next/bundle-analyzer` (Fase 6).
 
-## Cómo medir
+## Medición actual (Fase 3, ruta `/`)
 
-`pnpm build` muestra el tamaño por ruta. En Fase 6 se añade Lighthouse CI con presupuestos que
-fallan la build si se exceden.
+Medido sobre `pnpm start` (los `<script src>` reales de la ruta):
+
+| Compresión                       | First Load JS                      |
+| -------------------------------- | ---------------------------------- |
+| gzip -9                          | ~228 KB                            |
+| **Brotli** (lo que sirve un CDN) | **~199 KB** ✅ (objetivo < 200 KB) |
+
+> Next 16 + Turbopack no imprime la tabla de tamaños en el build; se mide sirviendo la ruta.
+> La validación formal (Lighthouse CI + budgets que fallan la build) se añade en la Fase 6.
