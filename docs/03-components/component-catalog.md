@@ -9,7 +9,8 @@
 | `Button`                                          | `ui/button`    | Variantes (`primary`/`secondary`/`outline`/`ghost`) y tallas con `cva`. `asChild` (Radix Slot) para renderizar como `<a>`. Touch target ≥ 44px. |
 | `Card` (+ `CardHeader/Title/Description/Content`) | `ui/card`      | Superficie con borde; composición por subpartes.                                                                                                |
 | `Container` / `Section`                           | `ui/container` | Ancho máximo + padding fluido; `Section` añade espaciado vertical y `scroll-mt` para anclas.                                                    |
-| `Input` / `Label`                                 | `ui/input`     | Campo y etiqueta base para formularios (Fase 4).                                                                                                |
+| `Input` / `Label`                                 | `ui/input`     | Campo y etiqueta base para formularios (usados por la Fase 4).                                                                                  |
+| `Textarea`                                        | `ui/textarea`  | Área multilínea (mensaje de contacto). `resize-y`, sin desbordar en anchos pequeños.                                                            |
 | `Accordion` (+ `Item/Trigger/Content`)            | `ui/accordion` | Sobre Radix Accordion (teclado + ARIA). Para la FAQ (Fase 2).                                                                                   |
 
 ## Compartidos (`src/components/shared`)
@@ -18,7 +19,7 @@
 | ------------- | ------------------------- | ------------------------------------------------------------------------------------- |
 | `Header`      | `shared/Header`           | Cabecera fija (sticky) con nav por anclas, `ThemeToggle` y CTA. Server Component.     |
 | `MobileNav`   | `shared/Header/MobileNav` | Menú móvil (< lg) con Radix Dialog (trampa de foco, Escape, ARIA). Cliente.           |
-| `Footer`      | `shared/Footer`           | Logo, navegación, redes (si hay datos) y copyright.                                   |
+| `Footer`      | `shared/Footer`           | Logo, navegación, redes (si hay datos), `NewsletterForm` y copyright.                 |
 | `ThemeToggle` | `shared/ThemeToggle`      | Alterna claro/oscuro (`next-themes`); usa `useMounted` para evitar mismatch. Cliente. |
 | `Logo`        | `shared/Logo`             | Wordmark tipográfico enlazado al inicio (sin logo gráfico aún, §19.5).                |
 
@@ -65,3 +66,19 @@ Contenido tipado en `src/lib/constants` (no hardcodeado). Helpers: `SectionHeadi
 
 Detalle completo en [design-system/motion](../02-design-system/motion.md). Framer Motion
 optimizado con `LazyMotion` + `m.*` + carga diferida del motor (§11).
+
+## Formularios (`src/components/forms`) — Fase 4
+
+Clientes (`"use client"`). Validan con el mismo esquema Zod que el servidor
+(`lib/utils/validators`) y envían por JSON a los route handlers. Seguridad y
+accesibilidad detalladas en [05-security/forms-hardening](../05-security/forms-hardening.md).
+
+| Componente       | Ubicación              | Notas                                                                                           |
+| ---------------- | ---------------------- | ----------------------------------------------------------------------------------------------- |
+| `ContactForm`    | `forms/ContactForm`    | Nombre/email/empresa/mensaje. Errores accesibles, estados pending/éxito/error. En el CTA final. |
+| `NewsletterForm` | `forms/NewsletterForm` | Email + suscripción, formato compacto para el pie de página.                                    |
+| `AntiBotFields`  | `forms/anti-bot`       | Honeypot + input de tiempo (time-trap) ocultos. Hook `useAntiBot` + `readAntiBotPayload`.       |
+| `postForm`       | `forms/post-form`      | POST JSON same-origin; normaliza la respuesta del servidor a un `SubmitResult` tipado.          |
+
+Endpoints (`src/app/api`): `contact/route.ts`, `newsletter/route.ts`,
+`health/route.ts` (runtime Node). Lógica de guardias en `src/lib/api`.

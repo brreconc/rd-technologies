@@ -30,8 +30,9 @@ Aplicadas en [`next.config.ts`](../../next.config.ts) vía `getSecurityHeaders()
 
 ### 3. Proxy (borde)
 
-[`src/proxy.ts`](../../src/proxy.ts) refuerza cabeceras clave y es el punto de extensión para el
-**rate limiting** (Fase 4).
+[`src/proxy.ts`](../../src/proxy.ts) refuerza cabeceras clave. El **rate limiting** NO vive aquí:
+se aplica en los route handlers (runtime Node), ver
+[ADR-007](../01-architecture/decisions/ADR-007-rate-limit-route-handlers.md).
 
 ### 4. Validación de entorno
 
@@ -42,10 +43,15 @@ Aplicadas en [`next.config.ts`](../../next.config.ts) vía `getSecurityHeaders()
 Comprobado en `pnpm start` que todas las cabeceras se emiten correctamente (200 OK, CSP de
 producción con `upgrade-insecure-requests`, HSTS presente, sin `x-powered-by`).
 
-## Pendiente (Fases 4 y 6)
+## Formularios (Fase 4 — implementado)
 
-- **Formularios:** validación doble (Zod cliente/servidor), sanitización, honeypot + time-trap,
-  rate limiting por IP, CSRF, captcha opcional. Ver [`forms-hardening.md`](./forms-hardening.md).
+Validación doble (Zod cliente/servidor), sanitización, honeypot + time-trap, rate limiting por IP,
+verificación de origen (CSRF) y capa de servicios con enmascarado de PII en logs. Detalle y
+verificación en [`forms-hardening.md`](./forms-hardening.md).
+
+## Pendiente (Fase 6)
+
+- **Captcha** opcional (Turnstile/hCaptcha) — decisión §19.7.
 - **CSP estricta con nonces** (eliminar `'unsafe-inline'` de scripts) — Fase 6.
 - **`pnpm audit` limpio** como criterio de entrega; modelo de amenazas en
   [`threat-model.md`](./threat-model.md).

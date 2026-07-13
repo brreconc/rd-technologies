@@ -25,6 +25,8 @@
   --fg: #ffffff; /* Texto principal */
   --muted: #b0b0b0; /* Texto secundario */
   --ring: #00f5ff; /* Anillo de foco */
+  --danger: #ff6b6b; /* Error de formulario (AA ~7.4:1 sobre --bg) */
+  --success: #4ade80; /* Éxito de formulario (AA sobre --bg) */
 }
 
 /* --- Tema CLARO --- */
@@ -37,6 +39,8 @@
   --fg: #0a0a0a;
   --muted: #4b5563; /* gray-600 — AA sobre blanco */
   --ring: #0e7490; /* cyan-700 — foco visible sobre claro */
+  --danger: #b91c1c; /* red-700 — AA (~5.9:1) sobre blanco */
+  --success: #15803d; /* green-700 — AA sobre blanco */
 }
 
 /* --- Constantes de marca (iguales en ambos temas) --- */
@@ -59,6 +63,8 @@
   --color-foreground: var(--fg);
   --color-muted: var(--muted);
   --color-ring: var(--ring);
+  --color-danger: var(--danger);
+  --color-success: var(--success);
 
   /* Acentos de marca (constantes) */
   --color-accent-cyan: var(--accent-cyan);

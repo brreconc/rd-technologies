@@ -1,5 +1,6 @@
 import { Container } from "@/components/ui/container";
 import { Logo } from "@/components/shared/Logo";
+import { NewsletterForm } from "@/components/forms/NewsletterForm";
 import { siteConfig } from "@/config/site";
 
 /** Enlaces de redes definidos y no vacíos (los datos reales están pendientes, §19.8). */
@@ -45,6 +46,10 @@ export function Footer() {
             ))}
           </nav>
         )}
+
+        <div className="w-full max-w-xs">
+          <NewsletterForm />
+        </div>
       </Container>
 
       <div className="border-border border-t">

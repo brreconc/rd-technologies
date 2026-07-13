@@ -37,7 +37,11 @@
 - ✅ **Fase 3 — Capa de motion:** reveals al scroll con stagger (Framer Motion optimizado con
   LazyMotion), entrada del hero, aurora CSS y hover-lift; respeta `prefers-reduced-motion` y el
   presupuesto de JS (~199 KB Brotli). **Completada.**
-- ⬜ Fase 4 — Formularios y backend local.
+- ✅ **Fase 4 — Formularios y "backend" local:** `ContactForm` (en el CTA) y `NewsletterForm`
+  (en el pie) con validación Zod doble (cliente+servidor), honeypot + time-trap, rate limiting por
+  IP, verificación de origen (CSRF) y sanitización; route handlers `/api/{contact,newsletter,health}`
+  con capa de servicios (log local, lista para Resend/BD). Mejora progresiva con `mailto` de
+  respaldo. Verificado con smoke tests de seguridad. **Completada.**
 - ⬜ Fase 5 — SEO, metadata, pulido.
 - ⬜ Fase 6 — QA final y hardening.
 - ⬜ Fase 7 — Preparación de despliegue.
