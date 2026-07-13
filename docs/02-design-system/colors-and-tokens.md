@@ -56,8 +56,16 @@ Todo par texto/fondo debe cumplir **WCAG AA** (≥ 4.5:1 texto normal, ≥ 3:1 t
 acentos neón sobre negro se validan antes de usarse como texto; para texto largo se prefiere
 `--color-foreground`/`--color-muted`. Validación automatizada con axe en Fase 6.
 
-## Tema claro (pendiente — §19.3)
+## Temas claro y oscuro (implementado — Fase 1)
 
-Hoy es dark-first (valores directos en `@theme`). El toggle está preparado (`next-themes` +
-`@custom-variant dark`). Para un tema claro completo se migrará a indirección por variables
-(`:root` claro, `.dark` oscuro). Ver [ADR-004](../01-architecture/decisions/ADR-004-tailwind-v4-tokens.md).
+Oscuro es el **default**. Se usa **indirección por variables**: los valores semánticos viven en
+`:root, .dark` (oscuro) y `.light` (claro) en `globals.css`, y `@theme inline` los mapea a las
+utilidades de Tailwind. Así `bg-background`, `text-foreground`, etc. **cambian solas** con el tema.
+
+- Los **acentos de marca** son constantes en ambos temas; `--on-accent` (#0a0a0a) da texto legible
+  sobre los acentos brillantes (p. ej. botón primario cian) en claro y oscuro.
+- `next-themes` alterna la clase en `<html>`; el control es `components/shared/ThemeToggle`.
+- El tema claro ajusta `--muted` y `--ring` a valores con contraste AA sobre fondo claro.
+
+Ver [ADR-004](../01-architecture/decisions/ADR-004-tailwind-v4-tokens.md) (Tailwind v4) y
+[ADR-006](../01-architecture/decisions/ADR-006-fase1-defaults.md) (decisión de incluir tema claro).

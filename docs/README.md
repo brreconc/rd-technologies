@@ -29,7 +29,9 @@
 
 - ✅ **Fase 0 — Cimientos:** scaffold, tooling, estructura, tokens de diseño, layout raíz,
   cabeceras de seguridad, accesibilidad base. **Completada.**
-- ⬜ Fase 1 — Sistema de diseño y primitivos (Header/Footer/Nav, componentes `ui/`, toggle de tema).
+- ✅ **Fase 1 — Sistema de diseño y primitivos:** tema claro+oscuro con tokens, primitivos `ui/`
+  (Button, Card, Container, Input, Accordion), Header/Footer/Navegación accesibles y ThemeToggle.
+  **Completada.**
 - ⬜ Fase 2 — Estructura y contenido estático (todas las secciones).
 - ⬜ Fase 3 — Capa de motion (animaciones).
 - ⬜ Fase 4 — Formularios y backend local.

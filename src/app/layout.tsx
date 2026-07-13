@@ -1,5 +1,7 @@
 import { Inter, Space_Grotesk, Fraunces, JetBrains_Mono } from "next/font/google";
 import { baseMetadata } from "@/config/metadata";
+import { Header } from "@/components/shared/Header";
+import { Footer } from "@/components/shared/Footer";
 import { Providers } from "./providers";
 import "./globals.css";
 
@@ -31,7 +33,7 @@ export default function RootLayout({
       suppressHydrationWarning
       className={`${inter.variable} ${spaceGrotesk.variable} ${fraunces.variable} ${jetbrainsMono.variable}`}
     >
-      <body className="min-h-dvh antialiased">
+      <body className="flex min-h-dvh flex-col antialiased">
         <Providers>
           {/* Skip link accesible (§10) — visible solo al enfocar con teclado. */}
           <a
@@ -40,7 +42,9 @@ export default function RootLayout({
           >
             Saltar al contenido
           </a>
+          <Header />
           {children}
+          <Footer />
         </Providers>
       </body>
     </html>
