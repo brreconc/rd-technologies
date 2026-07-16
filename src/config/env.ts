@@ -13,9 +13,23 @@ const envBoolean = z
   .transform((v) => ["1", "true", "yes", "on"].includes(v.trim().toLowerCase()))
   .pipe(z.boolean());
 
-const envSchema = z.object({
+/**
+ * Normaliza el vacío a `undefined` ANTES de validar. Es clave en despliegue:
+ * `docker compose` (y muchos orquestadores) pasan las variables no rellenadas
+ * como **cadena vacía** `""`, no como ausentes. Sin esto, un `RESEND_API_KEY=""`
+ * rompería `.optional()` (que solo admite `undefined`) y `z.email("")` fallaría,
+ * tirando toda la validación de entorno. Ver docs/10-deployment.
+ */
+const optional = <T extends z.ZodType>(schema: T) =>
+  z.preprocess((v) => (v === "" || v === undefined ? undefined : v), schema.optional());
+
+export const envSchema = z.object({
   NODE_ENV: z.enum(["development", "production", "test"]).default("development"),
-  NEXT_PUBLIC_SITE_URL: z.url().default("http://localhost:3000"),
+  // `""` → default (evita que un NEXT_PUBLIC_SITE_URL vacío rompa z.url()).
+  NEXT_PUBLIC_SITE_URL: z.preprocess(
+    (v) => (v === "" || v === undefined ? undefined : v),
+    z.url().default("http://localhost:3000"),
+  ),
 
   // Política de indexación (§12). Por defecto NO indexable mientras el proyecto
   // es local/no desplegado. Se activa explícitamente al desplegar poniendo
@@ -23,11 +37,11 @@ const envSchema = z.object({
   // y el `<meta robots>` (que se emiten en cliente/edge) deben leer el MISMO valor.
   NEXT_PUBLIC_SITE_INDEXABLE: envBoolean.optional().default(false),
 
-  // Integraciones futuras del formulario (Fase 4+). OPCIONALES: si no están, la
-  // capa de servicios usa el canal de log local. Cuando existan, `contact.service`
-  // seleccionará el canal real (Resend) sin tocar la UI ni los handlers.
-  RESEND_API_KEY: z.string().min(1).optional(),
-  CONTACT_TO_EMAIL: z.email().optional(),
+  // Integraciones futuras del formulario (Fase 4+). OPCIONALES: si no están (o
+  // llegan vacías), la capa de servicios usa el canal de log local. Cuando
+  // existan, `contact.service` selecciona Resend sin tocar UI ni handlers.
+  RESEND_API_KEY: optional(z.string().min(1)),
+  CONTACT_TO_EMAIL: optional(z.email()),
 });
 
 export const env = envSchema.parse({
