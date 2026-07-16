@@ -32,11 +32,31 @@
 
 ## App
 
-| Componente   | Ubicación               | Estado                                     |
-| ------------ | ----------------------- | ------------------------------------------ |
-| `RootLayout` | `src/app/layout.tsx`    | Fuentes, tema, skip link, Header + Footer. |
-| `Providers`  | `src/app/providers.tsx` | Theming (next-themes).                     |
-| `HomePage`   | `src/app/page.tsx`      | Compone las 9 secciones (one-page).        |
+| Componente    | Ubicación                  | Estado                                                      |
+| ------------- | -------------------------- | ----------------------------------------------------------- |
+| `RootLayout`  | `src/app/layout.tsx`       | Fuentes, tema, skip link, Header + Footer, `viewport`.      |
+| `Providers`   | `src/app/providers.tsx`    | Theming (next-themes).                                      |
+| `HomePage`    | `src/app/page.tsx`         | Compone las 9 secciones + JSON-LD (one-page).               |
+| `Loading`     | `src/app/loading.tsx`      | Indicador de carga accesible (Suspense de segmento raíz).   |
+| `NotFound`    | `src/app/not-found.tsx`    | 404 con rutas de recuperación (Server Component).           |
+| `Error`       | `src/app/error.tsx`        | Error boundary de segmento; `unstable_retry()` (Next 16.2). |
+| `GlobalError` | `src/app/global-error.tsx` | Fallo del layout raíz; autocontenido (html/body propios).   |
+
+### Rutas de metadata (Fase 5)
+
+`app/sitemap.ts`, `app/robots.ts`, `app/manifest.ts`, `app/opengraph-image.tsx` y
+`app/twitter-image.tsx`. Derivan su comportamiento de `config/seo.ts` (política de
+indexación única, [ADR-008](../01-architecture/decisions/ADR-008-indexing-policy.md)).
+Detalle en [09-content-seo/seo](../09-content-seo/seo.md).
+
+## SEO (`src/components/seo`, `src/lib/seo`) — Fase 5
+
+| Pieza                         | Ubicación               | Notas                                                                           |
+| ----------------------------- | ----------------------- | ------------------------------------------------------------------------------- |
+| `JsonLd`                      | `components/seo/JsonLd` | Server Component; `<script ld+json>` con escape de `<` (anti-inyección).        |
+| `buildHomeJsonLd`             | `lib/seo/json-ld`       | `@graph` con Organization/WebSite/FAQPage (FAQ desde `constants/faq`).          |
+| `renderOgImage`               | `lib/seo/og-image`      | Diseño 1200×630 compartido por `opengraph-image` y `twitter-image` (`next/og`). |
+| `isIndexable` / `absoluteUrl` | `config/seo`            | Fuente única de la política de indexación y de las URLs absolutas.              |
 
 ## Secciones (`src/components/sections`) — Fase 2
 

@@ -1,3 +1,4 @@
+import type { Viewport } from "next";
 import { Inter, Space_Grotesk, Fraunces, JetBrains_Mono } from "next/font/google";
 import { baseMetadata } from "@/config/metadata";
 import { Header } from "@/components/shared/Header";
@@ -20,6 +21,19 @@ const jetbrainsMono = JetBrains_Mono({
 });
 
 export const metadata = baseMetadata;
+
+/**
+ * Viewport (§12). `themeColor` va aquí (no en `metadata`, deprecado desde
+ * Next 14). Se declara por esquema de color para que la barra del navegador
+ * acompañe al tema claro/oscuro. `--bg` de cada tema en globals.css.
+ */
+export const viewport: Viewport = {
+  colorScheme: "dark light",
+  themeColor: [
+    { media: "(prefers-color-scheme: dark)", color: "#0a0a0a" },
+    { media: "(prefers-color-scheme: light)", color: "#ffffff" },
+  ],
+};
 
 export default function RootLayout({
   children,

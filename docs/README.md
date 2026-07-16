@@ -42,6 +42,11 @@
   IP, verificación de origen (CSRF) y sanitización; route handlers `/api/{contact,newsletter,health}`
   con capa de servicios (log local, lista para Resend/BD). Mejora progresiva con `mailto` de
   respaldo. Verificado con smoke tests de seguridad. **Completada.**
-- ⬜ Fase 5 — SEO, metadata, pulido.
+- ✅ **Fase 5 — SEO, metadata y pulido:** política de indexación única
+  (`config/seo.ts`, [ADR-008](./01-architecture/decisions/ADR-008-indexing-policy.md)),
+  JSON-LD (`Organization`/`WebSite`/`FAQPage`), imagen OG/Twitter con `next/og`,
+  `sitemap.ts`/`robots.ts`/`manifest.ts`, `viewport` (theme-color por esquema) y
+  estados `loading`/`not-found`/`error`/`global-error`. En local: `noindex` +
+  `Disallow: /` + sitemap vacío. Verificado con smoke tests. **Completada.**
 - ⬜ Fase 6 — QA final y hardening.
 - ⬜ Fase 7 — Preparación de despliegue.
