@@ -1,0 +1,46 @@
+# Dependencias y artefactos (se instalan/generan dentro de la imagen)
+node_modules
+.next
+out
+build
+coverage
+test-results
+playwright-report
+blob-report
+.lighthouseci
+
+# Git y metadatos
+.git
+.gitignore
+.github
+
+# Entorno y secretos — NUNCA copiar al contexto de build
+.env
+.env.*
+!.env.example
+!.env.production.example
+
+# Herramientas de desarrollo / test (no necesarias en la imagen)
+e2e
+playwright.config.ts
+vitest.config.mts
+vitest.setup.ts
+lighthouserc.json
+**/*.test.ts
+**/*.test.tsx
+**/*.spec.ts
+
+# Editor / SO / logs
+.vscode
+.idea
+.DS_Store
+*.log
+.husky
+.claude
+
+# Docker y documentación (no aportan a la build de la app)
+Dockerfile
+.dockerignore
+docker-compose.yml
+docs
+README.md

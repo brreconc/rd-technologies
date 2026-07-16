@@ -5,6 +5,10 @@ const isDev = process.env.NODE_ENV !== "production";
 
 const nextConfig: NextConfig = {
   reactStrictMode: true,
+  // Salida "standalone" (§16, Fase 7): genera `.next/standalone` con un
+  // `server.js` mínimo y solo las dependencias necesarias. Es la base de la
+  // imagen Docker (ver Dockerfile y docs/10-deployment). No afecta a `dev`.
+  output: "standalone",
   // No revelar la tecnología del servidor.
   poweredByHeader: false,
   images: {

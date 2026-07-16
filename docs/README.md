@@ -53,4 +53,9 @@
   suite **Vitest** (35 unit) + **Playwright** (E2E, responsive 320→2560 sin scroll horizontal,
   axe a11y en ambos temas, CSP sin violaciones), **Lighthouse CI** con presupuestos (Perf 99 /
   A11y 100 / BP 96 / SEO 100) y **`pnpm audit --prod` limpio**. **Completada.**
-- ⬜ Fase 7 — Preparación de despliegue.
+- ✅ **Fase 7 — Despliegue (Docker):** salida **standalone** (`output: "standalone"`),
+  **Dockerfile** multi-stage (Node 22 slim, usuario sin privilegios, HEALTHCHECK `/api/health`),
+  `.dockerignore`, **docker-compose.yml**, plantilla `.env.production.example` y workflow de CI
+  (`.github/workflows/ci.yml`: calidad + E2E + build de imagen). Runtime standalone verificado en
+  local con variables de producción. Guía completa para desplegar en
+  [`10-deployment/future-deployment`](./10-deployment/future-deployment.md). **Completada.**
