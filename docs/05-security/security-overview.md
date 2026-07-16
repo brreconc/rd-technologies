@@ -21,18 +21,25 @@ Aplicadas en [`next.config.ts`](../../next.config.ts) vía `getSecurityHeaders()
 | `Strict-Transport-Security`    | solo producción                   | Fuerza HTTPS.                    |
 | `X-Powered-By`                 | **eliminada**                     | No revelar tecnología.           |
 
-### 2. CSP dependiente del entorno
+### 2. CSP estricta con nonce (Fase 6)
 
-- **Dev:** permite `'unsafe-inline'`/`'unsafe-eval'` y `ws:`/`wss:` (necesario para el HMR de
-  Next/Turbopack).
-- **Prod:** se endurece y añade `upgrade-insecure-requests`.
+- **Prod:** `script-src 'self' 'nonce-<n>' 'strict-dynamic'` — **sin `'unsafe-inline'`**. El nonce
+  se genera por petición en el proxy; Next lo aplica a sus scripts y `next-themes` lo recibe en su
+  script anti-parpadeo. Ver [ADR-009](../01-architecture/decisions/ADR-009-csp-nonce.md).
+- **Dev:** `'unsafe-inline'`/`'unsafe-eval'` + `ws:` (necesarios para el HMR de Next/Turbopack); ahí
+  el nonce no aplica.
+- `style-src` mantiene `'unsafe-inline'` (estilos en atributos `style=""` de React; riesgo muy
+  inferior al de script).
 - Las **fuentes se auto-hospedan** (next/font) → `font-src 'self'`, sin orígenes externos.
+- **Consecuencia:** las páginas HTML pasan a render dinámico; las rutas de metadata
+  (sitemap/robots/manifest/OG) siguen estáticas y cacheables.
 
 ### 3. Proxy (borde)
 
-[`src/proxy.ts`](../../src/proxy.ts) refuerza cabeceras clave. El **rate limiting** NO vive aquí:
-se aplica en los route handlers (runtime Node), ver
-[ADR-007](../01-architecture/decisions/ADR-007-rate-limit-route-handlers.md).
+[`src/proxy.ts`](../../src/proxy.ts) genera el **nonce** y aplica la **CSP** por petición
+([ADR-009](../01-architecture/decisions/ADR-009-csp-nonce.md)). El resto de cabeceras se aplican
+en `next.config.ts`. El **rate limiting** NO vive aquí: se aplica en los route handlers (runtime
+Node), ver [ADR-007](../01-architecture/decisions/ADR-007-rate-limit-route-handlers.md).
 
 ### 4. Validación de entorno
 
@@ -40,8 +47,15 @@ se aplica en los route handlers (runtime Node), ver
 
 ## Verificación
 
-Comprobado en `pnpm start` que todas las cabeceras se emiten correctamente (200 OK, CSP de
-producción con `upgrade-insecure-requests`, HSTS presente, sin `x-powered-by`).
+Comprobado en `pnpm start`:
+
+- CSP con **nonce por petición** activa; `script-src` **sin `'unsafe-inline'`**; el nonce de la
+  cabecera coincide con el de los `<script>` del HTML (si no, no ejecutarían). Confirmado en
+  navegador real (Playwright): **cero violaciones de CSP** ni errores de consola.
+- HSTS presente, sin `x-powered-by`, resto de cabeceras correctas.
+- **`pnpm audit --prod`: sin vulnerabilidades** (se fija `postcss ≥ 8.5.10` vía override de pnpm,
+  ver `pnpm-workspace.yaml`). Los avisos restantes están confinados a `@lhci/cli` (herramienta de
+  desarrollo, no se despliega).
 
 ## Formularios (Fase 4 — implementado)
 
@@ -49,10 +63,15 @@ Validación doble (Zod cliente/servidor), sanitización, honeypot + time-trap, r
 verificación de origen (CSRF) y capa de servicios con enmascarado de PII en logs. Detalle y
 verificación en [`forms-hardening.md`](./forms-hardening.md).
 
-## Pendiente (Fase 6)
+## QA de seguridad (Fase 6 — implementado)
+
+- **CSP estricta con nonces** — hecho (ADR-009).
+- **`pnpm audit` limpio** en producción — hecho (override de `postcss`).
+- Tests de seguridad automatizados: unit (sanitize, rate-limit, anti-bot, validadores, respuestas)
+  con Vitest y E2E (CSP sin violaciones) con Playwright. Ver [08-testing](../08-testing/testing-strategy.md).
+
+## Pendiente
 
 - **Captcha** opcional (Turnstile/hCaptcha) — decisión §19.7.
-- **CSP estricta con nonces** (eliminar `'unsafe-inline'` de scripts) — Fase 6.
-- **`pnpm audit` limpio** como criterio de entrega; modelo de amenazas en
-  [`threat-model.md`](./threat-model.md).
-- Alineación con **OWASP Top 10**.
+- Modelo de amenazas en [`threat-model.md`](./threat-model.md) y repaso final **OWASP Top 10**.
+- Rate limiting distribuido (Redis) y `x-forwarded-for` de proxy de confianza — al desplegar (ADR-007).

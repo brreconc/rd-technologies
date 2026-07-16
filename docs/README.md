@@ -48,5 +48,9 @@
   `sitemap.ts`/`robots.ts`/`manifest.ts`, `viewport` (theme-color por esquema) y
   estados `loading`/`not-found`/`error`/`global-error`. En local: `noindex` +
   `Disallow: /` + sitemap vacío. Verificado con smoke tests. **Completada.**
-- ⬜ Fase 6 — QA final y hardening.
+- ✅ **Fase 6 — QA final y hardening:** **CSP estricta con nonce por petición**
+  ([ADR-009](./01-architecture/decisions/ADR-009-csp-nonce.md), sin `'unsafe-inline'` en scripts),
+  suite **Vitest** (35 unit) + **Playwright** (E2E, responsive 320→2560 sin scroll horizontal,
+  axe a11y en ambos temas, CSP sin violaciones), **Lighthouse CI** con presupuestos (Perf 99 /
+  A11y 100 / BP 96 / SEO 100) y **`pnpm audit --prod` limpio**. **Completada.**
 - ⬜ Fase 7 — Preparación de despliegue.

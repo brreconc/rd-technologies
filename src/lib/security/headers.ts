@@ -2,19 +2,36 @@
  * Fuente única de verdad de las cabeceras de seguridad HTTP.
  * Requisito §9 del prompt maestro (defensa en profundidad).
  *
- * Se consume desde `next.config.ts` (para aplicarlas a todas las respuestas).
- * Módulo puro (sin APIs de Node) para poder importarse desde cualquier runtime.
+ * Reparto de responsabilidades (Fase 6):
+ * - La **CSP** se genera aquí pero se APLICA en `src/proxy.ts`, porque en
+ *   producción incorpora un **nonce por petición** (script-src sin
+ *   'unsafe-inline'). Ver ADR-009.
+ * - El resto de cabeceras (estáticas) se aplican en `next.config.ts` a todas
+ *   las rutas vía `getStaticSecurityHeaders()`.
  *
- * NOTA sobre CSP: en desarrollo Next/Turbopack necesitan `'unsafe-eval'` e
- * inline para el HMR/React Refresh. En producción se endurece. La CSP con
- * `nonce` (eliminar `'unsafe-inline'` de scripts) queda planificada para la
- * fase de hardening (Fase 6) — ver docs/05-security.
+ * Módulo puro (sin APIs de Node) para poder importarse desde cualquier runtime.
  */
 
 export type SecurityHeader = { key: string; value: string };
 
-/** Construye la Content-Security-Policy según el entorno. */
-export function buildContentSecurityPolicy(isDev: boolean): string {
+/**
+ * Construye la Content-Security-Policy según el entorno.
+ *
+ * - **Producción:** `script-src` SIN `'unsafe-inline'`; se autoriza solo con
+ *   `'nonce-<n>'` + `'strict-dynamic'` (los scripts cargados por un script de
+ *   confianza quedan permitidos → Next, sus chunks y Framer Motion funcionan).
+ * - **Desarrollo:** Turbopack/React Refresh necesitan `'unsafe-inline'`,
+ *   `'unsafe-eval'` y `ws:`; ahí no se usa nonce (no aporta seguridad en local
+ *   y rompería el HMR).
+ * - `style-src` mantiene `'unsafe-inline'` en ambos: hay estilos en atributos
+ *   `style=""` (React) que un nonce NO cubre; el riesgo de inyección por estilo
+ *   es muy inferior al de script.
+ */
+export function buildContentSecurityPolicy(isDev: boolean, nonce?: string): string {
+  const scriptSrc = isDev
+    ? ["'self'", "'unsafe-inline'", "'unsafe-eval'"]
+    : ["'self'", `'nonce-${nonce}'`, "'strict-dynamic'"];
+
   const directives: Record<string, string[]> = {
     "default-src": ["'self'"],
     "base-uri": ["'self'"],
@@ -25,9 +42,7 @@ export function buildContentSecurityPolicy(isDev: boolean): string {
     "font-src": ["'self'", "data:"],
     "img-src": ["'self'", "data:", "blob:"],
     "style-src": ["'self'", "'unsafe-inline'"],
-    "script-src": isDev
-      ? ["'self'", "'unsafe-inline'", "'unsafe-eval'"]
-      : ["'self'", "'unsafe-inline'"],
+    "script-src": scriptSrc,
     "connect-src": isDev ? ["'self'", "ws:", "wss:"] : ["'self'"],
     "worker-src": ["'self'", "blob:"],
     "manifest-src": ["'self'"],
@@ -43,10 +58,12 @@ export function buildContentSecurityPolicy(isDev: boolean): string {
     .join("; ");
 }
 
-/** Lista de cabeceras de seguridad aplicadas a todas las rutas. */
-export function getSecurityHeaders(isDev: boolean): SecurityHeader[] {
+/**
+ * Cabeceras de seguridad ESTÁTICAS (todas menos la CSP), aplicadas a todas las
+ * rutas desde `next.config.ts`. La CSP se aplica aparte en el proxy (nonce).
+ */
+export function getStaticSecurityHeaders(isDev: boolean): SecurityHeader[] {
   const headers: SecurityHeader[] = [
-    { key: "Content-Security-Policy", value: buildContentSecurityPolicy(isDev) },
     { key: "X-Frame-Options", value: "DENY" },
     { key: "X-Content-Type-Options", value: "nosniff" },
     { key: "Referrer-Policy", value: "strict-origin-when-cross-origin" },

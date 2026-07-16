@@ -19,7 +19,7 @@ Requisito §11.
   ([`motion-features.ts`](../../src/lib/animations/motion-features.ts)) → fuera del JS crítico.
 - ✅ **El `<h1>` del hero no se anima** (elemento LCP): se pinta de inmediato.
 - ✅ Efectos de fondo por **CSS** (aurora del hero) en vez de JS.
-- ⬜ Auditoría con **Lighthouse CI** y `@next/bundle-analyzer` (Fase 6).
+- ✅ **Lighthouse CI** con presupuestos que fallan la build ([`lighthouserc.json`](../../lighthouserc.json), Fase 6).
 
 ## Medición actual (Fase 3, ruta `/`)
 
@@ -31,4 +31,22 @@ Medido sobre `pnpm start` (los `<script src>` reales de la ruta):
 | **Brotli** (lo que sirve un CDN) | **~199 KB** ✅ (objetivo < 200 KB) |
 
 > Next 16 + Turbopack no imprime la tabla de tamaños en el build; se mide sirviendo la ruta.
-> La validación formal (Lighthouse CI + budgets que fallan la build) se añade en la Fase 6.
+
+## Lighthouse CI (Fase 6)
+
+Presupuestos en [`lighthouserc.json`](../../lighthouserc.json): las cuatro categorías deben ser
+**≥ 0,95** o la build de auditoría falla. Corrida local (`pnpm lhci`, preset desktop, 3 pasadas,
+build indexable):
+
+| Categoría      | Score |
+| -------------- | ----- |
+| Performance    | 99    |
+| Accessibility  | 100   |
+| Best Practices | 96    |
+| SEO            | 100   |
+
+Métricas: **LCP 0,9 s · CLS 0 · TBT 0 ms**.
+
+> Nota: Lighthouse audita un build **indexable** (`NEXT_PUBLIC_SITE_INDEXABLE=true`); con el sitio
+> en `noindex` (local) la auditoría SEO penalizaría por diseño. Con la CSP por nonce las páginas se
+> sirven dinámicas, sin impacto medible en estas métricas de laboratorio.

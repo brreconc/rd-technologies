@@ -3,3 +3,10 @@
 allowBuilds:
   sharp: true
   unrs-resolver: true
+
+# Overrides de seguridad (Fase 6). En pnpm 11 los overrides viven aquí, no en
+# package.json. Se fuerza postcss (transitiva de Next) a la línea parcheada
+# frente a GHSA-qx2v-qp2m-jg93 (XSS en el stringify de CSS). postcss 8.5 es
+# compatible con 8.4, solo se usa en build. Ver docs/05-security.
+overrides:
+  postcss@<8.5.10: ">=8.5.10"

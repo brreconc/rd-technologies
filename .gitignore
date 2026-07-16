@@ -42,5 +42,13 @@ yarn-error.log*
 *.tsbuildinfo
 next-env.d.ts
 
+# Testing (Fase 6)
+/coverage
+/test-results
+/playwright-report
+/blob-report
+/playwright/.cache
+/.lighthouseci
+
 # Claude Code (local)
 .claude/settings.local.json

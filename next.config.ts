@@ -1,5 +1,5 @@
 import type { NextConfig } from "next";
-import { getSecurityHeaders } from "./src/lib/security/headers";
+import { getStaticSecurityHeaders } from "./src/lib/security/headers";
 
 const isDev = process.env.NODE_ENV !== "production";
 
@@ -14,9 +14,11 @@ const nextConfig: NextConfig = {
   async headers() {
     return [
       {
-        // Cabeceras de seguridad para todas las rutas (§9).
+        // Cabeceras de seguridad ESTÁTICAS para todas las rutas (§9).
+        // La CSP NO está aquí: se aplica en `src/proxy.ts` con nonce por
+        // petición (ver ADR-009).
         source: "/:path*",
-        headers: getSecurityHeaders(isDev),
+        headers: getStaticSecurityHeaders(isDev),
       },
     ];
   },

@@ -1,4 +1,5 @@
 import type { Viewport } from "next";
+import { headers } from "next/headers";
 import { Inter, Space_Grotesk, Fraunces, JetBrains_Mono } from "next/font/google";
 import { baseMetadata } from "@/config/metadata";
 import { Header } from "@/components/shared/Header";
@@ -35,11 +36,16 @@ export const viewport: Viewport = {
   ],
 };
 
-export default function RootLayout({
+export default async function RootLayout({
   children,
 }: Readonly<{
   children: React.ReactNode;
 }>) {
+  // Nonce de la CSP (lo fija el proxy). Leer `headers()` fuerza el render
+  // dinámico necesario para el nonce por petición (ADR-009). Se pasa a
+  // `next-themes` para que su script inline anti-parpadeo lleve el nonce.
+  const nonce = (await headers()).get("x-nonce") ?? undefined;
+
   return (
     <html
       lang="es"
@@ -56,7 +62,7 @@ export default function RootLayout({
             }}
           />
         </noscript>
-        <Providers>
+        <Providers nonce={nonce}>
           {/* Skip link accesible (§10) — visible solo al enfocar con teclado. */}
           <a
             href="#contenido-principal"

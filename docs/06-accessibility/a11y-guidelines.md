@@ -19,6 +19,13 @@
 - [ ] Contraste AA verificado.
 - [ ] Estados (hover/focus/active/disabled) perceptibles sin depender solo del color.
 
-## Automatización (Fase 6)
+## Automatización (Fase 6 — implementado)
 
-axe-core en Playwright + revisión manual con lector de pantalla.
+- **axe-core en Playwright** (`e2e/a11y.spec.ts`): sin violaciones críticas/serias (WCAG 2.0/2.1
+  A y AA) en tema claro y oscuro. Complementa (no sustituye) la revisión manual con teclado y
+  lector de pantalla.
+- **Lighthouse Accessibility: 100** (Fase 6).
+- **Adornos decorativos:** los números de paso "01"…, iconos y resplandores llevan
+  `aria-hidden="true"`; están fuera del árbol de accesibilidad y, como texto decorativo, quedan
+  exentos del contraste (WCAG 1.4.3). El escaneo axe los excluye a propósito; el contenido que sí
+  leen las ayudas técnicas se audita al completo. Ver [08-testing](../08-testing/testing-strategy.md).
