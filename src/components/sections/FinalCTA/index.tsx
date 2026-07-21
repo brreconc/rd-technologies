@@ -15,13 +15,14 @@ export function FinalCTA() {
     <Section id="contacto" aria-labelledby="cta-title" className="border-border border-t">
       <Container>
         <Reveal>
-          <div className="border-border bg-surface relative overflow-hidden rounded-2xl border px-6 py-14 sm:px-12">
+          <div className="gradient-border border-border bg-surface relative overflow-hidden rounded-2xl border px-6 py-14 sm:px-12">
+            <div aria-hidden="true" className="grid-dots opacity-40" />
             <div
               aria-hidden="true"
-              className="pointer-events-none absolute inset-0 -z-10 opacity-70"
+              className="pointer-events-none absolute inset-0 -z-10"
               style={{
                 background:
-                  "radial-gradient(60% 80% at 50% 0%, rgba(0,245,255,0.12), transparent 70%)",
+                  "radial-gradient(60% 80% at 50% 0%, rgba(0,245,255,0.14), transparent 70%), radial-gradient(50% 60% at 100% 100%, rgba(139,92,246,0.12), transparent 70%)",
               }}
             />
             <div className="mx-auto max-w-2xl text-center">

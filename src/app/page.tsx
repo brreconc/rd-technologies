@@ -1,4 +1,5 @@
 import { Hero } from "@/components/sections/Hero";
+import { TechMarquee } from "@/components/sections/TechMarquee";
 import { ValueProps } from "@/components/sections/ValueProps";
 import { Services } from "@/components/sections/Services";
 import { Differentiators } from "@/components/sections/Differentiators";
@@ -19,6 +20,7 @@ export default function HomePage() {
     <main id="contenido-principal" className="flex-1">
       <JsonLd data={buildHomeJsonLd()} />
       <Hero />
+      <TechMarquee />
       <ValueProps />
       <Services />
       <Differentiators />

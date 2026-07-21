@@ -151,6 +151,22 @@
   color: transparent;
 }
 
+/* Gradiente de marca ANIMADO (solo color; no toca opacidad ni layout, por lo
+   que es seguro aplicarlo al h1 LCP sin retrasar su pintado). */
+@utility text-gradient-animated {
+  background-image: linear-gradient(
+    100deg,
+    var(--accent-cyan),
+    var(--accent-purple),
+    var(--accent-cyan)
+  );
+  background-size: 200% auto;
+  background-clip: text;
+  -webkit-background-clip: text;
+  color: transparent;
+  animation: gradient-pan 7s linear infinite;
+}
+
 /* --------------------------------------------------------------------------
    Animaciones (Fase 3). Framer Motion es el motor principal; aquí solo van
    efectos de fondo puramente decorativos y de bajo coste (§11).
@@ -185,5 +201,273 @@
 @media (prefers-reduced-motion: reduce) {
   .hero-aurora {
     animation: none;
+  }
+}
+
+/* ==========================================================================
+   SISTEMA DE MOVIMIENTO v2 — "de otro mundo" (Fase 8)
+   Todo lo de aquí es GPU-friendly (transform/opacity/filter) y decorativo.
+   La regla global de @layer base (prefers-reduced-motion) ya fuerza
+   `animation-duration: 0.001ms`, así que TODAS estas animaciones se detienen
+   solas cuando el usuario pide menos movimiento. Ver docs/02-design-system
+   y ADR-010.
+   ========================================================================== */
+
+@keyframes gradient-pan {
+  to {
+    background-position: 200% center;
+  }
+}
+
+@keyframes float-orb {
+  0%,
+  100% {
+    transform: translate3d(0, 0, 0) scale(1);
+  }
+  50% {
+    transform: translate3d(0, -28px, 0) scale(1.06);
+  }
+}
+
+@keyframes float-orb-alt {
+  0%,
+  100% {
+    transform: translate3d(0, 0, 0) scale(1);
+  }
+  50% {
+    transform: translate3d(14px, 20px, 0) scale(0.94);
+  }
+}
+
+@keyframes marquee-x {
+  to {
+    transform: translateX(-50%);
+  }
+}
+
+@keyframes spin-slow {
+  to {
+    transform: rotate(1turn);
+  }
+}
+
+@keyframes shine-sweep {
+  to {
+    transform: translateX(240%) skewX(-18deg);
+  }
+}
+
+@keyframes pulse-ring {
+  0% {
+    transform: scale(1);
+    opacity: 0.7;
+  }
+  70%,
+  100% {
+    transform: scale(2.6);
+    opacity: 0;
+  }
+}
+
+/* --- Orbes flotantes del hero (blobs difuminados) --- */
+.orb {
+  position: absolute;
+  border-radius: 9999px;
+  filter: blur(70px);
+  pointer-events: none;
+  will-change: transform;
+  z-index: -10;
+}
+.orb--cyan {
+  background: radial-gradient(
+    circle,
+    color-mix(in srgb, var(--accent-cyan) 55%, transparent),
+    transparent 70%
+  );
+  animation: float-orb 11s ease-in-out infinite;
+}
+.orb--purple {
+  background: radial-gradient(
+    circle,
+    color-mix(in srgb, var(--accent-purple) 55%, transparent),
+    transparent 70%
+  );
+  animation: float-orb-alt 13s ease-in-out infinite;
+}
+
+/* --- Rejilla de puntos difuminada (fondo técnico) --- */
+.grid-dots {
+  position: absolute;
+  inset: 0;
+  z-index: -10;
+  pointer-events: none;
+  background-image: radial-gradient(
+    color-mix(in srgb, var(--fg) 14%, transparent) 1px,
+    transparent 1px
+  );
+  background-size: 32px 32px;
+  -webkit-mask-image: radial-gradient(ellipse 70% 60% at 50% 0%, #000 20%, transparent 75%);
+  mask-image: radial-gradient(ellipse 70% 60% at 50% 0%, #000 20%, transparent 75%);
+  opacity: 0.5;
+}
+
+/* --- Grano/ruido sutil (textura de superficie) --- */
+.grain-overlay {
+  position: absolute;
+  inset: 0;
+  z-index: -9;
+  pointer-events: none;
+  opacity: 0.04;
+  mix-blend-mode: overlay;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='120' height='120'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='3' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");
+}
+
+/* --- Barra de progreso de scroll (arriba, fija) --- */
+.scroll-progress {
+  transform-origin: 0 50%;
+  background-image: linear-gradient(90deg, var(--accent-cyan), var(--accent-purple));
+}
+
+/* --- Foco/spotlight que sigue al cursor dentro de una tarjeta --- */
+.spotlight {
+  position: relative;
+  isolation: isolate;
+}
+.spotlight::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  border-radius: inherit;
+  z-index: -1;
+  background: radial-gradient(
+    240px circle at var(--mx, 50%) var(--my, 0%),
+    color-mix(in srgb, var(--accent-cyan) 16%, transparent),
+    transparent 65%
+  );
+  opacity: 0;
+  transition: opacity 0.35s ease;
+  pointer-events: none;
+}
+.spotlight:hover::before,
+.spotlight:focus-within::before {
+  opacity: 1;
+}
+
+/* --- Borde con gradiente que aparece al pasar el cursor --- */
+.gradient-border::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  border-radius: inherit;
+  padding: 1px;
+  background: linear-gradient(
+    130deg,
+    color-mix(in srgb, var(--accent-cyan) 70%, transparent),
+    transparent 45%,
+    color-mix(in srgb, var(--accent-purple) 70%, transparent)
+  );
+  -webkit-mask:
+    linear-gradient(#000 0 0) content-box,
+    linear-gradient(#000 0 0);
+  -webkit-mask-composite: xor;
+  mask-composite: exclude;
+  opacity: 0;
+  transition: opacity 0.35s ease;
+  pointer-events: none;
+}
+.gradient-border:hover::after,
+.gradient-border:focus-within::after {
+  opacity: 1;
+}
+
+/* --- Anillo de luz que gira alrededor de un borde (badge / CTA) --- */
+.animated-ring {
+  position: relative;
+}
+.animated-ring::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  border-radius: inherit;
+  padding: 1px;
+  background: conic-gradient(
+    from 0deg,
+    transparent 0 55%,
+    var(--accent-cyan) 72%,
+    var(--accent-purple) 88%,
+    transparent 100%
+  );
+  -webkit-mask:
+    linear-gradient(#000 0 0) content-box,
+    linear-gradient(#000 0 0);
+  -webkit-mask-composite: xor;
+  mask-composite: exclude;
+  animation: spin-slow 4s linear infinite;
+  pointer-events: none;
+}
+
+/* --- Punto "disponible" con pulso --- */
+.pulse-dot {
+  position: relative;
+}
+.pulse-dot::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  border-radius: inherit;
+  background: var(--accent-cyan);
+  animation: pulse-ring 2.4s ease-out infinite;
+}
+
+/* --- Brillo diagonal que barre un botón al hacer hover --- */
+.btn-shine {
+  position: relative;
+  overflow: hidden;
+}
+.btn-shine::after {
+  content: "";
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 45%;
+  height: 100%;
+  background: linear-gradient(
+    90deg,
+    transparent,
+    color-mix(in srgb, #fff 55%, transparent),
+    transparent
+  );
+  transform: translateX(-180%) skewX(-18deg);
+  pointer-events: none;
+}
+.btn-shine:hover::after {
+  animation: shine-sweep 0.9s ease;
+}
+
+/* --- Marquee infinito (tiras de tecnología / confianza) --- */
+.marquee {
+  display: flex;
+  overflow: hidden;
+  -webkit-mask-image: linear-gradient(90deg, transparent, #000 10%, #000 90%, transparent);
+  mask-image: linear-gradient(90deg, transparent, #000 10%, #000 90%, transparent);
+}
+.marquee-track {
+  display: flex;
+  flex: 0 0 auto;
+  align-items: center;
+  gap: var(--gap, 3rem);
+  padding-right: var(--gap, 3rem);
+  min-width: 100%;
+  animation: marquee-x var(--speed, 34s) linear infinite;
+  will-change: transform;
+}
+.marquee:hover .marquee-track {
+  animation-play-state: paused;
+}
+
+/* Transiciones de vista suaves (progresivo; solo navegadores que lo soporten). */
+@media (prefers-reduced-motion: no-preference) {
+  @view-transition {
+    navigation: auto;
   }
 }

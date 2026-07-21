@@ -1,5 +1,5 @@
 import { Container, Section } from "@/components/ui/container";
-import { Card } from "@/components/ui/card";
+import { SpotlightCard } from "@/components/ui/spotlight-card";
 import { SectionHeading } from "@/components/sections/SectionHeading";
 import { IconBadge } from "@/components/sections/IconBadge";
 import { Reveal } from "@/components/animations/Reveal";
@@ -23,7 +23,7 @@ export function Services() {
         <Stagger className="mt-12 grid gap-6 lg:grid-cols-3">
           {services.map((service) => (
             <StaggerItem key={service.title}>
-              <Card className="flex h-full flex-col gap-4">
+              <SpotlightCard className="flex h-full flex-col gap-4">
                 <IconBadge icon={service.icon} />
                 <h3 className="font-display text-foreground text-xl font-semibold">
                   {service.title}
@@ -39,7 +39,7 @@ export function Services() {
                     </li>
                   ))}
                 </ul>
-              </Card>
+              </SpotlightCard>
             </StaggerItem>
           ))}
         </Stagger>

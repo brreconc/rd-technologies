@@ -29,6 +29,25 @@
 | **Hover-lift en cards**          | `components/ui/card`                                                       | `hover:-translate-y-1` + borde acento (CSS).                     | Reduced-motion desactiva la transición (salto instantáneo).  |
 | **Acordeón FAQ**                 | `components/ui/accordion`                                                  | Estados de Radix (rotación del chevron).                         | Reduced-motion vía CSS global.                               |
 
+## Catálogo v2 — sistema "cinematográfico" (Fase 8, ADR-010)
+
+Ampliación de alto impacto **sin nuevas dependencias**: CSS puro + el Framer Motion que ya estaba.
+Todo degrada a estático con `prefers-reduced-motion` y respeta el LCP, la CSP y el no-JS.
+
+| Animación                        | Dónde                                                                            | Cómo funciona                                                                | Cómo se desactiva                                               |
+| -------------------------------- | -------------------------------------------------------------------------------- | ---------------------------------------------------------------------------- | --------------------------------------------------------------- |
+| **Gradiente de texto animado**   | Resaltado del `h1` (`.text-gradient-animated`)                                   | Anima `background-position` (solo color) → **no toca el LCP**.               | Regla global reduced-motion.                                    |
+| **Orbes + rejilla + grano**      | Fondo del hero / CTA (`.orb`, `.grid-dots`, `.grain-overlay`)                    | Blobs difuminados que flotan; puntos y ruido SVG en `data:` URI (sin red).   | Reduced-motion detiene el flotado; son `aria-hidden`.           |
+| **Anillo de luz giratorio**      | Badge del hero (`.animated-ring`)                                                | Conic-gradient enmascarado a un borde de 1px que gira.                       | Regla global reduced-motion.                                    |
+| **Punto "disponible" con pulso** | Badge del hero (`.pulse-dot`)                                                    | Anillo que escala y se desvanece.                                            | Regla global reduced-motion.                                    |
+| **Barra de progreso de scroll**  | [`animations/ScrollProgress`](../../src/components/animations/ScrollProgress)    | `useScroll` + `useSpring` → `scaleX` de una barra fija superior.             | Reduced-motion neutraliza la transición; es `aria-hidden`.      |
+| **SpotlightCard** (glow+tilt)    | [`ui/spotlight-card`](../../src/components/ui/spotlight-card)                    | El puntero fija `--mx/--my` (resplandor CSS) y un tilt 3D ≤6° con muelle.    | `useReducedMotion` → tarjeta estática, **sin listeners**.       |
+| **Botón magnético**              | [`animations/MagneticButton`](../../src/components/animations/MagneticButton)    | El CTA se desplaza hacia el cursor con muelle; no altera foco ni tabulación. | `useReducedMotion` → renderiza el hijo tal cual.                |
+| **Brillo de botón**              | Botón primario / CTAs (`.btn-shine`)                                             | Barrido diagonal blanco al hover (`::after`).                                | Regla global reduced-motion.                                    |
+| **Borde de gradiente**           | Tarjetas y CTA final (`.gradient-border`)                                        | Gradiente enmascarado a un borde de 1px, visible en hover/focus.             | Estático; sin animación que desactivar.                         |
+| **Marquee de stack**             | [`sections/TechMarquee`](../../src/components/sections/TechMarquee) + `.marquee` | Pista flex con contenido duplicado que se desplaza -50% en bucle (CSS puro). | Pausa al hover; reduced-motion la detiene; copia `aria-hidden`. |
+| **CountUp** (métricas)           | [`animations/CountUp`](../../src/components/animations/CountUp)                  | `useInView` (once) + `animate` cuentan de 0 al valor al entrar en pantalla.  | `useReducedMotion` → pinta el valor final directamente.         |
+
 ## Variantes compartidas
 
 En [`lib/animations/framer-variants.ts`](../../src/lib/animations/framer-variants.ts): `EASE_OUT`,
@@ -36,6 +55,7 @@ En [`lib/animations/framer-variants.ts`](../../src/lib/animations/framer-variant
 
 ## Pendiente / opcional (Fase 3+)
 
-Efectos pesados opcionales (partículas / Three.js) quedan **fuera** por ahora para proteger el
-presupuesto (ADR-003). Si se añaden, será con `next/dynamic` + fallback estático y desactivables
-por `prefers-reduced-motion`.
+Efectos pesados opcionales (partículas / Three.js) quedan **fuera** para proteger el presupuesto
+(ADR-003/ADR-010): el impacto "de otro mundo" se logró con transform/opacity/filter reutilizando
+Framer. Si algún día se añaden, será con `next/dynamic` + fallback estático y desactivables por
+`prefers-reduced-motion`.

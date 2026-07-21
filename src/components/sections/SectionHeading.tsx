@@ -21,7 +21,18 @@ export function SectionHeading({
   return (
     <div className={cn("max-w-2xl", centered && "mx-auto text-center", className)}>
       {eyebrow && (
-        <p className="text-muted mb-3 font-mono text-xs tracking-widest uppercase">{eyebrow}</p>
+        <p
+          className={cn(
+            "text-muted mb-3 flex items-center gap-2.5 font-mono text-xs tracking-widest uppercase",
+            centered && "justify-center",
+          )}
+        >
+          <span
+            aria-hidden="true"
+            className="from-accent-cyan to-accent-purple h-px w-8 bg-gradient-to-r"
+          />
+          {eyebrow}
+        </p>
       )}
       <h2 id={id} className="font-display text-fluid-2xl font-bold tracking-tight text-balance">
         {title}

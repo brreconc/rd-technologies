@@ -10,11 +10,12 @@ import { cn } from "@/lib/utils/cn";
  * Todas las tallas cumplen el touch target mínimo de 44px (§5.3.10).
  */
 const buttonVariants = cva(
-  "inline-flex select-none items-center justify-center gap-2 whitespace-nowrap rounded-lg font-medium transition-[transform,background-color,color,border-color,filter] disabled:pointer-events-none disabled:opacity-50",
+  "inline-flex select-none items-center justify-center gap-2 whitespace-nowrap rounded-lg font-medium transition-[transform,background-color,color,border-color,filter,box-shadow] disabled:pointer-events-none disabled:opacity-50",
   {
     variants: {
       variant: {
-        primary: "bg-accent-cyan text-on-accent hover:brightness-110 active:brightness-95",
+        primary:
+          "bg-accent-cyan text-on-accent shadow-[0_8px_24px_-10px_rgba(0,245,255,0.6)] hover:shadow-[0_10px_34px_-8px_rgba(0,245,255,0.75)] hover:brightness-110 active:brightness-95",
         secondary: "border border-border bg-surface text-foreground hover:bg-surface-2",
         outline: "border border-border text-foreground hover:bg-surface",
         ghost: "text-foreground hover:bg-surface",

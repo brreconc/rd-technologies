@@ -1,6 +1,6 @@
 import { Quote } from "lucide-react";
 import { Container, Section } from "@/components/ui/container";
-import { Card } from "@/components/ui/card";
+import { SpotlightCard } from "@/components/ui/spotlight-card";
 import { SectionHeading } from "@/components/sections/SectionHeading";
 import { Reveal } from "@/components/animations/Reveal";
 import { Stagger, StaggerItem } from "@/components/animations/Stagger";
@@ -33,7 +33,7 @@ export function Testimonials() {
         <Stagger className="mt-12 grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
           {testimonials.map((testimonial) => (
             <StaggerItem key={testimonial.role}>
-              <Card className="flex h-full flex-col gap-4">
+              <SpotlightCard className="flex h-full flex-col gap-4">
                 <Quote className="text-accent-cyan size-8" aria-hidden="true" />
                 <p className="text-foreground">“{testimonial.quote}”</p>
                 <div className="mt-auto flex items-center gap-3 pt-2">
@@ -48,7 +48,7 @@ export function Testimonials() {
                     <p className="text-muted text-sm">{testimonial.role}</p>
                   </div>
                 </div>
-              </Card>
+              </SpotlightCard>
             </StaggerItem>
           ))}
         </Stagger>

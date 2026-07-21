@@ -1,5 +1,5 @@
 import { Container, Section } from "@/components/ui/container";
-import { Card } from "@/components/ui/card";
+import { SpotlightCard } from "@/components/ui/spotlight-card";
 import { IconBadge } from "@/components/sections/IconBadge";
 import { Reveal } from "@/components/animations/Reveal";
 import { Stagger, StaggerItem } from "@/components/animations/Stagger";
@@ -27,13 +27,13 @@ export function ValueProps() {
         <Stagger className="mt-12 grid gap-6 sm:grid-cols-3">
           {valueProps.pillars.map((pillar) => (
             <StaggerItem key={pillar.title}>
-              <Card className="flex h-full flex-col items-center gap-3 text-center">
+              <SpotlightCard className="flex h-full flex-col items-center gap-3 text-center">
                 <IconBadge icon={pillar.icon} />
                 <h3 className="font-display text-foreground text-lg font-semibold">
                   {pillar.title}
                 </h3>
                 <p className="text-muted">{pillar.description}</p>
-              </Card>
+              </SpotlightCard>
             </StaggerItem>
           ))}
         </Stagger>

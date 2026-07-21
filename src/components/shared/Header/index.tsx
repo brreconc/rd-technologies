@@ -29,7 +29,7 @@ export function Header() {
 
         <div className="flex items-center gap-2">
           <ThemeToggle />
-          <Button asChild size="sm" className="hidden sm:inline-flex">
+          <Button asChild size="sm" className="btn-shine hidden sm:inline-flex">
             <a href="#contacto">Cotiza tu proyecto</a>
           </Button>
           <MobileNav />

@@ -4,6 +4,7 @@ import { Inter, Space_Grotesk, Fraunces, JetBrains_Mono } from "next/font/google
 import { baseMetadata } from "@/config/metadata";
 import { Header } from "@/components/shared/Header";
 import { Footer } from "@/components/shared/Footer";
+import { ScrollProgress } from "@/components/animations/ScrollProgress";
 import { Providers } from "./providers";
 import "./globals.css";
 
@@ -63,6 +64,7 @@ export default async function RootLayout({
           />
         </noscript>
         <Providers nonce={nonce}>
+          <ScrollProgress />
           {/* Skip link accesible (§10) — visible solo al enfocar con teclado. */}
           <a
             href="#contenido-principal"
