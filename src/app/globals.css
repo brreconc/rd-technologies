@@ -86,8 +86,8 @@
   --text-fluid-xl--line-height: 1.4;
   --text-fluid-2xl: clamp(1.875rem, 1.2rem + 3vw, 3rem);
   --text-fluid-2xl--line-height: 1.2;
-  --text-fluid-hero: clamp(2.5rem, 1.4rem + 5.2vw, 5.5rem);
-  --text-fluid-hero--line-height: 1.05;
+  --text-fluid-hero: clamp(2.25rem, 1.55rem + 3.4vw, 4.5rem);
+  --text-fluid-hero--line-height: 1.06;
 }
 
 @layer base {

@@ -2,7 +2,7 @@ import { Container } from "@/components/ui/container";
 import { Button } from "@/components/ui/button";
 import { Logo } from "@/components/shared/Logo";
 import { ThemeToggle } from "@/components/shared/ThemeToggle";
-import { siteConfig } from "@/config/site";
+import { NavLinks } from "./NavLinks";
 import { MobileNav } from "./MobileNav";
 
 /**
@@ -15,17 +15,7 @@ export function Header() {
       <Container className="flex h-16 items-center justify-between gap-4">
         <Logo />
 
-        <nav aria-label="Principal" className="hidden items-center gap-1 lg:flex">
-          {siteConfig.nav.map((item) => (
-            <a
-              key={item.href}
-              href={item.href}
-              className="text-muted hover:bg-surface hover:text-foreground rounded-md px-3 py-2 text-sm transition-colors"
-            >
-              {item.label}
-            </a>
-          ))}
-        </nav>
+        <NavLinks />
 
         <div className="flex items-center gap-2">
           <ThemeToggle />

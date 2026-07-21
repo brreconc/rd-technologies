@@ -38,11 +38,12 @@ test.describe("Home", () => {
     const html = page.locator("html");
     await expect(html).toHaveClass(/dark/);
 
-    await page
-      .getByRole("button", { name: /tema|theme|claro|oscuro/i })
-      .first()
-      .click();
+    // El toggle de tema es un role="switch" (aria-checked = tema claro).
+    const toggle = page.getByRole("switch", { name: /tema|theme|claro|oscuro/i }).first();
+    await expect(toggle).toHaveAttribute("aria-checked", "false");
+    await toggle.click();
     await expect(html).toHaveClass(/light/);
+    await expect(toggle).toHaveAttribute("aria-checked", "true");
   });
 
   test("el formulario de contacto muestra errores accesibles al enviar vacío", async ({ page }) => {

@@ -64,6 +64,34 @@ de JS y la CSP por poco beneficio marginal.
 - El marquee se pausa al hover y su copia es `aria-hidden` (`display:contents`)
   para no duplicar contenido al lector de pantalla.
 
+## Iteración 2 (feedback del cliente, 2026-07-21)
+
+Tras la primera entrega el cliente pidió: fondo de **red neuronal** (datos viajando
+por la red, sensación de vanguardia + seguridad) en lugar de los orbes; elementos
+mejor dimensionados para portátil; quitar el badge del hero y subir/impactar más el
+titular; logo, nav y switch de tema "VIP"; y la cinta de stack más pequeña y especial.
+
+Decisiones de esta iteración:
+
+- **`NeuralNetwork`** (canvas propio, sin librerías): nodos que derivan, conexiones
+  por proximidad y **pulsos de datos** que viajan por las aristas. Se pausa fuera de
+  viewport / con la pestaña oculta y pinta un solo fotograma con reduced-motion.
+  Reemplaza a los orbes/aurora como fondo del hero. DPR≤2 y nº de nodos acotado por
+  área para no castigar portátiles.
+- **Hero**: se elimina el badge; el `<h1>` sube y crece en peso (`extrabold`) con un
+  scrim radial que garantiza legibilidad sobre la red sin apagarla. Se **reduce el
+  `--text-fluid-hero`** (tope 5.5rem→4.5rem) y los tamaños de la banda de métricas,
+  a petición del cliente (se veían grandes en portátil).
+- **Logo**: marca gráfica de "grafo de nodos" en SVG (usa `var(--surface)`/acentos)
+  con halo de resplandor + wordmark con gradiente animado.
+- **Nav (`NavLinks`)**: `IntersectionObserver` de scroll-spy que resalta la sección
+  visible y anima un subrayado de gradiente; los enlaces siguen siendo anclas reales
+  (`scroll-mt` en cada `Section` compensa la cabecera → aterrizaje exacto).
+- **`ThemeToggle`**: switch con pomo deslizante (muelle) sol/luna, `role="switch"` +
+  `aria-checked`. Se actualizó el e2e para localizarlo por rol `switch`.
+- **`TechMarquee`**: banda más baja, cada tecnología en pastilla con nodo de
+  gradiente y etiqueta lateral "STACK" fundida con un degradado.
+
 ## Consecuencias
 
 - ✅ Salto de impacto visual grande sin nuevas dependencias ni riesgo de CSP.

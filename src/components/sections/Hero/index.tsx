@@ -4,58 +4,43 @@ import { Button } from "@/components/ui/button";
 import { Reveal } from "@/components/animations/Reveal";
 import { MagneticButton } from "@/components/animations/MagneticButton";
 import { CountUp } from "@/components/animations/CountUp";
+import { NeuralNetwork } from "@/components/animations/NeuralNetwork";
 import { stats } from "@/lib/constants/stats";
 
 /**
  * Sección Hero (§8.1). Copy oficial de Prompt.md.
  *
+ * Fondo: RED NEURONAL animada (canvas) que evoca datos moviéndose por una red —
+ * vanguardia + seguridad (ver `NeuralNetwork` y ADR-010). Sobre ella, un scrim
+ * radial mantiene el texto legible sin apagar el efecto en los bordes.
+ *
  * Rendimiento (§11): el `<h1>` es el elemento LCP y se pinta de inmediato (sin
- * animación de entrada). El gradiente animado del resaltado es SOLO color
- * (no toca opacidad/layout), por lo que no retrasa el LCP. Todo el resto de
- * capas de fondo son decorativas (`aria-hidden`), GPU-friendly y se detienen con
- * `prefers-reduced-motion`.
+ * animación de entrada). El gradiente animado del resaltado es SOLO color, por
+ * lo que no retrasa el LCP. Todo el fondo es decorativo (`aria-hidden`) y se
+ * detiene con `prefers-reduced-motion`.
  */
 export function Hero() {
   return (
     <section
       aria-labelledby="hero-title"
-      className="relative flex min-h-[92svh] items-center overflow-hidden py-24 sm:py-28 lg:py-32"
+      className="relative flex min-h-[86svh] items-center overflow-hidden py-20 sm:py-24"
     >
-      {/* --- Capas de fondo decorativas --- */}
-      <div aria-hidden="true" className="grid-dots" />
-      <div aria-hidden="true" className="hero-aurora" />
-      <div
-        aria-hidden="true"
-        className="orb orb--cyan top-[-6%] left-[-8%] size-[38vw] max-h-[520px] max-w-[520px]"
-      />
-      <div
-        aria-hidden="true"
-        className="orb orb--purple right-[-6%] bottom-[-12%] size-[42vw] max-h-[560px] max-w-[560px]"
-      />
-      <div aria-hidden="true" className="grain-overlay" />
+      {/* --- Fondo: red neuronal + scrim de legibilidad --- */}
+      <NeuralNetwork />
       <div
         aria-hidden="true"
         className="pointer-events-none absolute inset-0 -z-10"
         style={{
-          background: "radial-gradient(60% 50% at 50% 0%, rgba(0,245,255,0.08), transparent 70%)",
+          background:
+            "radial-gradient(52% 48% at 50% 42%, color-mix(in srgb, var(--bg) 78%, transparent), transparent 78%)",
         }}
       />
 
       <Container className="flex flex-col items-center text-center">
-        <Reveal mode="mount">
-          <p className="animated-ring border-border bg-surface/70 text-muted mb-8 inline-flex items-center gap-2.5 rounded-full border px-4 py-1.5 font-mono text-sm backdrop-blur">
-            <span className="relative inline-flex size-2 items-center justify-center">
-              <span className="pulse-dot bg-accent-cyan absolute inset-0 rounded-full" />
-              <span className="bg-accent-cyan relative size-2 rounded-full" aria-hidden="true" />
-            </span>
-            Desarrollo de software · Ciberseguridad
-          </p>
-        </Reveal>
-
         {/* h1 sin animar: es el elemento LCP; se pinta de inmediato (§11). */}
         <h1
           id="hero-title"
-          className="font-display text-fluid-hero max-w-4xl font-bold tracking-tight text-balance"
+          className="font-display text-fluid-hero max-w-4xl font-extrabold tracking-tight text-balance [text-shadow:0_2px_40px_rgba(0,0,0,0.35)]"
         >
           Transformamos tus ideas en{" "}
           <span className="text-gradient-animated">productos digitales seguros</span>
@@ -71,7 +56,7 @@ export function Hero() {
         <Reveal
           mode="mount"
           delay={0.2}
-          className="mt-10 flex flex-col items-center gap-4 sm:flex-row"
+          className="mt-9 flex flex-col items-center gap-4 sm:flex-row"
         >
           <MagneticButton>
             <Button asChild size="lg" className="btn-shine group">
@@ -92,12 +77,12 @@ export function Hero() {
         </Reveal>
 
         {/* --- Banda de métricas de confianza (valores ilustrativos, §19) --- */}
-        <Reveal mode="mount" delay={0.35} className="mt-16 w-full max-w-3xl">
-          <dl className="border-border/70 grid grid-cols-2 gap-y-8 border-t pt-10 sm:grid-cols-4">
+        <Reveal mode="mount" delay={0.35} className="mt-14 w-full max-w-2xl">
+          <dl className="border-border/60 grid grid-cols-2 gap-y-6 border-t pt-8 sm:grid-cols-4">
             {stats.map((stat) => (
               <div key={stat.label} className="flex flex-col items-center gap-1">
                 <dt className="sr-only">{stat.label}</dt>
-                <dd className="font-display text-gradient-brand text-3xl font-bold sm:text-4xl">
+                <dd className="font-display text-gradient-brand text-2xl font-bold sm:text-3xl">
                   <CountUp
                     value={stat.value}
                     prefix={stat.prefix}
@@ -105,7 +90,7 @@ export function Hero() {
                     decimals={stat.decimals}
                   />
                 </dd>
-                <p className="text-muted text-xs sm:text-sm" aria-hidden="true">
+                <p className="text-muted text-xs" aria-hidden="true">
                   {stat.label}
                 </p>
               </div>
@@ -117,7 +102,7 @@ export function Hero() {
       {/* --- Indicador de scroll (decorativo) --- */}
       <div
         aria-hidden="true"
-        className="text-muted/60 absolute inset-x-0 bottom-6 flex justify-center"
+        className="text-muted/50 absolute inset-x-0 bottom-6 flex justify-center"
       >
         <ChevronDown className="size-6 animate-bounce" />
       </div>
