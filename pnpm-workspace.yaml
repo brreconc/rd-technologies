@@ -10,3 +10,11 @@ allowBuilds:
 # compatible con 8.4, solo se usa en build. Ver docs/05-security.
 overrides:
   postcss@<8.5.10: ">=8.5.10"
+  # sharp arrastra los CVE de libvips CVE-2026-33327/33328/35590/35591
+  # (GHSA-f88m-g3jw-g9cj), parcheados en 0.35. Next lo declara como dependencia
+  # OPCIONAL (^0.34.5) y solo lo usa el optimizador de `next/image`, que este
+  # proyecto no utiliza (no hay imágenes rasterizadas; `public/` son SVG) — de
+  # hecho sharp ni siquiera entra en la salida standalone que forma la imagen
+  # Docker. Se fuerza igualmente la línea parcheada para no arrastrar el aviso
+  # en el árbol de dependencias. Ver docs/05-security.
+  sharp@<0.35.0: ">=0.35.0"

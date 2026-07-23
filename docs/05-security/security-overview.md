@@ -53,9 +53,29 @@ Comprobado en `pnpm start`:
   cabecera coincide con el de los `<script>` del HTML (si no, no ejecutarían). Confirmado en
   navegador real (Playwright): **cero violaciones de CSP** ni errores de consola.
 - HSTS presente, sin `x-powered-by`, resto de cabeceras correctas.
-- **`pnpm audit --prod`: sin vulnerabilidades** (se fija `postcss ≥ 8.5.10` vía override de pnpm,
-  ver `pnpm-workspace.yaml`). Los avisos restantes están confinados a `@lhci/cli` (herramienta de
-  desarrollo, no se despliega).
+- **`pnpm audit --prod`: sin vulnerabilidades.** Ver el apartado de dependencias más abajo. Los
+  avisos restantes están confinados a `@lhci/cli` (herramienta de desarrollo, no se despliega).
+
+## Dependencias vulnerables — actuaciones
+
+El criterio de entrega es `pnpm audit --prod` limpio, y el CI lo hace fallar si no lo está
+(`.github/workflows/ci.yml`, job `quality`). Historial de actuaciones:
+
+| Fecha      | Aviso                                                                                           | Actuación                                                              |
+| ---------- | ----------------------------------------------------------------------------------------------- | ---------------------------------------------------------------------- |
+| Fase 6     | `postcss` — XSS en el stringify de CSS (GHSA-qx2v-qp2m-jg93)                                    | Override a `>=8.5.10` en `pnpm-workspace.yaml` (solo se usa en build). |
+| 2026-07-23 | **`next` 16.2.10** — 4 avisos, entre ellos **bypass de middleware/proxy** (GHSA-6gpp-xcg3-4w24) | **Actualización a `next@16.2.11`** + `eslint-config-next@16.2.11`.     |
+| 2026-07-23 | `sharp <0.35.0` — CVE de libvips heredados (GHSA-f88m-g3jw-g9cj)                                | Override a `>=0.35.0`.                                                 |
+
+> ⚠️ **Por qué el aviso de `next` era serio aquí.** El bypass afectaba a aplicaciones del App Router
+> con Turbopack, y en este proyecto **la CSP con nonce y las cabeceras de seguridad se aplican en el
+> proxy** (`src/proxy.ts`, ADR-009). Una petición capaz de esquivar el proxy se serviría sin CSP.
+> Por eso la actualización no era opcional.
+
+> **Nota sobre `sharp`.** Es una dependencia _opcional_ de Next (`^0.34.5`) que solo usa el
+> optimizador de `next/image`. Este proyecto no usa `next/image` (no hay imágenes rasterizadas;
+> `public/` son SVG) y **`sharp` no aparece en la salida standalone**, así que nunca llegó a viajar
+> en la imagen Docker. El override se aplica igualmente para no arrastrar el aviso.
 
 ## Formularios (Fase 4 — implementado)
 
@@ -66,7 +86,7 @@ verificación en [`forms-hardening.md`](./forms-hardening.md).
 ## QA de seguridad (Fase 6 — implementado)
 
 - **CSP estricta con nonces** — hecho (ADR-009).
-- **`pnpm audit` limpio** en producción — hecho (override de `postcss`).
+- **`pnpm audit` limpio** en producción — hecho (ver historial de actuaciones arriba).
 - Tests de seguridad automatizados: unit (sanitize, rate-limit, anti-bot, validadores, respuestas)
   con Vitest y E2E (CSP sin violaciones) con Playwright. Ver [08-testing](../08-testing/testing-strategy.md).
 
