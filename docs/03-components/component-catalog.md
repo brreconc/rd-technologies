@@ -4,24 +4,27 @@
 
 ## Primitivos UI (`src/components/ui`)
 
-| Componente                                        | Ubicación      | Notas                                                                                                                                           |
-| ------------------------------------------------- | -------------- | ----------------------------------------------------------------------------------------------------------------------------------------------- |
-| `Button`                                          | `ui/button`    | Variantes (`primary`/`secondary`/`outline`/`ghost`) y tallas con `cva`. `asChild` (Radix Slot) para renderizar como `<a>`. Touch target ≥ 44px. |
-| `Card` (+ `CardHeader/Title/Description/Content`) | `ui/card`      | Superficie con borde; composición por subpartes.                                                                                                |
-| `Container` / `Section`                           | `ui/container` | Ancho máximo + padding fluido; `Section` añade espaciado vertical y `scroll-mt` para anclas.                                                    |
-| `Input` / `Label`                                 | `ui/input`     | Campo y etiqueta base para formularios (usados por la Fase 4).                                                                                  |
-| `Textarea`                                        | `ui/textarea`  | Área multilínea (mensaje de contacto). `resize-y`, sin desbordar en anchos pequeños.                                                            |
-| `Accordion` (+ `Item/Trigger/Content`)            | `ui/accordion` | Sobre Radix Accordion (teclado + ARIA). Para la FAQ (Fase 2).                                                                                   |
+| Componente                                        | Ubicación           | Notas                                                                                                                                           |
+| ------------------------------------------------- | ------------------- | ----------------------------------------------------------------------------------------------------------------------------------------------- |
+| `Button`                                          | `ui/button`         | Variantes (`primary`/`secondary`/`outline`/`ghost`) y tallas con `cva`. `asChild` (Radix Slot) para renderizar como `<a>`. Touch target ≥ 44px. |
+| `Card` (+ `CardHeader/Title/Description/Content`) | `ui/card`           | Superficie con borde; composición por subpartes.                                                                                                |
+| `Container` / `Section`                           | `ui/container`      | Ancho máximo + padding fluido; `Section` añade espaciado vertical y `scroll-mt` para anclas.                                                    |
+| `Input` / `Label`                                 | `ui/input`          | Campo y etiqueta base para formularios (usados por la Fase 4).                                                                                  |
+| `Textarea`                                        | `ui/textarea`       | Área multilínea (mensaje de contacto). `resize-y`, sin desbordar en anchos pequeños.                                                            |
+| `Accordion` (+ `Item/Trigger/Content`)            | `ui/accordion`      | Sobre Radix Accordion (teclado + ARIA). Para la FAQ (Fase 2).                                                                                   |
+| `SpotlightCard`                                   | `ui/spotlight-card` | Tarjeta "viva": spotlight que sigue al cursor, tilt 3D ≤6°, borde de gradiente y esquinas de HUD. Cliente.                                      |
 
 ## Compartidos (`src/components/shared`)
 
-| Componente    | Ubicación                 | Notas                                                                                 |
-| ------------- | ------------------------- | ------------------------------------------------------------------------------------- |
-| `Header`      | `shared/Header`           | Cabecera fija (sticky) con nav por anclas, `ThemeToggle` y CTA. Server Component.     |
-| `MobileNav`   | `shared/Header/MobileNav` | Menú móvil (< lg) con Radix Dialog (trampa de foco, Escape, ARIA). Cliente.           |
-| `Footer`      | `shared/Footer`           | Logo, navegación, redes (si hay datos), `NewsletterForm` y copyright.                 |
-| `ThemeToggle` | `shared/ThemeToggle`      | Alterna claro/oscuro (`next-themes`); usa `useMounted` para evitar mismatch. Cliente. |
-| `Logo`        | `shared/Logo`             | Wordmark tipográfico enlazado al inicio (sin logo gráfico aún, §19.5).                |
+| Componente    | Ubicación                   | Notas                                                                                          |
+| ------------- | --------------------------- | ---------------------------------------------------------------------------------------------- |
+| `Header`      | `shared/Header`             | Cabecera sticky: `Logo`, `NavLinks`, `ThemeToggle`, CTA y `MobileNav`. Server Component.       |
+| `HeaderShell` | `shared/Header/HeaderShell` | Envoltorio cliente: transparente arriba del todo, cristal + sombra + línea al hacer scroll.    |
+| `NavLinks`    | `shared/Header/NavLinks`    | Nav de escritorio con scroll-spy (`aria-current`) y pastilla deslizante con muelle. Cliente.   |
+| `MobileNav`   | `shared/Header/MobileNav`   | Menú móvil (< lg) con Radix Dialog (trampa de foco, Escape, ARIA). Cliente.                    |
+| `Footer`      | `shared/Footer`             | Logo, navegación, redes (si hay datos), `NewsletterForm` y copyright.                          |
+| `ThemeToggle` | `shared/ThemeToggle`        | `role="switch"` con pomo deslizante sol/luna; `useMounted` evita el mismatch de tema. Cliente. |
+| `Logo`        | `shared/Logo`               | Marca gráfica de grafo (SVG) + wordmark con gradiente animado; nunca parte de línea.           |
 
 ## Hooks (`src/lib/hooks`)
 
@@ -32,15 +35,15 @@
 
 ## App
 
-| Componente    | Ubicación                  | Estado                                                      |
-| ------------- | -------------------------- | ----------------------------------------------------------- |
-| `RootLayout`  | `src/app/layout.tsx`       | Fuentes, tema, skip link, Header + Footer, `viewport`.      |
-| `Providers`   | `src/app/providers.tsx`    | Theming (next-themes).                                      |
-| `HomePage`    | `src/app/page.tsx`         | Compone las 9 secciones + JSON-LD (one-page).               |
-| `Loading`     | `src/app/loading.tsx`      | Indicador de carga accesible (Suspense de segmento raíz).   |
-| `NotFound`    | `src/app/not-found.tsx`    | 404 con rutas de recuperación (Server Component).           |
-| `Error`       | `src/app/error.tsx`        | Error boundary de segmento; `unstable_retry()` (Next 16.2). |
-| `GlobalError` | `src/app/global-error.tsx` | Fallo del layout raíz; autocontenido (html/body propios).   |
+| Componente    | Ubicación                  | Estado                                                        |
+| ------------- | -------------------------- | ------------------------------------------------------------- |
+| `RootLayout`  | `src/app/layout.tsx`       | Fuentes, tema, skip link, Header + Footer, `viewport`.        |
+| `Providers`   | `src/app/providers.tsx`    | Theming + `LazyMotion` + `MotionConfig reducedMotion="user"`. |
+| `HomePage`    | `src/app/page.tsx`         | Compone las 9 secciones + JSON-LD (one-page).                 |
+| `Loading`     | `src/app/loading.tsx`      | Indicador de carga accesible (Suspense de segmento raíz).     |
+| `NotFound`    | `src/app/not-found.tsx`    | 404 con rutas de recuperación (Server Component).             |
+| `Error`       | `src/app/error.tsx`        | Error boundary de segmento; `unstable_retry()` (Next 16.2).   |
+| `GlobalError` | `src/app/global-error.tsx` | Fallo del layout raíz; autocontenido (html/body propios).     |
 
 ### Rutas de metadata (Fase 5)
 
@@ -62,30 +65,44 @@ Detalle en [09-content-seo/seo](../09-content-seo/seo.md).
 
 Contenido tipado en `src/lib/constants` (no hardcodeado). Helpers: `SectionHeading`, `IconBadge`.
 
-| Sección           | Ancla                 | Fuente de contenido                 |
-| ----------------- | --------------------- | ----------------------------------- |
-| `Hero`            | —                     | copy inline (oficial)               |
-| `ValueProps`      | `#propuesta-de-valor` | `constants/value-props`             |
-| `Services`        | `#servicios`          | `constants/services`                |
-| `Differentiators` | `#por-que-elegirnos`  | `constants/differentiators`         |
-| `Process`         | `#proceso`            | `constants/process`                 |
-| `UseCases`        | `#casos-de-uso`       | `constants/use-cases`               |
-| `Testimonials`    | `#testimonios`        | `constants/testimonials` (ejemplos) |
-| `FAQ`             | `#faq`                | `constants/faq` (Accordion)         |
-| `FinalCTA`        | `#contacto`           | copy inline (oficial)               |
+| Sección           | Ancla                 | Fuente de contenido                                |
+| ----------------- | --------------------- | -------------------------------------------------- |
+| `Hero`            | —                     | copy inline (oficial) + `HeroBackdrop`/`HeroStage` |
+| `TechMarquee`     | —                     | `constants/tech`                                   |
+| `ValueProps`      | `#propuesta-de-valor` | `constants/value-props`                            |
+| `Services`        | `#servicios`          | `constants/services`                               |
+| `Differentiators` | `#por-que-elegirnos`  | `constants/differentiators`                        |
+| `Process`         | `#proceso`            | `constants/process` (línea de tiempo con scroll)   |
+| `UseCases`        | `#casos-de-uso`       | `constants/use-cases`                              |
+| `Testimonials`    | `#testimonios`        | `constants/testimonials` (ejemplos)                |
+| `FAQ`             | `#faq`                | `constants/faq` (Accordion)                        |
+| `FinalCTA`        | `#contacto`           | copy inline (oficial)                              |
 
 > Todas las secciones usan HTML semántico (`section` + `aria-labelledby`, listas, headings
 > jerárquicos) y animaciones de entrada (ver abajo).
 
-## Animaciones (`src/components/animations`) — Fase 3
+## Animaciones (`src/components/animations`)
 
-| Componente                | Uso                                                                                 |
-| ------------------------- | ----------------------------------------------------------------------------------- |
-| `Reveal`                  | Entrada fade+subida al hacer scroll (`mode="scroll"`) o al montar (`mode="mount"`). |
-| `Stagger` / `StaggerItem` | Lista con entrada escalonada de sus ítems.                                          |
+| Componente                | Uso                                                                                                         |
+| ------------------------- | ----------------------------------------------------------------------------------------------------------- |
+| `Reveal`                  | Entrada fade+subida al hacer scroll (`mode="scroll"`) o al montar (`mode="mount"`); opción `blur`.          |
+| `Stagger` / `StaggerItem` | Lista con entrada escalonada 3D de sus ítems (variante `cardIn`).                                           |
+| `TextReveal`              | Título revelado **palabra a palabra** desde detrás de su máscara. Usado por todos los `SectionHeading`.     |
+| `NeuralNetwork`           | Malla neuronal del hero en `<canvas>`: arranque, tráfico de datos e intrusiones interceptadas. Ver ADR-011. |
+| `ScrollProgress`          | Barra de progreso de lectura fija arriba (`aria-hidden`).                                                   |
+| `MagneticButton`          | El CTA se desplaza hacia el cursor con muelle; sin listeners con movimiento reducido.                       |
+| `CountUp`                 | Cuenta de 0 al valor al entrar en pantalla; el HTML contiene siempre el valor final.                        |
+| `Marquee`                 | Cinta infinita en CSS puro con copia `aria-hidden` para no duplicar contenido.                              |
+
+La lógica de la malla vive aparte, **sin DOM**, en `animations/NeuralNetwork/engine.ts` (probada con
+Vitest en `engine.test.ts`).
 
 Detalle completo en [design-system/motion](../02-design-system/motion.md). Framer Motion
 optimizado con `LazyMotion` + `m.*` + carga diferida del motor (§11).
+
+> ⚠️ **Al escribir un componente animado nuevo:** nunca cambies el markup según
+> `useReducedMotion()` — ver la regla de oro en
+> [motion](../02-design-system/motion.md#política-de-prefers-reduced-motion-adr-011-️-importante).
 
 ## Formularios (`src/components/forms`) — Fase 4
 

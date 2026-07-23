@@ -1,35 +1,46 @@
 "use client";
 
 import * as React from "react";
+import { m, useReducedMotion } from "framer-motion";
 import { cn } from "@/lib/utils/cn";
 import { siteConfig } from "@/config/site";
 
 /**
- * Navegación de escritorio con "scroll-spy" (Fase 8): resalta el enlace de la
- * sección visible mientras se hace scroll y anima un subrayado de gradiente bajo
- * el activo. El desplazamiento al hacer clic es nativo por ancla (`scroll-mt`
- * en cada `Section` compensa la cabecera fija → aterriza exacto en el título).
+ * Navegación de escritorio con "scroll-spy" + pastilla deslizante (Fase 9).
  *
- * Accesibilidad: los enlaces siguen siendo `<a href="#...">` reales (funcionan
- * sin JS); el estado activo se expone con `aria-current="true"`. El observer solo
- * añade realce visual — no cambia el comportamiento base.
+ * - Un `IntersectionObserver` marca la sección visible (`aria-current`).
+ * - Una ÚNICA pastilla se desliza con muelle hasta el enlace resaltado: el que
+ *   tiene puntero o foco y, si no hay ninguno, el de la sección activa. Animar
+ *   un solo elemento (en vez de un fondo por enlace) mantiene el coste constante.
+ * - Al hacer clic, el desplazamiento es el nativo del ancla; el `scroll-mt` de
+ *   cada `Section` compensa la cabecera para aterrizar justo en el título.
+ *
+ * Accesibilidad: los enlaces son `<a href="#…">` reales (funcionan sin JS); la
+ * pastilla es `aria-hidden` y el estado activo se expone con `aria-current`,
+ * reforzado con un subrayado de gradiente (no solo color, §10).
  */
 export function NavLinks() {
+  const reduce = useReducedMotion();
   const ids = React.useMemo(() => siteConfig.nav.map((item) => item.href.replace(/^#/, "")), []);
   const [active, setActive] = React.useState<string | null>(null);
+  const [focused, setFocused] = React.useState<string | null>(null);
+  const [pill, setPill] = React.useState<{ x: number; width: number } | null>(null);
 
+  const navRef = React.useRef<HTMLElement>(null);
+  const itemsRef = React.useRef(new Map<string, HTMLAnchorElement>());
+
+  // --- Scroll-spy: activa la sección más alta que cruza la banda superior del
+  // viewport (justo bajo la cabecera).
   React.useEffect(() => {
     const sections = ids
       .map((id) => document.getElementById(id))
       .filter((el): el is HTMLElement => el !== null);
     if (sections.length === 0) return;
 
-    // Se considera "activa" la sección cuya parte superior cruza la banda alta
-    // del viewport (justo bajo la cabecera). Elegimos la más abajo que ya entró.
     const observer = new IntersectionObserver(
       (entries) => {
         const visible = entries
-          .filter((e) => e.isIntersecting)
+          .filter((entry) => entry.isIntersecting)
           .sort((a, b) => a.boundingClientRect.top - b.boundingClientRect.top);
         if (visible[0]) setActive(visible[0].target.id);
       },
@@ -40,8 +51,42 @@ export function NavLinks() {
     return () => observer.disconnect();
   }, [ids]);
 
+  // --- Posición de la pastilla. Se remide si cambia el resaltado o el ancho del
+  // nav (zoom, rotación del dispositivo, carga tardía de la tipografía…).
+  const highlighted = focused ?? active;
+  React.useEffect(() => {
+    const nav = navRef.current;
+    const el = highlighted ? itemsRef.current.get(highlighted) : undefined;
+    if (!nav || !el) {
+      setPill(null);
+      return;
+    }
+    const measure = () => setPill({ x: el.offsetLeft, width: el.offsetWidth });
+    measure();
+    const observer = new ResizeObserver(measure);
+    observer.observe(nav);
+    return () => observer.disconnect();
+  }, [highlighted]);
+
   return (
-    <nav aria-label="Principal" className="hidden items-center gap-1 lg:flex">
+    <nav
+      ref={navRef}
+      aria-label="Principal"
+      className="relative hidden items-center gap-1 lg:flex"
+      onPointerLeave={() => setFocused(null)}
+    >
+      {pill && (
+        <m.span
+          aria-hidden="true"
+          className="bg-surface-2/70 ring-accent-cyan/25 pointer-events-none absolute inset-y-1 left-0 rounded-full ring-1"
+          initial={false}
+          animate={{ x: pill.x, width: pill.width }}
+          transition={
+            reduce ? { duration: 0 } : { type: "spring", stiffness: 460, damping: 36, mass: 0.7 }
+          }
+        />
+      )}
+
       {siteConfig.nav.map((item) => {
         const id = item.href.replace(/^#/, "");
         const isActive = active === id;
@@ -49,9 +94,16 @@ export function NavLinks() {
           <a
             key={item.href}
             href={item.href}
+            ref={(node) => {
+              if (node) itemsRef.current.set(id, node);
+              else itemsRef.current.delete(id);
+            }}
             aria-current={isActive ? "true" : undefined}
+            onPointerEnter={() => setFocused(id)}
+            onFocus={() => setFocused(id)}
+            onBlur={() => setFocused(null)}
             className={cn(
-              "group relative rounded-md px-3 py-2 text-sm transition-colors",
+              "relative z-10 rounded-full px-3.5 py-2 text-sm transition-colors duration-300",
               isActive ? "text-foreground" : "text-muted hover:text-foreground",
             )}
           >
@@ -59,8 +111,8 @@ export function NavLinks() {
             <span
               aria-hidden="true"
               className={cn(
-                "from-accent-cyan to-accent-purple absolute inset-x-3 -bottom-0.5 h-0.5 origin-left rounded-full bg-gradient-to-r transition-transform duration-300 ease-out",
-                isActive ? "scale-x-100" : "scale-x-0 group-hover:scale-x-100",
+                "from-accent-cyan to-accent-purple absolute inset-x-3.5 bottom-1 h-0.5 origin-left rounded-full bg-gradient-to-r transition-transform duration-300 ease-out",
+                isActive ? "scale-x-100" : "scale-x-0",
               )}
             />
           </a>

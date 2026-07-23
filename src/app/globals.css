@@ -140,6 +140,16 @@
       animation-iteration-count: 1 !important;
       transition-duration: 0.001ms !important;
     }
+    /* Cualquier elemento con entrada animada aparece ya en su sitio (ADR-011).
+       El CSS es la fuente de verdad de este contrato: gana a los estilos en
+       línea que Framer serializa en el HTML, así que los componentes NUNCA
+       tienen que cambiar su markup según `useReducedMotion()` (hacerlo rompía
+       la hidratación). Es la misma regla que aplica el <noscript> del layout. */
+    .reveal {
+      opacity: 1 !important;
+      transform: none !important;
+      filter: none !important;
+    }
   }
 }
 
@@ -152,7 +162,12 @@
 }
 
 /* Gradiente de marca ANIMADO (solo color; no toca opacidad ni layout, por lo
-   que es seguro aplicarlo al h1 LCP sin retrasar su pintado). */
+   que es seguro aplicarlo al h1 LCP sin retrasar su pintado).
+
+   Dos tiempos (Fase 9): primero un BARRIDO rápido de "arranque" que recorre el
+   texto una sola vez al cargar, y después el vaivén lento en bucle. El degradado
+   se repite en mosaico, así que el texto está coloreado desde el primer
+   fotograma — nunca hay un instante de texto invisible. */
 @utility text-gradient-animated {
   background-image: linear-gradient(
     100deg,
@@ -164,53 +179,18 @@
   background-clip: text;
   -webkit-background-clip: text;
   color: transparent;
-  animation: gradient-pan 7s linear infinite;
-}
-
-/* --------------------------------------------------------------------------
-   Animaciones (Fase 3). Framer Motion es el motor principal; aquí solo van
-   efectos de fondo puramente decorativos y de bajo coste (§11).
-   -------------------------------------------------------------------------- */
-
-/* Fondo "aurora" del hero: gradiente cónico difuminado que gira lentamente.
-   Coste casi nulo (una capa con blur + transform), no bloquea nada. */
-@keyframes aurora-spin {
-  to {
-    transform: rotate(1turn);
-  }
-}
-
-.hero-aurora {
-  position: absolute;
-  inset: -30% -20% auto -20%;
-  z-index: -10;
-  height: 70%;
-  pointer-events: none;
-  background: conic-gradient(
-    from 0deg at 50% 50%,
-    color-mix(in srgb, var(--accent-cyan) 12%, transparent),
-    color-mix(in srgb, var(--accent-purple) 12%, transparent),
-    color-mix(in srgb, var(--accent-cyan) 12%, transparent)
-  );
-  filter: blur(90px);
-  opacity: 0.7;
-  animation: aurora-spin 24s linear infinite;
-  will-change: transform;
-}
-
-@media (prefers-reduced-motion: reduce) {
-  .hero-aurora {
-    animation: none;
-  }
+  animation:
+    gradient-boot 1.5s cubic-bezier(0.16, 1, 0.3, 1) 1 both,
+    gradient-pan 8s linear 1.5s infinite;
 }
 
 /* ==========================================================================
-   SISTEMA DE MOVIMIENTO v2 — "de otro mundo" (Fase 8)
+   SISTEMA DE MOVIMIENTO v3 — "escenografía de sistema seguro" (Fase 9)
    Todo lo de aquí es GPU-friendly (transform/opacity/filter) y decorativo.
    La regla global de @layer base (prefers-reduced-motion) ya fuerza
    `animation-duration: 0.001ms`, así que TODAS estas animaciones se detienen
-   solas cuando el usuario pide menos movimiento. Ver docs/02-design-system
-   y ADR-010.
+   solas cuando el usuario pide menos movimiento.
+   Ver docs/02-design-system/motion.md, ADR-010 y ADR-011.
    ========================================================================== */
 
 @keyframes gradient-pan {
@@ -219,23 +199,12 @@
   }
 }
 
-@keyframes float-orb {
-  0%,
-  100% {
-    transform: translate3d(0, 0, 0) scale(1);
+@keyframes gradient-boot {
+  from {
+    background-position: -120% center;
   }
-  50% {
-    transform: translate3d(0, -28px, 0) scale(1.06);
-  }
-}
-
-@keyframes float-orb-alt {
-  0%,
-  100% {
-    transform: translate3d(0, 0, 0) scale(1);
-  }
-  50% {
-    transform: translate3d(14px, 20px, 0) scale(0.94);
+  to {
+    background-position: 0% center;
   }
 }
 
@@ -245,54 +214,75 @@
   }
 }
 
-@keyframes spin-slow {
-  to {
-    transform: rotate(1turn);
-  }
-}
-
 @keyframes shine-sweep {
   to {
     transform: translateX(240%) skewX(-18deg);
   }
 }
 
-@keyframes pulse-ring {
-  0% {
-    transform: scale(1);
-    opacity: 0.7;
+@keyframes radar-spin {
+  to {
+    transform: rotate(1turn);
   }
-  70%,
+}
+
+@keyframes cue-fall {
+  0% {
+    transform: translateY(0);
+    opacity: 0;
+  }
+  25% {
+    opacity: 1;
+  }
   100% {
-    transform: scale(2.6);
+    transform: translateY(340%);
     opacity: 0;
   }
 }
 
-/* --- Orbes flotantes del hero (blobs difuminados) --- */
-.orb {
+@keyframes edge-draw {
+  from {
+    transform: scaleX(0.2);
+    opacity: 0;
+  }
+  to {
+    transform: scaleX(1);
+    opacity: 1;
+  }
+}
+
+/* --- Costura entre secciones: hilo de luz en lugar de un borde plano --------
+   Donde el navegador soporta animaciones ligadas al scroll, el hilo se DIBUJA
+   desde el centro al entrar la sección — coste cero de JavaScript. Donde no
+   (Safari, navegadores antiguos), queda pintado en su estado final. */
+.section-edge {
+  position: relative;
+}
+.section-edge::before {
+  content: "";
   position: absolute;
-  border-radius: 9999px;
-  filter: blur(70px);
+  inset-inline: 0;
+  top: 0;
+  height: 1px;
   pointer-events: none;
-  will-change: transform;
-  z-index: -10;
-}
-.orb--cyan {
-  background: radial-gradient(
-    circle,
-    color-mix(in srgb, var(--accent-cyan) 55%, transparent),
-    transparent 70%
+  background: linear-gradient(
+    90deg,
+    transparent,
+    var(--border) 14%,
+    color-mix(in srgb, var(--accent-cyan) 55%, transparent) 50%,
+    var(--border) 86%,
+    transparent
   );
-  animation: float-orb 11s ease-in-out infinite;
 }
-.orb--purple {
-  background: radial-gradient(
-    circle,
-    color-mix(in srgb, var(--accent-purple) 55%, transparent),
-    transparent 70%
-  );
-  animation: float-orb-alt 13s ease-in-out infinite;
+
+@supports (animation-timeline: view()) {
+  @media (prefers-reduced-motion: no-preference) {
+    .section-edge::before {
+      animation: edge-draw linear both;
+      animation-timeline: view();
+      animation-range: entry 0% entry 65%;
+    }
+  }
 }
 
 /* --- Rejilla de puntos difuminada (fondo técnico) --- */
@@ -311,15 +301,42 @@
   opacity: 0.5;
 }
 
-/* --- Grano/ruido sutil (textura de superficie) --- */
-.grain-overlay {
+/* --- Barrido de radar (CTA final): cierra el relato de vigilancia del hero --- */
+.radar-sweep {
   position: absolute;
   inset: 0;
-  z-index: -9;
+  z-index: -10;
   pointer-events: none;
-  opacity: 0.04;
-  mix-blend-mode: overlay;
-  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='120' height='120'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='3' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");
+  transform-origin: 50% 100%;
+  background: conic-gradient(
+    from 0deg at 50% 100%,
+    transparent 0deg,
+    color-mix(in srgb, var(--accent-cyan) 18%, transparent) 14deg,
+    transparent 40deg
+  );
+  -webkit-mask-image: radial-gradient(circle at 50% 100%, #000 8%, transparent 70%);
+  mask-image: radial-gradient(circle at 50% 100%, #000 8%, transparent 70%);
+  animation: radar-spin 12s linear infinite;
+  will-change: transform;
+}
+
+/* --- Indicador de scroll: gota de luz que cae por un hilo --- */
+.scroll-cue {
+  position: relative;
+  display: block;
+  width: 1px;
+  height: 40px;
+  overflow: hidden;
+  background: linear-gradient(180deg, transparent, color-mix(in srgb, var(--fg) 20%, transparent));
+}
+.scroll-cue::after {
+  content: "";
+  position: absolute;
+  inset-inline: 0;
+  top: -40%;
+  height: 40%;
+  background: linear-gradient(180deg, transparent, var(--accent-cyan));
+  animation: cue-fall 2.4s cubic-bezier(0.65, 0, 0.35, 1) infinite;
 }
 
 /* --- Barra de progreso de scroll (arriba, fija) --- */
@@ -353,6 +370,43 @@
   opacity: 1;
 }
 
+/* --- Brillo superior sutil: da volumen a las superficies --- */
+.card-sheen {
+  background-image: linear-gradient(
+    180deg,
+    color-mix(in srgb, var(--fg) 4%, transparent),
+    transparent 45%
+  );
+}
+
+/* --- Esquinas de HUD: se despliegan al enfocar/pasar el cursor por la tarjeta.
+   Ocho franjas de 1px dibujadas con gradientes (sin nodos extra ni bordes). --- */
+.hud-corners {
+  position: absolute;
+  inset: 0.55rem;
+  pointer-events: none;
+  opacity: 0;
+  transform: scale(0.98);
+  transition:
+    opacity 0.35s ease,
+    transform 0.35s ease;
+  --hud: color-mix(in srgb, var(--accent-cyan) 70%, transparent);
+  background:
+    linear-gradient(var(--hud), var(--hud)) left top / 14px 1px no-repeat,
+    linear-gradient(var(--hud), var(--hud)) left top / 1px 14px no-repeat,
+    linear-gradient(var(--hud), var(--hud)) right top / 14px 1px no-repeat,
+    linear-gradient(var(--hud), var(--hud)) right top / 1px 14px no-repeat,
+    linear-gradient(var(--hud), var(--hud)) left bottom / 14px 1px no-repeat,
+    linear-gradient(var(--hud), var(--hud)) left bottom / 1px 14px no-repeat,
+    linear-gradient(var(--hud), var(--hud)) right bottom / 14px 1px no-repeat,
+    linear-gradient(var(--hud), var(--hud)) right bottom / 1px 14px no-repeat;
+}
+.group:hover > .hud-corners,
+.group:focus-within > .hud-corners {
+  opacity: 1;
+  transform: scale(1);
+}
+
 /* --- Borde con gradiente que aparece al pasar el cursor --- */
 .gradient-border::after {
   content: "";
@@ -378,45 +432,6 @@
 .gradient-border:hover::after,
 .gradient-border:focus-within::after {
   opacity: 1;
-}
-
-/* --- Anillo de luz que gira alrededor de un borde (badge / CTA) --- */
-.animated-ring {
-  position: relative;
-}
-.animated-ring::before {
-  content: "";
-  position: absolute;
-  inset: 0;
-  border-radius: inherit;
-  padding: 1px;
-  background: conic-gradient(
-    from 0deg,
-    transparent 0 55%,
-    var(--accent-cyan) 72%,
-    var(--accent-purple) 88%,
-    transparent 100%
-  );
-  -webkit-mask:
-    linear-gradient(#000 0 0) content-box,
-    linear-gradient(#000 0 0);
-  -webkit-mask-composite: xor;
-  mask-composite: exclude;
-  animation: spin-slow 4s linear infinite;
-  pointer-events: none;
-}
-
-/* --- Punto "disponible" con pulso --- */
-.pulse-dot {
-  position: relative;
-}
-.pulse-dot::after {
-  content: "";
-  position: absolute;
-  inset: 0;
-  border-radius: inherit;
-  background: var(--accent-cyan);
-  animation: pulse-ring 2.4s ease-out infinite;
 }
 
 /* --- Brillo diagonal que barre un botón al hacer hover --- */

@@ -1,12 +1,17 @@
 "use client";
 
-import { m, useReducedMotion } from "framer-motion";
+import { m } from "framer-motion";
 import { cn } from "@/lib/utils/cn";
-import { fadeUp, staggerContainer } from "@/lib/animations/framer-variants";
+import { cardIn, staggerContainer } from "@/lib/animations/framer-variants";
 
 /**
  * Lista (`ul`/`ol`) que escalona la entrada de sus `StaggerItem` al hacer scroll.
- * Reduced-motion → renderiza la lista estática. Seguro sin JS (clase `reveal`).
+ * La perspectiva del contenedor es la que da profundidad al giro 3D de cada
+ * ítem (ver `cardIn`).
+ *
+ * `prefers-reduced-motion` se respeta SIN bifurcar el markup (ADR-011): la clase
+ * `reveal` la neutraliza el CSS y `MotionConfig` desactiva las transformaciones.
+ * Por la misma vía queda visible sin JavaScript.
  */
 export function Stagger({
   as = "ul",
@@ -17,17 +22,10 @@ export function Stagger({
   className?: string;
   children: React.ReactNode;
 }) {
-  const reduce = useReducedMotion();
-
-  if (reduce) {
-    const Plain = as;
-    return <Plain className={className}>{children}</Plain>;
-  }
-
   const MotionList = as === "ol" ? m.ol : m.ul;
   return (
     <MotionList
-      className={cn("reveal", className)}
+      className={cn("reveal [perspective:1200px]", className)}
       variants={staggerContainer}
       initial="hidden"
       whileInView="show"
@@ -46,10 +44,8 @@ export function StaggerItem({
   className?: string;
   children: React.ReactNode;
 }) {
-  const reduce = useReducedMotion();
-  if (reduce) return <li className={className}>{children}</li>;
   return (
-    <m.li className={cn("reveal", className)} variants={fadeUp}>
+    <m.li className={cn("reveal", className)} variants={cardIn}>
       {children}
     </m.li>
   );

@@ -1,5 +1,7 @@
+import { ShieldCheck } from "lucide-react";
 import { Container, Section } from "@/components/ui/container";
 import { Reveal } from "@/components/animations/Reveal";
+import { TextReveal } from "@/components/animations/TextReveal";
 import { ContactForm } from "@/components/forms/ContactForm";
 import { siteConfig } from "@/config/site";
 
@@ -9,14 +11,21 @@ import { siteConfig } from "@/config/site";
  * Mejora progresiva (§3.2): el formulario es la vía enriquecida (requiere JS),
  * pero SIEMPRE queda visible un enlace de correo directo, de modo que el CTA de
  * contacto funciona aunque el JavaScript falle o esté desactivado.
+ *
+ * El "radar" del fondo (Fase 9) cierra el relato que abre el hero: la landing
+ * empieza con una malla que se defiende y termina con un canal vigilado. La nota
+ * bajo el formulario describe protecciones REALES del proyecto (validación con
+ * el mismo esquema Zod en cliente y servidor, saneado, anti-bot y límite de
+ * peticiones por IP) — ver docs/05-security.
  */
 export function FinalCTA() {
   return (
-    <Section id="contacto" aria-labelledby="cta-title" className="border-border border-t">
+    <Section id="contacto" aria-labelledby="cta-title" className="section-edge">
       <Container>
         <Reveal>
           <div className="gradient-border border-border bg-surface relative overflow-hidden rounded-2xl border px-6 py-14 sm:px-12">
             <div aria-hidden="true" className="grid-dots opacity-40" />
+            <div aria-hidden="true" className="radar-sweep" />
             <div
               aria-hidden="true"
               className="pointer-events-none absolute inset-0 -z-10"
@@ -26,21 +35,27 @@ export function FinalCTA() {
               }}
             />
             <div className="mx-auto max-w-2xl text-center">
-              <h2
+              <TextReveal
                 id="cta-title"
+                text="¿Listo para construir tu próximo producto digital?"
                 className="font-display text-fluid-2xl font-bold tracking-tight text-balance"
-              >
-                ¿Listo para construir tu próximo producto digital?
-              </h2>
-              <p className="text-fluid-lg text-muted mx-auto mt-4 max-w-xl text-pretty">
-                Hablemos de tu proyecto sin compromiso.
-              </p>
+              />
+              <Reveal delay={0.18} y={16}>
+                <p className="text-fluid-lg text-muted mx-auto mt-4 max-w-xl text-pretty">
+                  Hablemos de tu proyecto sin compromiso.
+                </p>
+              </Reveal>
             </div>
 
             <div className="mx-auto mt-10 max-w-2xl">
               <ContactForm />
 
-              <p className="text-muted mt-6 text-center text-sm">
+              <p className="text-muted mt-6 flex flex-wrap items-center justify-center gap-x-2 gap-y-1 text-center font-mono text-xs">
+                <ShieldCheck className="text-accent-cyan size-4 shrink-0" aria-hidden="true" />
+                Validación y saneado en cliente y servidor · anti-bot · límite de peticiones por IP
+              </p>
+
+              <p className="text-muted mt-4 text-center text-sm">
                 ¿Prefieres el correo? Escríbenos a{" "}
                 <a
                   href={`mailto:${siteConfig.contact.email}`}

@@ -1,6 +1,6 @@
 "use client";
 
-import { m, useReducedMotion } from "framer-motion";
+import { m } from "framer-motion";
 import { cn } from "@/lib/utils/cn";
 import { EASE_OUT } from "@/lib/animations/framer-variants";
 
@@ -19,7 +19,10 @@ interface RevealProps {
 
 /**
  * Revela su contenido con un fade + subida. Requisitos §5.4/§10:
- * - Respeta `prefers-reduced-motion` (renderiza estático).
+ * - Respeta `prefers-reduced-motion` SIN cambiar el markup (ADR-011): la clase
+ *   `reveal` queda neutralizada por CSS y `MotionConfig reducedMotion="user"`
+ *   hace que Framer ignore las transformaciones. Bifurcar el markup según el
+ *   hook rompía la hidratación (en el servidor el hook devuelve `null`).
  * - Seguro sin JS: la clase `reveal` se fuerza visible vía <noscript> (layout).
  */
 export function Reveal({
@@ -30,9 +33,6 @@ export function Reveal({
   mode = "scroll",
   blur = false,
 }: RevealProps) {
-  const reduce = useReducedMotion();
-  if (reduce) return <div className={className}>{children}</div>;
-
   const target = { opacity: 1, y: 0, filter: blur ? "blur(0px)" : undefined };
   const initial = { opacity: 0, y, filter: blur ? "blur(10px)" : undefined };
   const animation =

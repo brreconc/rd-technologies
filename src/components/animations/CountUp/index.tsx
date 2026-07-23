@@ -8,9 +8,11 @@ import { useInView, useReducedMotion, animate } from "framer-motion";
  * (Fase 8). Detalle premium para bandas de estadísticas / prueba social.
  *
  * - Arranca una sola vez, al ser visible (`useInView`, once).
- * - `prefers-reduced-motion` → pinta el valor final directamente, sin animar.
- * - El valor accesible es el texto final (no hay ARIA extra: el nodo muestra
- *   siempre un número legible; durante la animación es una cuenta ascendente).
+ * - `prefers-reduced-motion` → no se anima: el número ya está pintado.
+ * - El HTML renderizado contiene SIEMPRE el valor final (ADR-011). Así el
+ *   servidor y el cliente coinciden (nada de desajustes de hidratación), la
+ *   página es correcta sin JavaScript y los buscadores leen la cifra real; la
+ *   cuenta ascendente es puramente un adorno que añade el cliente.
  */
 export function CountUp({
   value,
@@ -36,11 +38,8 @@ export function CountUp({
 
   React.useEffect(() => {
     const node = ref.current;
-    if (!node) return;
-    if (reduce || !inView) {
-      if (reduce) node.textContent = format(value);
-      return;
-    }
+    if (!node || reduce || !inView) return;
+
     const controls = animate(0, value, {
       duration,
       ease: [0.22, 1, 0.36, 1],
@@ -48,12 +47,11 @@ export function CountUp({
         node.textContent = format(v);
       },
     });
-    return () => controls.stop();
+    return () => {
+      controls.stop();
+      node.textContent = format(value);
+    };
   }, [inView, reduce, value, duration, format]);
 
-  return (
-    <span ref={ref} aria-label={format(value)}>
-      {format(reduce ? value : 0)}
-    </span>
-  );
+  return <span ref={ref}>{format(value)}</span>;
 }

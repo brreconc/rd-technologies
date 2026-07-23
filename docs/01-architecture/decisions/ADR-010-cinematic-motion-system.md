@@ -1,8 +1,14 @@
 # ADR-010 — Sistema de movimiento "cinematográfico" v2 (Fase 8)
 
-- **Estado:** Aceptada
+- **Estado:** Aceptada — ampliada por [ADR-011](./ADR-011-secure-system-scenography.md)
 - **Fecha:** 2026-07-21
 - **Decisores:** Frontend Senior, Performance, UI, Accesibilidad
+
+> ⚠️ **Actualización (Fase 9, ADR-011).** La estrategia de `prefers-reduced-motion` descrita aquí
+> ("cada componente renderiza estático si el usuario pide menos movimiento") **quedó sustituida**:
+> bifurcar el markup según `useReducedMotion()` rompía la hidratación, porque ese hook devuelve
+> `null` en el servidor. Ahora el contrato lo garantiza el CSS. Además, el fondo de red neuronal
+> descrito en la "Iteración 2" fue reescrito por completo. Lo demás de este ADR sigue vigente.
 
 ## Contexto
 

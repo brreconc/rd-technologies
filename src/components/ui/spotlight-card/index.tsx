@@ -16,17 +16,20 @@ interface SpotlightCardProps extends DivProps {
 }
 
 /**
- * Tarjeta "viva" (Fase 8): combina tres efectos GPU-friendly que reaccionan al
- * puntero, todo con degradado a un estado seguro:
+ * Tarjeta "viva" (Fase 8, ampliada en Fase 9). Combina efectos GPU-friendly que
+ * reaccionan al puntero, todos con degradado a un estado seguro:
  *  - Spotlight: un resplandor radial (`--mx`/`--my`) sigue al cursor (CSS).
  *  - Tilt 3D: rota levemente hacia el puntero con un muelle (limitado para no
  *    desbordar nunca; ver §5.3.4).
- *  - Borde de gradiente que se enciende al hover/focus (CSS `.gradient-border`).
+ *  - Borde de gradiente que se enciende al hover/focus (`.gradient-border`).
+ *  - Esquinas de HUD que se despliegan al hover/focus (`.hud-corners`): el guiño
+ *    de "consola de seguridad" que hilvana la estética de toda la página.
  *
- * Accesibilidad/rendimiento: si el usuario pide `prefers-reduced-motion`, no se
- * registran listeners ni tilt — se comporta como una tarjeta estática con los
- * mismos estilos base. El resplandor también responde a `:focus-within`, así que
- * la navegación por teclado percibe el mismo realce.
+ * Accesibilidad/rendimiento: con `prefers-reduced-motion` no se registran los
+ * listeners de puntero ni el realce de hover, así que la tarjeta se queda
+ * quieta. El markup NO cambia (ADR-011) — los manejadores no viajan en el HTML,
+ * de modo que la hidratación siempre coincide. Los realces responden también a
+ * `:focus-within`, así que el teclado percibe lo mismo que el ratón.
  */
 export function SpotlightCard({ className, children, tilt = 6, ...props }: SpotlightCardProps) {
   const reduce = useReducedMotion();
@@ -34,19 +37,6 @@ export function SpotlightCard({ className, children, tilt = 6, ...props }: Spotl
 
   const rx = useSpring(useMotionValue(0), { stiffness: 150, damping: 18 });
   const ry = useSpring(useMotionValue(0), { stiffness: 150, damping: 18 });
-
-  const base = cn(
-    "spotlight gradient-border border-border bg-surface hover:border-accent-cyan/40 relative rounded-xl border p-6 transition-colors duration-300 sm:p-8",
-    className,
-  );
-
-  if (reduce) {
-    return (
-      <div className={base} {...props}>
-        {children}
-      </div>
-    );
-  }
 
   const handlePointerMove = (e: React.PointerEvent<HTMLDivElement>) => {
     const el = ref.current;
@@ -72,10 +62,13 @@ export function SpotlightCard({ className, children, tilt = 6, ...props }: Spotl
   return (
     <m.div
       ref={ref}
-      className={base}
-      onPointerMove={handlePointerMove}
-      onPointerLeave={reset}
-      whileHover={{ y: -6 }}
+      className={cn(
+        "spotlight gradient-border card-sheen border-border bg-surface hover:border-accent-cyan/40 group relative rounded-xl border p-6 transition-colors duration-300 sm:p-8",
+        className,
+      )}
+      onPointerMove={reduce ? undefined : handlePointerMove}
+      onPointerLeave={reduce ? undefined : reset}
+      whileHover={reduce ? undefined : { y: -6 }}
       transition={{ type: "spring", stiffness: 300, damping: 24 }}
       style={{
         rotateX: rx,
@@ -85,6 +78,7 @@ export function SpotlightCard({ className, children, tilt = 6, ...props }: Spotl
       }}
       {...props}
     >
+      <span aria-hidden="true" className="hud-corners" />
       {children}
     </m.div>
   );

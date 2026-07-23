@@ -14,11 +14,11 @@ export function Logo({ className }: { className?: string }) {
       href="/"
       aria-label={`${siteConfig.name} — Inicio`}
       className={cn(
-        "group flex items-center gap-2.5 rounded-md transition-opacity hover:opacity-95",
+        "group flex items-center gap-2 rounded-md transition-opacity hover:opacity-95 sm:gap-2.5",
         className,
       )}
     >
-      <span className="relative inline-flex size-9 shrink-0 items-center justify-center">
+      <span className="relative inline-flex size-8 shrink-0 items-center justify-center sm:size-9">
         {/* Halo de resplandor. */}
         <span
           aria-hidden="true"
@@ -27,7 +27,7 @@ export function Logo({ className }: { className?: string }) {
         <svg
           viewBox="0 0 32 32"
           aria-hidden="true"
-          className="relative size-9 transition-transform duration-300 group-hover:scale-105"
+          className="relative size-8 transition-transform duration-300 group-hover:scale-105 sm:size-9"
         >
           <defs>
             <linearGradient id="logo-grad" x1="0" y1="0" x2="1" y2="1">
@@ -59,11 +59,13 @@ export function Logo({ className }: { className?: string }) {
           </g>
         </svg>
       </span>
-      <span className="font-display flex flex-col leading-none">
-        <span className="text-foreground text-base font-bold tracking-tight">
+      {/* `whitespace-nowrap`: el wordmark nunca debe partirse a media marca,
+          ni siquiera a 320px (§5.3.4). */}
+      <span className="font-display flex flex-col leading-none whitespace-nowrap">
+        <span className="text-foreground text-sm font-bold tracking-tight sm:text-base">
           <span className="text-gradient-animated">R&amp;D</span> Technologies
         </span>
-        <span className="text-muted text-[0.6rem] font-medium tracking-[0.28em] uppercase">
+        <span className="text-muted text-[0.5rem] font-medium tracking-[0.2em] uppercase sm:text-[0.6rem] sm:tracking-[0.28em]">
           Software · Security
         </span>
       </span>

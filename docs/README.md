@@ -59,3 +59,25 @@
   (`.github/workflows/ci.yml`: calidad + E2E + build de imagen). Runtime standalone verificado en
   local con variables de producción. Guía completa para desplegar en
   [`10-deployment/future-deployment`](./10-deployment/future-deployment.md). **Completada.**
+- ✅ **Fase 8 — Sistema de movimiento cinematográfico:** salto de impacto visual **sin nuevas
+  dependencias** ([ADR-010](./01-architecture/decisions/ADR-010-cinematic-motion-system.md)):
+  `SpotlightCard` (glow + tilt 3D), botones magnéticos, contadores, barra de progreso de scroll,
+  marquee de stack, nav con scroll-spy, switch de tema premium y el primer fondo de red neuronal en
+  `<canvas>`. **Completada.**
+- ✅ **Fase 9 — Escenografía de "sistema seguro" y coreografía de scroll:**
+  ([ADR-011](./01-architecture/decisions/ADR-011-secure-system-scenography.md)) el fondo del hero
+  pasa a **narrar la marca** (la malla se compila sola y neutraliza intrusiones), los títulos se
+  revelan palabra a palabra, el proceso se convierte en una **línea de tiempo que se ilumina con el
+  scroll**, las costuras entre secciones se dibujan con `animation-timeline: view()` (sin JS) y la
+  cabecera reacciona al scroll. Incluye la **corrección de un desajuste de hidratación** que
+  afectaba a los usuarios con `prefers-reduced-motion` y una nueva política: el CSS es la fuente de
+  verdad del movimiento reducido. Verificada con 49 unit + 18 E2E y Lighthouse 99/100/96/100.
+  **Completada.**
+
+## Deuda técnica abierta
+
+| Tema                               | Detalle                                                                                                                       |
+| ---------------------------------- | ----------------------------------------------------------------------------------------------------------------------------- |
+| **Presupuesto de JS (§11)**        | ~288 KB brotli frente al objetivo < 200 KB. Origen y plan en [07-performance](./07-performance/performance-budgets.md).       |
+| **La página no se muestra sin JS** | Consecuencia de la ruta dinámica que exige el nonce de la CSP. Ver [06-accessibility](./06-accessibility/a11y-guidelines.md). |
+| **Contenido pendiente (§19)**      | Datos reales de contacto, testimonios y las métricas del hero (hoy ilustrativas).                                             |

@@ -2,16 +2,18 @@ import { Container } from "@/components/ui/container";
 import { Button } from "@/components/ui/button";
 import { Logo } from "@/components/shared/Logo";
 import { ThemeToggle } from "@/components/shared/ThemeToggle";
+import { HeaderShell } from "./HeaderShell";
 import { NavLinks } from "./NavLinks";
 import { MobileNav } from "./MobileNav";
 
 /**
- * Cabecera fija con navegación por anclas, toggle de tema y CTA.
- * Server Component; solo el toggle y el menú móvil son de cliente.
+ * Cabecera pegajosa con navegación por anclas, toggle de tema y CTA.
+ * Server Component; solo el envoltorio reactivo al scroll (`HeaderShell`), la
+ * navegación con pastilla, el toggle y el menú móvil son de cliente.
  */
 export function Header() {
   return (
-    <header className="border-border/60 bg-background/80 sticky top-0 z-40 border-b backdrop-blur-md">
+    <HeaderShell>
       <Container className="flex h-16 items-center justify-between gap-4">
         <Logo />
 
@@ -25,6 +27,6 @@ export function Header() {
           <MobileNav />
         </div>
       </Container>
-    </header>
+    </HeaderShell>
   );
 }

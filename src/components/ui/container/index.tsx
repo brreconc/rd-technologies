@@ -6,7 +6,9 @@ import { cn } from "@/lib/utils/cn";
  * Centraliza el ancho de lectura para mantener consistencia entre secciones.
  */
 export function Container({ className, ...props }: React.ComponentProps<"div">) {
-  return <div className={cn("mx-auto w-full max-w-7xl px-6 sm:px-8", className)} {...props} />;
+  return (
+    <div className={cn("mx-auto w-full max-w-7xl px-4 sm:px-6 lg:px-8", className)} {...props} />
+  );
 }
 
 /**

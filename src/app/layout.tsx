@@ -59,7 +59,7 @@ export default async function RootLayout({
         <noscript>
           <style
             dangerouslySetInnerHTML={{
-              __html: ".reveal{opacity:1!important;transform:none!important}",
+              __html: ".reveal{opacity:1!important;transform:none!important;filter:none!important}",
             }}
           />
         </noscript>

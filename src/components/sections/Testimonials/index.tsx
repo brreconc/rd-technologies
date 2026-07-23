@@ -2,7 +2,6 @@ import { Quote } from "lucide-react";
 import { Container, Section } from "@/components/ui/container";
 import { SpotlightCard } from "@/components/ui/spotlight-card";
 import { SectionHeading } from "@/components/sections/SectionHeading";
-import { Reveal } from "@/components/animations/Reveal";
 import { Stagger, StaggerItem } from "@/components/animations/Stagger";
 import { testimonials } from "@/lib/constants/testimonials";
 
@@ -18,17 +17,15 @@ function getInitials(name: string): string {
 /** Sección "Testimonios" (§8.7). Contenido de EJEMPLO (§19.9). */
 export function Testimonials() {
   return (
-    <Section id="testimonios" aria-labelledby="testi-title" className="border-border border-t">
+    <Section id="testimonios" aria-labelledby="testi-title" className="section-edge">
       <Container>
-        <Reveal className="mx-auto max-w-2xl text-center">
-          <SectionHeading
-            id="testi-title"
-            centered
-            eyebrow="Testimonios"
-            title="Historias de confianza"
-            description="Ejemplos ilustrativos — se reemplazarán por testimonios reales."
-          />
-        </Reveal>
+        <SectionHeading
+          id="testi-title"
+          centered
+          eyebrow="Testimonios"
+          title="Historias de confianza"
+          description="Ejemplos ilustrativos — se reemplazarán por testimonios reales."
+        />
 
         <Stagger className="mt-12 grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
           {testimonials.map((testimonial) => (

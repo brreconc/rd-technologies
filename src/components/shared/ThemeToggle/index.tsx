@@ -30,14 +30,17 @@ export function ThemeToggle() {
       aria-label={isDark ? "Activar tema claro" : "Activar tema oscuro"}
       className="group border-border bg-surface hover:border-accent-cyan/50 relative inline-flex h-11 w-[4.25rem] items-center rounded-full border p-1 transition-colors"
     >
-      {/* Iconos de fondo a ambos lados de la pista. */}
+      {/* Iconos de la pista. Van en el MISMO orden que las posiciones del pomo
+          (luna a la izquierda = oscuro, sol a la derecha = claro): así el pomo
+          tapa siempre el icono del tema actual y el que queda a la vista es el
+          tema al que se cambiaría. */}
       <span className="pointer-events-none absolute inset-0 flex items-center justify-between px-2.5">
-        <Sun
-          className={`size-4 transition-colors ${isDark ? "text-muted/50" : "text-accent-yellow"}`}
+        <Moon
+          className={`size-4 transition-colors ${isDark ? "text-transparent" : "text-muted/60"}`}
           aria-hidden="true"
         />
-        <Moon
-          className={`size-4 transition-colors ${isDark ? "text-accent-cyan" : "text-muted/50"}`}
+        <Sun
+          className={`size-4 transition-colors ${isDark ? "text-accent-yellow/80" : "text-transparent"}`}
           aria-hidden="true"
         />
       </span>

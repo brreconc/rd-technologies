@@ -10,7 +10,9 @@ import { m, useMotionValue, useSpring, useReducedMotion } from "framer-motion";
  *
  * - Solo interacción de puntero: no altera el foco ni el orden de tabulación,
  *   así que la accesibilidad por teclado es idéntica.
- * - `prefers-reduced-motion` → renderiza el hijo tal cual, sin listeners.
+ * - `prefers-reduced-motion` → no se registran los listeners. El markup NO
+ *   cambia (ADR-011): los manejadores no forman parte del HTML, así que la
+ *   hidratación coincide siempre.
  *
  * Se aplica sobre un `inline-block` para no romper el layout del botón interno.
  */
@@ -28,8 +30,6 @@ export function MagneticButton({
   const ref = React.useRef<HTMLSpanElement>(null);
   const x = useSpring(useMotionValue(0), { stiffness: 220, damping: 16 });
   const y = useSpring(useMotionValue(0), { stiffness: 220, damping: 16 });
-
-  if (reduce) return <span className={className}>{children}</span>;
 
   const onMove = (e: React.PointerEvent<HTMLSpanElement>) => {
     const el = ref.current;
@@ -51,8 +51,8 @@ export function MagneticButton({
       ref={ref}
       className={className}
       style={{ x, y, display: "inline-block" }}
-      onPointerMove={onMove}
-      onPointerLeave={reset}
+      onPointerMove={reduce ? undefined : onMove}
+      onPointerLeave={reduce ? undefined : reset}
     >
       {children}
     </m.span>

@@ -15,18 +15,16 @@ import { faq } from "@/lib/constants/faq";
  */
 export function FAQ() {
   return (
-    <Section id="faq" aria-labelledby="faq-title" className="border-border border-t">
+    <Section id="faq" aria-labelledby="faq-title" className="section-edge">
       <Container className="max-w-3xl">
-        <Reveal className="text-center">
-          <SectionHeading
-            id="faq-title"
-            centered
-            eyebrow="Preguntas frecuentes"
-            title="Resolvemos tus dudas"
-          />
-        </Reveal>
+        <SectionHeading
+          id="faq-title"
+          centered
+          eyebrow="Preguntas frecuentes"
+          title="Resolvemos tus dudas"
+        />
 
-        <Reveal>
+        <Reveal delay={0.1}>
           <Accordion type="single" collapsible className="mt-10">
             {faq.map((item, index) => (
               <AccordionItem key={item.question} value={`faq-${index}`}>
