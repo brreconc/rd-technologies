@@ -110,15 +110,60 @@ para terminar TLS/HTTPS y absorber peticiones malformadas/lentas
 - [ ] Verificar `robots.txt` (`Allow: /` + `Sitemap:`) y `sitemap.xml` con el
       dominio real.
 - [ ] (Opcional) Integrar Resend rellenando `RESEND_API_KEY`/`CONTACT_TO_EMAIL`.
-- [ ] (Opcional) Publicar la imagen en el registro del equipo (extender el job
-      `docker` de `.github/workflows/ci.yml` con login + `push: true`).
+- [ ] Definir las variables `SITE_URL` y `SITE_INDEXABLE` del repositorio
+      (Settings → Secrets and variables → Actions → **Variables**) para que la
+      imagen publicada se construya contra el dominio real.
 
 ## Integración continua
 
 `.github/workflows/ci.yml` ejecuta en cada push/PR a `main`: typecheck, lint,
-`format:check`, tests unitarios, build, `pnpm audit --prod`, E2E (Chromium) y un
-**build de la imagen Docker** (sin publicar). Para publicarla, el PM añade
-`docker/login-action` y `push: true` con las credenciales de su registro.
+`format:check`, tests unitarios, build, `pnpm audit --prod`, E2E (Chromium) y el
+**build de la imagen Docker**. En los push a `main` además la **publica en GHCR**.
+
+## Compartir el proyecto con otro programador
+
+Hay dos caminos, y conviene entender cuándo usar cada uno.
+
+### A) Desde el código (lo habitual para desarrollar)
+
+```bash
+git clone git@github.com:<usuario>/rd-technologies.git
+cd rd-technologies
+cp .env.production.example .env   # y rellenar
+docker compose up -d --build      # construye rd-technologies:latest y levanta
+```
+
+### B) Desde la imagen publicada (para solo revisar, sin compilar)
+
+Cada push a `main` publica la imagen en **GitHub Container Registry**:
+
+```
+ghcr.io/<usuario>/rd-technologies:latest      # última de main
+ghcr.io/<usuario>/rd-technologies:sha-1a2b3c  # inmutable, por commit
+```
+
+```bash
+# El repo es PRIVADO → el paquete también lo es: hace falta login una vez.
+# Token en github.com/settings/tokens con el scope `read:packages`.
+echo "<TOKEN>" | docker login ghcr.io -u <usuario> --password-stdin
+
+docker pull ghcr.io/<usuario>/rd-technologies:latest
+docker run -d --name rdtech -p 3000:3000 ghcr.io/<usuario>/rd-technologies:latest
+```
+
+> Para dar acceso a otra persona sin darle acceso al repo: en la página del
+> paquete (Packages → rd-technologies → Package settings) se invita a su usuario
+> con rol _Read_, o se marca el paquete como público.
+
+### ⚠️ Qué lleva horneado la imagen publicada
+
+Las `NEXT_PUBLIC_*` se inlinean en `next build`, así que **viajan dentro de la
+imagen**. Por defecto el workflow la construye con `http://localhost:3000` y
+`INDEXABLE=false`: así quien la descarga la levanta y funciona sin configurar
+nada. Cuando exista el dominio real, se definen las variables de repositorio
+`SITE_URL` y `SITE_INDEXABLE` y el siguiente push a `main` publica ya la imagen
+de producción. Los **secretos de servidor** (`RESEND_API_KEY`, …) nunca se
+hornean: se pasan en runtime con `-e` o vía compose.
 
 ## Verificación ya realizada (local)
 
