@@ -10,8 +10,9 @@ import { buildContentSecurityPolicy } from "@/lib/security/headers";
  * CSP con NONCE por petición (Fase 6, ADR-009): se genera un nonce aleatorio,
  * se inyecta en la cabecera `Content-Security-Policy` y en `x-nonce`. Next lo
  * extrae de la CSP y lo aplica automáticamente a sus scripts (framework, chunks,
- * inline propios); el layout lo pasa además a `next-themes`. Esto elimina
- * `'unsafe-inline'` de `script-src` en producción, pero obliga a render dinámico.
+ * inline propios). Esto elimina `'unsafe-inline'` de `script-src` en producción,
+ * pero OBLIGA a render dinámico: el layout lee `headers()` justamente para eso
+ * (una página estática se genera en build, cuando aún no existe ningún nonce).
  *
  * El resto de cabeceras (X-Frame-Options, nosniff, HSTS…) se aplican en
  * `next.config.ts`. El rate limiting vive en los route handlers (ADR-007).

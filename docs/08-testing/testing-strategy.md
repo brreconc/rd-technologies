@@ -7,12 +7,13 @@ Requisito §13. Suite instalada y en verde.
 | Nivel                | Herramienta                          | Dónde                    | Cubre                                                                                                                               |
 | -------------------- | ------------------------------------ | ------------------------ | ----------------------------------------------------------------------------------------------------------------------------------- |
 | Unit / componentes   | Vitest + Testing Library (jsdom)     | `src/**/*.test.ts(x)`    | Validadores Zod, sanitize, rate-limit, anti-bot, respuestas, JSON-LD, render de primitivos.                                         |
-| E2E funcional        | Playwright                           | `e2e/home.spec.ts`       | Navegación por anclas, toggle de tema, errores accesibles del formulario.                                                           |
+| E2E funcional        | Playwright                           | `e2e/home.spec.ts`       | Navegación por anclas, paleta oscura única, errores accesibles del formulario.                                                      |
 | Experiencia (Fase 9) | Playwright                           | `e2e/experience.spec.ts` | Canvas del hero, texto íntegro de los títulos revelados, scroll-spy, sin JS y con movimiento reducido (sin errores de hidratación). |
+| Deck (Fase 10)       | Playwright                           | `e2e/platforms.spec.ts`  | Patrón de pestañas, teclado, recorrido automático detenible (WCAG 2.2.2), 320px y movimiento reducido.                              |
 | Seguridad (CSP)      | Playwright                           | `e2e/home.spec.ts`       | La CSP con nonce NO bloquea scripts: 0 violaciones ni errores de consola.                                                           |
 | Cross-browser        | Playwright (Chromium/Firefox/WebKit) | `ALL_BROWSERS=1`         | Paridad entre motores.                                                                                                              |
 | Responsive           | Playwright (320→2560)                | `e2e/responsive.spec.ts` | **Cero scroll horizontal** por breakpoint.                                                                                          |
-| Accesibilidad        | @axe-core/playwright                 | `e2e/a11y.spec.ts`       | Sin violaciones críticas/serias (WCAG 2.0/2.1 A y AA), tema claro y oscuro.                                                         |
+| Accesibilidad        | @axe-core/playwright                 | `e2e/a11y.spec.ts`       | Sin violaciones críticas/serias (WCAG 2.0/2.1 A y AA), también con el deck en otro acento.                                          |
 | Performance          | Lighthouse CI                        | `lighthouserc.json`      | Presupuestos CWV y categorías ≥ 95.                                                                                                 |
 
 ## Comandos
@@ -64,12 +65,36 @@ Estos tests existen porque cada uno destapó (o pudo destapar) un fallo real:
    `transform:none` / `opacity:1`; si no, las palabras enmascaradas quedarían invisibles.
 4. **El canvas del hero se dimensiona** (no colapsa a 0×0) y el scroll-spy marca `aria-current`.
 
+## Regresiones que vigila el deck (Fase 10)
+
+### `screens.test.ts` — unit, sin montar nada
+
+Los mock-ups del deck son **datos** ([ADR-013](../01-architecture/decisions/ADR-013-platform-deck.md)),
+así que se validan sin jsdom ni SVG. Es el equivalente, dentro del dispositivo, del contrato de
+"cero desbordamiento" de §5.3:
+
+- Ninguna figura se sale de su `viewBox` (si no, asomaría fuera de la pantalla del dispositivo).
+- Cada `viewBox` cuadra con la proporción del `frame` de su plataforma (si no, el mock-up saldría
+  descentrado con franjas a los lados).
+- La capa flotante existe y no está vacía. **Este test cazó un fallo real** durante el desarrollo:
+  el índice de la capa flotante de Android apuntaba al final del array, así que la separación en
+  profundidad no habría existido y nadie lo habría notado a simple vista.
+
+### `platforms.spec.ts` — E2E
+
+1. **El recorrido automático avanza solo Y se puede detener.** Cubre WCAG 2.2.2: comprueba que
+   cambia de destino sin intervención y que, tras pulsar el botón, deja de cambiar.
+2. **Teclado.** Flechas, `Inicio` y `Fin` recorren el rail moviendo foco y selección a la vez.
+3. **Ningún destino desborda a 320px** — se recorren los cuatro midiendo `scrollWidth`.
+4. **Movimiento reducido:** no hay recorrido automático, el botón no se ofrece, el contenido está
+   completo y **no hay ni un error de consola** (guardia contra desajustes de hidratación).
+
 ## Resultados (última corrida local, Chromium)
 
-- **Unit (Vitest):** 49 tests en verde (incluye el motor de la malla neuronal).
-- **E2E + responsive + a11y (Playwright):** 18 tests en verde.
+- **Unit (Vitest):** 66 tests en verde (incluye el motor de la malla neuronal y los mock-ups del deck).
+- **E2E + responsive + a11y (Playwright):** 24 tests en verde.
 - **Lighthouse (build indexable):** Performance **99**, Accessibility **100**,
-  Best Practices **96**, SEO **100**; LCP 0,8 s · CLS 0 · TBT 0 ms.
+  Best Practices **96**, SEO **100**; LCP 0,9 s · CLS 0 · TBT 0 ms.
 - **`pnpm audit --prod`:** sin vulnerabilidades.
 
 ## Pendiente

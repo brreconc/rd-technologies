@@ -35,6 +35,31 @@ Implementadas en [`globals.css`](../../src/app/globals.css):
 5. **Unidades de viewport modernas:** `100dvh` para evitar el salto de la barra de direcciones.
 6. **`scrollbar-gutter: stable`** para que la barra no cause reflow.
 
+## Dónde cambia la navegación (Fase 10)
+
+La navegación de escritorio aparece a partir de **`xl` (1280px)**, no de `lg`. Con seis destinos
+—Servicios, Plataformas, Proceso, Casos de uso, Preguntas frecuentes, Contacto— los rótulos
+completos no caben a 1024px y se partían en varias líneas. Entre 1024 y 1279px manda el menú
+lateral (`MobileNav`), que es una hoja completa con trampa de foco.
+
+> Se prefirió mover el breakpoint antes que recortar los rótulos: el copy es del cliente.
+> Ver [ADR-013](../01-architecture/decisions/ADR-013-platform-deck.md).
+
+## El deck multiplataforma en cada tamaño
+
+El deck ([`sections/Platforms`](../../src/components/sections/Platforms)) reordena su rejilla con
+áreas explícitas en lugar de `order`, para que el orden de lectura tenga sentido en ambos casos:
+
+| Tamaño | Disposición                                                                        |
+| ------ | ---------------------------------------------------------------------------------- |
+| < `lg` | Rail horizontal con desplazamiento y anclaje (`snap`) → escenario → panel de texto |
+| ≥ `lg` | Rail vertical y panel a la izquierda; escenario a la derecha, pegajoso al scroll   |
+
+El dispositivo se dimensiona en **porcentajes de su escenario**, y el escenario tiene proporción
+fija. Por eso el morfismo entre destinos no cambia la altura de la página (**CLS 0**) y funciona
+igual a 320px que a 4K sin números mágicos en píxeles. `e2e/platforms.spec.ts` comprueba que
+**ningún destino desborda a 320px**.
+
 ## Pendiente por fase
 
 - **Container Queries** para componentes que dependen de su contenedor (Fases 1–2).

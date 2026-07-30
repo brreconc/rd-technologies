@@ -22,13 +22,44 @@
 ## Automatización (Fase 6 — implementado)
 
 - **axe-core en Playwright** (`e2e/a11y.spec.ts`): sin violaciones críticas/serias (WCAG 2.0/2.1
-  A y AA) en tema claro y oscuro. Complementa (no sustituye) la revisión manual con teclado y
-  lector de pantalla.
+  A y AA). Complementa (no sustituye) la revisión manual con teclado y lector de pantalla. Desde la
+  Fase 10 hay **una sola paleta** que auditar ([ADR-012](../01-architecture/decisions/ADR-012-single-dark-theme.md)),
+  pero el escaneo se ejecuta **dos veces**: una con la página tal cual y otra con el deck
+  multiplataforma en su último destino, porque ahí el acento de la escena es otro y el primer
+  escaneo no lo vería.
 - **Lighthouse Accessibility: 100** (Fase 6).
 - **Adornos decorativos:** los números de paso "01"…, iconos y resplandores llevan
   `aria-hidden="true"`; están fuera del árbol de accesibilidad y, como texto decorativo, quedan
   exentos del contraste (WCAG 1.4.3). El escaneo axe los excluye a propósito; el contenido que sí
   leen las ayudas técnicas se audita al completo. Ver [08-testing](../08-testing/testing-strategy.md).
+
+## Contenido que se mueve solo — WCAG 2.2.2 (Fase 10 — ADR-013)
+
+El **deck multiplataforma** recorre sus cuatro destinos por su cuenta. Eso es contenido en
+movimiento que arranca automáticamente y dura más de cinco segundos, así que el criterio 2.2.2
+(_Pausar, detener, ocultar_) obliga a que el usuario pueda pararlo. Se cubre por triplicado:
+
+1. Un **botón explícito** ("Detener el recorrido automático") junto al escenario.
+2. Se **pausa solo** al pasar el puntero por encima o al enfocar cualquier elemento del deck, para
+   que nadie pierda de vista lo que está leyendo.
+3. **Elegir un destino a mano lo detiene definitivamente**: si el usuario ha tomado el control, no
+   se le vuelve a arrebatar.
+
+Además, con `prefers-reduced-motion` el recorrido **no llega a existir** —no hay temporizador— y el
+botón ni se ofrece, porque no habría nada que parar.
+
+Regla para lo que venga: **cualquier cosa que se mueva sola y dure más de 5 s necesita un mando.**
+Si no puedes ofrecerlo, no la pongas en marcha sola.
+
+### Patrón de pestañas del deck
+
+- `tablist` / `tab` / `tabpanel` de WAI-ARIA con `tabindex` rotatorio (solo la pestaña activa es
+  tabulable; dentro se navega con flechas).
+- Se aceptan **los dos ejes** de flechas (`←→` y `↑↓`) porque el rail es horizontal en móvil y
+  vertical en escritorio, más `Inicio` y `Fin`. La selección mueve también el foco.
+- El mock-up del dispositivo es decorativo (`aria-hidden`): toda la información está en el texto del
+  panel. Una región `aria-live="polite"` anuncia el destino en pantalla, porque si no los cambios
+  del recorrido automático pasarían inadvertidos a un lector de pantalla.
 
 ## Movimiento reducido (Fase 9 — ADR-011)
 

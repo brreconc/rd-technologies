@@ -2,6 +2,7 @@ import { Hero } from "@/components/sections/Hero";
 import { TechMarquee } from "@/components/sections/TechMarquee";
 import { ValueProps } from "@/components/sections/ValueProps";
 import { Services } from "@/components/sections/Services";
+import { Platforms } from "@/components/sections/Platforms";
 import { Differentiators } from "@/components/sections/Differentiators";
 import { Process } from "@/components/sections/Process";
 import { UseCases } from "@/components/sections/UseCases";
@@ -23,6 +24,9 @@ export default function HomePage() {
       <TechMarquee />
       <ValueProps />
       <Services />
+      {/* "Plataformas" va justo detrás de "Servicios": este cuenta QUÉ hacemos,
+          aquel demuestra DÓNDE corre. Ninguna sección previa se ha retirado. */}
+      <Platforms />
       <Differentiators />
       <Process />
       <UseCases />

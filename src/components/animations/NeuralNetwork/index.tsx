@@ -25,6 +25,8 @@ import {
 const CYAN = "0,245,255";
 const PURPLE = "139,92,246";
 const RED = "255,107,107";
+/** Gris azulado de las aristas en reposo (calibrado sobre el fondo `--bg`). */
+const EDGE = "150,178,205";
 
 /** Cada cuántos fotogramas se recalcula la vecindad (las aristas). */
 const EDGE_REFRESH = 30;
@@ -153,7 +155,6 @@ export function NeuralNetwork({ className, onThreatBlocked }: NeuralNetworkProps
     let raf = 0;
     let frame = 0;
     let running = false;
-    let dark = true;
     // Reloj de la escena: acumula solo el tiempo en que la escena está VISIBLE,
     // de modo que pausar y reanudar no salta la línea temporal del arranque.
     let sceneTime = 0;
@@ -162,11 +163,6 @@ export function NeuralNetwork({ className, onThreatBlocked }: NeuralNetworkProps
     let lowPower = false;
 
     const pointer = { x: 0, y: 0, strength: 0, target: 0 };
-
-    const readTheme = () => {
-      const root = document.documentElement;
-      dark = root.classList.contains("dark") || !root.classList.contains("light");
-    };
 
     // ---------------------------------------------------------------- escena
     const refreshEdges = () => {
@@ -349,7 +345,7 @@ export function NeuralNetwork({ className, onThreatBlocked }: NeuralNetworkProps
     };
 
     const drawEdges = () => {
-      const maxAlpha = dark ? 0.3 : 0.26;
+      const maxAlpha = 0.3;
       const buckets = lowPower ? 3 : 5;
       let visible = 0;
 
@@ -378,7 +374,6 @@ export function NeuralNetwork({ className, onThreatBlocked }: NeuralNetworkProps
         visible++;
       }
 
-      const lineRGB = dark ? "150,178,205" : "64,88,124";
       ctx.lineWidth = 1;
       for (let bucket = 0; bucket < buckets; bucket++) {
         ctx.beginPath();
@@ -391,13 +386,13 @@ export function NeuralNetwork({ className, onThreatBlocked }: NeuralNetworkProps
           used = true;
         }
         if (!used) continue;
-        ctx.strokeStyle = `rgba(${lineRGB},${(((bucket + 1) / buckets) * maxAlpha).toFixed(3)})`;
+        ctx.strokeStyle = `rgba(${EDGE},${(((bucket + 1) / buckets) * maxAlpha).toFixed(3)})`;
         ctx.stroke();
       }
     };
 
     const drawNodes = () => {
-      const baseAlpha = dark ? 0.34 : 0.28;
+      const baseAlpha = 0.34;
       for (const node of nodes) {
         const ignition = progress(
           sceneTime,
@@ -485,9 +480,7 @@ export function NeuralNetwork({ className, onThreatBlocked }: NeuralNetworkProps
         drawGlow(x, y, packet.threat ? 12 : 9, sprite, packet.threat ? 0.95 : 0.8);
         ctx.beginPath();
         ctx.arc(x, y, packet.threat ? 2 : 1.6, 0, Math.PI * 2);
-        ctx.fillStyle = packet.threat
-          ? `rgba(255,235,235,0.95)`
-          : `rgba(255,255,255,${dark ? 0.92 : 0.8})`;
+        ctx.fillStyle = packet.threat ? `rgba(255,235,235,0.95)` : `rgba(255,255,255,0.92)`;
         ctx.fill();
       }
     };
@@ -599,7 +592,6 @@ export function NeuralNetwork({ className, onThreatBlocked }: NeuralNetworkProps
       cancelAnimationFrame(raf);
     };
 
-    readTheme();
     resize();
 
     if (reduce) {
@@ -611,15 +603,6 @@ export function NeuralNetwork({ className, onThreatBlocked }: NeuralNetworkProps
     }
 
     // --------------------------------------------------------- observadores
-    const themeObserver = new MutationObserver(() => {
-      readTheme();
-      if (reduce) render(0, false);
-    });
-    themeObserver.observe(document.documentElement, {
-      attributes: true,
-      attributeFilter: ["class"],
-    });
-
     const resizeObserver = new ResizeObserver(() => {
       resize();
       if (reduce) render(0, false);
@@ -671,7 +654,6 @@ export function NeuralNetwork({ className, onThreatBlocked }: NeuralNetworkProps
 
     return () => {
       stop();
-      themeObserver.disconnect();
       resizeObserver.disconnect();
       intersectionObserver.disconnect();
       document.removeEventListener("visibilitychange", onVisibility);

@@ -14,7 +14,7 @@ Un token en `@theme` genera automáticamente utilidades y una variable CSS:
 | `--font-display: var(--font-space-grotesk)` | `var(--font-display)`      | `font-display`                                              |
 | `--text-fluid-hero: clamp(...)`             | `var(--text-fluid-hero)`   | `text-fluid-hero`                                           |
 
-## Paleta (tema oscuro por defecto)
+## Paleta (tema oscuro único)
 
 | Token                   | Valor               | Uso                             |
 | ----------------------- | ------------------- | ------------------------------- |
@@ -56,16 +56,40 @@ Todo par texto/fondo debe cumplir **WCAG AA** (≥ 4.5:1 texto normal, ≥ 3:1 t
 acentos neón sobre negro se validan antes de usarse como texto; para texto largo se prefiere
 `--color-foreground`/`--color-muted`. Validación automatizada con axe en Fase 6.
 
-## Temas claro y oscuro (implementado — Fase 1)
+## Tema único oscuro (Fase 10 — [ADR-012](../01-architecture/decisions/ADR-012-single-dark-theme.md))
 
-Oscuro es el **default**. Se usa **indirección por variables**: los valores semánticos viven en
-`:root, .dark` (oscuro) y `.light` (claro) en `globals.css`, y `@theme inline` los mapea a las
-utilidades de Tailwind. Así `bg-background`, `text-foreground`, etc. **cambian solas** con el tema.
+El sitio tiene **un solo tema**. Ya no hay alternador, ni clase `.light`/`.dark` en `<html>`, ni
+`next-themes`: la paleta se declara una vez en `:root`, con `color-scheme: dark`.
 
-- Los **acentos de marca** son constantes en ambos temas; `--on-accent` (#0a0a0a) da texto legible
-  sobre los acentos brillantes (p. ej. botón primario cian) en claro y oscuro.
-- `next-themes` alterna la clase en `<html>`; el control es `components/shared/ThemeToggle`.
-- El tema claro ajusta `--muted` y `--ring` a valores con contraste AA sobre fondo claro.
+La **indirección por variables se mantiene** y es la regla que no se negocia: los componentes usan
+`bg-background`, `text-foreground`, `border-border`… **nunca** un color literal. Cambiar la paleta
+—o reintroducir un segundo tema en el futuro— es editar el bloque `:root` de `globals.css`, no
+rastrear componentes.
 
-Ver [ADR-004](../01-architecture/decisions/ADR-004-tailwind-v4-tokens.md) (Tailwind v4) y
-[ADR-006](../01-architecture/decisions/ADR-006-fase1-defaults.md) (decisión de incluir tema claro).
+- `--on-accent` (`#0a0a0a`) da texto legible sobre los acentos brillantes (p. ej. el botón primario
+  cian).
+- `color-scheme: dark` hace que el navegador pinte en oscuro lo que no controlamos: barras de
+  desplazamiento, autocompletado del formulario y controles nativos. Sin él aparecerían cajas
+  blancas dentro de la interfaz.
+- Un tema menos **no relaja el contraste**: sigue siendo obligatorio AA sobre la paleta oscura, y se
+  sigue verificando con axe en E2E.
+
+### Acentos por plataforma (deck de §8)
+
+El deck multiplataforma ([ADR-013](../01-architecture/decisions/ADR-013-platform-deck.md)) tiñe toda
+su escena desde una única variable, `--platform-accent`, que fija el componente según el destino
+activo. Los valores viven en [`lib/constants/platforms.ts`](../../src/lib/constants/platforms.ts):
+
+| Destino    | Acento    | Contraste sobre `#0a0a0a` |
+| ---------- | --------- | ------------------------- |
+| Web        | `#00f5ff` | ~15:1                     |
+| Android    | `#4ade80` | ~11:1                     |
+| iOS        | `#a78bfa` | ~8:1                      |
+| Escritorio | `#ffd93d` | ~14:1                     |
+
+Todos superan AA con holgura. Si se añade un destino nuevo, su acento debe validarse igual: se usa
+como **texto** en la línea "Entregable:".
+
+Ver [ADR-004](../01-architecture/decisions/ADR-004-tailwind-v4-tokens.md) (tokens en CSS con
+Tailwind v4) y [ADR-006](../01-architecture/decisions/ADR-006-fase1-defaults.md) (decisión original
+de incluir tema claro, superada por ADR-012).

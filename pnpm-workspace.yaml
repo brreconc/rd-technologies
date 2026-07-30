@@ -6,10 +6,12 @@ allowBuilds:
 
 # Overrides de seguridad (Fase 6). En pnpm 11 los overrides viven aquí, no en
 # package.json. Se fuerza postcss (transitiva de Next) a la línea parcheada
-# frente a GHSA-qx2v-qp2m-jg93 (XSS en el stringify de CSS). postcss 8.5 es
-# compatible con 8.4, solo se usa en build. Ver docs/05-security.
+# frente a GHSA-qx2v-qp2m-jg93 (XSS en el stringify de CSS) y, desde la Fase 10,
+# a GHSA-r28c-9q8g-f849 (path traversal al auto-cargar el source map previo vía
+# `sourceMappingURL`, que expone ficheros .map arbitrarios). postcss solo se usa
+# en build, pero el aviso es "high" y el salto es de parche. Ver docs/05-security.
 overrides:
-  postcss@<8.5.10: ">=8.5.10"
+  postcss@<8.5.18: ">=8.5.18"
   # sharp arrastra los CVE de libvips CVE-2026-33327/33328/35590/35591
   # (GHSA-f88m-g3jw-g9cj), parcheados en 0.35. Next lo declara como dependencia
   # OPCIONAL (^0.34.5) y solo lo usa el optimizador de `next/image`, que este

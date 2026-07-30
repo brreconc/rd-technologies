@@ -4,6 +4,8 @@
 - **Fecha:** 2026-07-12
 - **Decisores:** UI, Frontend Senior
 
+> ⚠️ **Actualización (Fase 10, [ADR-012](./ADR-012-single-dark-theme.md)).** El `@custom-variant dark` que se menciona aquí **se eliminó** (no lo usaba ningún componente) y la migración a indirección por variables ya se hizo: hoy hay un único bloque `:root`. La regla de fondo —tokens en CSS, nunca colores literales en el JSX— sigue vigente y es la que hace barato cambiar de paleta.
+
 ## Contexto
 
 `create-next-app` generó **Tailwind CSS v4**, que abandona `tailwind.config.ts` en favor de una

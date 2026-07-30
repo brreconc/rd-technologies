@@ -4,6 +4,8 @@
 - **Fecha:** 2026-07-12
 - **Decisores:** Arquitecto Senior, UI/UX
 
+> ⚠️ **Actualización (Fase 10, [ADR-012](./ADR-012-single-dark-theme.md)).** El default de **incluir tema claro** quedó revertido: el sitio pasa a tener tema oscuro único. Era, como decía este ADR, una decisión reversible.
+
 ## Contexto
 
 La Fase 1 se inició sin respuesta del cliente a las preguntas abiertas §19. Para no bloquear, se

@@ -24,8 +24,14 @@ Aplicadas en [`next.config.ts`](../../next.config.ts) vía `getSecurityHeaders()
 ### 2. CSP estricta con nonce (Fase 6)
 
 - **Prod:** `script-src 'self' 'nonce-<n>' 'strict-dynamic'` — **sin `'unsafe-inline'`**. El nonce
-  se genera por petición en el proxy; Next lo aplica a sus scripts y `next-themes` lo recibe en su
-  script anti-parpadeo. Ver [ADR-009](../01-architecture/decisions/ADR-009-csp-nonce.md).
+  se genera por petición en el proxy y Next lo extrae de la propia cabecera CSP para aplicarlo a sus
+  scripts. Ver [ADR-009](../01-architecture/decisions/ADR-009-csp-nonce.md).
+- **Esto obliga a render dinámico.** El layout llama a `await headers()` justamente para forzarlo:
+  una página estática se genera en build, cuando todavía no existe ningún nonce. Si alguien retira
+  esa llamada "porque no se usa el valor", la CSP con nonce deja de funcionar.
+- Desde la Fase 10 **ya no hay ningún script inline propio** que firmar: al retirarse `next-themes`
+  con el tema claro ([ADR-012](../01-architecture/decisions/ADR-012-single-dark-theme.md))
+  desapareció su script anti-parpadeo del `<head>`. Una superficie menos.
 - **Dev:** `'unsafe-inline'`/`'unsafe-eval'` + `ws:` (necesarios para el HMR de Next/Turbopack); ahí
   el nonce no aplica.
 - `style-src` mantiene `'unsafe-inline'` (estilos en atributos `style=""` de React; riesgo muy
@@ -66,6 +72,7 @@ El criterio de entrega es `pnpm audit --prod` limpio, y el CI lo hace fallar si 
 | Fase 6     | `postcss` — XSS en el stringify de CSS (GHSA-qx2v-qp2m-jg93)                                    | Override a `>=8.5.10` en `pnpm-workspace.yaml` (solo se usa en build). |
 | 2026-07-23 | **`next` 16.2.10** — 4 avisos, entre ellos **bypass de middleware/proxy** (GHSA-6gpp-xcg3-4w24) | **Actualización a `next@16.2.11`** + `eslint-config-next@16.2.11`.     |
 | 2026-07-23 | `sharp <0.35.0` — CVE de libvips heredados (GHSA-f88m-g3jw-g9cj)                                | Override a `>=0.35.0`.                                                 |
+| 2026-07-30 | `postcss <=8.5.17` — path traversal al auto-cargar el source map previo (GHSA-r28c-9q8g-f849)   | Override elevado a `>=8.5.18`.                                         |
 
 > ⚠️ **Por qué el aviso de `next` era serio aquí.** El bypass afectaba a aplicaciones del App Router
 > con Turbopack, y en este proyecto **la CSP con nonce y las cabeceras de seguridad se aplican en el

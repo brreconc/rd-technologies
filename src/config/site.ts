@@ -33,6 +33,7 @@ export const siteConfig = {
   // Anclas de la landing (one-page). Rutas dedicadas pendientes de decisión (§19).
   nav: [
     { label: "Servicios", href: "#servicios" },
+    { label: "Plataformas", href: "#plataformas" },
     { label: "Proceso", href: "#proceso" },
     { label: "Casos de uso", href: "#casos-de-uso" },
     { label: "Preguntas frecuentes", href: "#faq" },

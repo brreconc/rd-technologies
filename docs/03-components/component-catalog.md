@@ -16,15 +16,21 @@
 
 ## Compartidos (`src/components/shared`)
 
-| Componente    | Ubicación                   | Notas                                                                                          |
-| ------------- | --------------------------- | ---------------------------------------------------------------------------------------------- |
-| `Header`      | `shared/Header`             | Cabecera sticky: `Logo`, `NavLinks`, `ThemeToggle`, CTA y `MobileNav`. Server Component.       |
-| `HeaderShell` | `shared/Header/HeaderShell` | Envoltorio cliente: transparente arriba del todo, cristal + sombra + línea al hacer scroll.    |
-| `NavLinks`    | `shared/Header/NavLinks`    | Nav de escritorio con scroll-spy (`aria-current`) y pastilla deslizante con muelle. Cliente.   |
-| `MobileNav`   | `shared/Header/MobileNav`   | Menú móvil (< lg) con Radix Dialog (trampa de foco, Escape, ARIA). Cliente.                    |
-| `Footer`      | `shared/Footer`             | Logo, navegación, redes (si hay datos), `NewsletterForm` y copyright.                          |
-| `ThemeToggle` | `shared/ThemeToggle`        | `role="switch"` con pomo deslizante sol/luna; `useMounted` evita el mismatch de tema. Cliente. |
-| `Logo`        | `shared/Logo`               | Marca gráfica de grafo (SVG) + wordmark con gradiente animado; nunca parte de línea.           |
+| Componente    | Ubicación                   | Notas                                                                                        |
+| ------------- | --------------------------- | -------------------------------------------------------------------------------------------- |
+| `Header`      | `shared/Header`             | Cabecera sticky: `Logo`, `NavLinks`, CTA y `MobileNav`. Server Component.                    |
+| `HeaderShell` | `shared/Header/HeaderShell` | Envoltorio cliente: transparente arriba del todo, cristal + sombra + línea al hacer scroll.  |
+| `NavLinks`    | `shared/Header/NavLinks`    | Nav de escritorio (**≥ xl**) con scroll-spy (`aria-current`) y pastilla deslizante. Cliente. |
+| `MobileNav`   | `shared/Header/MobileNav`   | Menú lateral (**< xl**) con Radix Dialog (trampa de foco, Escape, ARIA). Cliente.            |
+| `Footer`      | `shared/Footer`             | Logo, navegación, redes (si hay datos), `NewsletterForm` y copyright.                        |
+| `Logo`        | `shared/Logo`               | Marca gráfica de grafo (SVG) + wordmark con gradiente animado; nunca parte de línea.         |
+
+> El corte de la navegación está en `xl` (1280px), no en `lg`: con seis destinos, los rótulos
+> completos no caben a 1024px y se partían en varias líneas. Entre 1024 y 1279px manda el menú
+> lateral. Ver [ADR-013](../01-architecture/decisions/ADR-013-platform-deck.md).
+>
+> Ya **no hay `ThemeToggle`**: el sitio tiene tema oscuro único
+> ([ADR-012](../01-architecture/decisions/ADR-012-single-dark-theme.md)).
 
 ## Hooks (`src/lib/hooks`)
 
@@ -71,6 +77,7 @@ Contenido tipado en `src/lib/constants` (no hardcodeado). Helpers: `SectionHeadi
 | `TechMarquee`     | —                     | `constants/tech`                                   |
 | `ValueProps`      | `#propuesta-de-valor` | `constants/value-props`                            |
 | `Services`        | `#servicios`          | `constants/services`                               |
+| `Platforms`       | `#plataformas`        | `constants/platforms` (deck interactivo, Fase 10)  |
 | `Differentiators` | `#por-que-elegirnos`  | `constants/differentiators`                        |
 | `Process`         | `#proceso`            | `constants/process` (línea de tiempo con scroll)   |
 | `UseCases`        | `#casos-de-uso`       | `constants/use-cases`                              |
@@ -80,6 +87,28 @@ Contenido tipado en `src/lib/constants` (no hardcodeado). Helpers: `SectionHeadi
 
 > Todas las secciones usan HTML semántico (`section` + `aria-labelledby`, listas, headings
 > jerárquicos) y animaciones de entrada (ver abajo).
+
+### Deck multiplataforma (`sections/Platforms`) — Fase 10
+
+La sección más interactiva del sitio. Responde de un vistazo a "¿pueden hacer LO MÍO?"
+compilando el destino elegido delante del cliente. Ver
+[ADR-013](../01-architecture/decisions/ADR-013-platform-deck.md).
+
+| Fichero            | Qué es                                                                                                                                                    |
+| ------------------ | --------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `index.tsx`        | Server Component: encabezado, marco y el párrafo de cierre. Solo el deck baja al cliente.                                                                 |
+| `PlatformDeck.tsx` | Cliente. Patrón `tablist`/`tab`/`tabpanel`, morfismo del dispositivo, retinte por acento, inclinación 3D con el puntero y recorrido automático detenible. |
+| `screens.ts`       | Los mock-ups como **datos** (rectángulos y círculos por `viewBox`), no como JSX. Añadir una pantalla es añadir datos.                                     |
+| `screens.test.ts`  | Verifica sin montar nada que ninguna figura se sale de su `viewBox` y que cada `viewBox` cuadra con la proporción del dispositivo.                        |
+
+**Cómo añadir una plataforma:**
+
+1. Añade la entrada en [`lib/constants/platforms.ts`](../../src/lib/constants/platforms.ts) con su
+   acento (valida el contraste sobre `#0a0a0a`: se usa como texto) y su `frame` en porcentajes del
+   escenario.
+2. Añade su pantalla en `screens.ts` con un `viewBox` cuya proporción cuadre con ese `frame`.
+3. Ejecuta `pnpm test`: `screens.test.ts` avisa si la proporción no cuadra o si alguna figura se
+   sale. No hay que tocar `PlatformDeck.tsx`.
 
 ## Animaciones (`src/components/animations`)
 

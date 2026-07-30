@@ -4,6 +4,9 @@
 - **Fecha:** 2026-07-23
 - **Decisores:** Frontend Senior, Performance, UI, Accesibilidad
 - **Sustituye parcialmente a:** [ADR-010](./ADR-010-cinematic-motion-system.md) (lo amplía; no lo deroga)
+- **Ampliada por:** [ADR-013](./ADR-013-platform-deck.md) (movimiento v4 y deck multiplataforma)
+
+> ⚠️ **Actualización (Fase 10, [ADR-012](./ADR-012-single-dark-theme.md)).** Las referencias a "ambos temas" y al `ThemeToggle` quedan obsoletas: hay un único tema oscuro. **La regla de oro de este ADR sigue plenamente vigente** y el deck de la Fase 10 la respeta.
 
 ## Contexto
 

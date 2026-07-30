@@ -70,8 +70,10 @@ Toda la documentación vive en [`docs/`](./docs). Empieza por [`docs/README.md`]
 
 ## 🧱 Stack principal
 
-Next.js 16 · React 19 · TypeScript (strict) · Tailwind CSS v4 · Framer Motion · next-themes ·
-Zod · React Hook Form · Radix/shadcn (próxima fase) · Lucide.
+Next.js 16 · React 19 · TypeScript (strict) · Tailwind CSS v4 · Framer Motion ·
+Zod · React Hook Form · Radix · Lucide.
+
+Tema oscuro único, sin librería de theming ([ADR-012](./docs/01-architecture/decisions/ADR-012-single-dark-theme.md)).
 
 ## 📄 Licencia
 

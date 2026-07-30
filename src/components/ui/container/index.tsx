@@ -13,7 +13,14 @@ export function Container({ className, ...props }: React.ComponentProps<"div">) 
 
 /**
  * Sección vertical con espaciado responsivo. Acepta `id` para el scroll por anclas.
+ *
+ * `section-flow` le da la LLEGADA cinematográfica: la sección entra atenuada y
+ * alcanza su brillo pleno conforme sube, atada al scroll por CSS puro
+ * (`animation-timeline: view()`), sin JavaScript ni observadores. Al vivir aquí,
+ * todas las secciones la heredan sin repetir nada. Ver docs/02-design-system/motion.md.
  */
 export function Section({ className, ...props }: React.ComponentProps<"section">) {
-  return <section className={cn("scroll-mt-20 py-16 sm:py-24", className)} {...props} />;
+  return (
+    <section className={cn("section-flow scroll-mt-20 py-16 sm:py-24", className)} {...props} />
+  );
 }

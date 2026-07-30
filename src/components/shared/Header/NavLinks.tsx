@@ -72,7 +72,11 @@ export function NavLinks() {
     <nav
       ref={navRef}
       aria-label="Principal"
-      className="relative hidden items-center gap-1 lg:flex"
+      // A partir de `xl`, no de `lg`: con seis destinos los rótulos completos
+      // ("Preguntas frecuentes", "Casos de uso") no caben a 1024px y se partían
+      // en varias líneas. Entre 1024 y 1279px manda el menú móvil, que ya es
+      // una hoja lateral completa. Se prefiere eso a recortar los rótulos.
+      className="relative hidden items-center gap-1 xl:flex"
       onPointerLeave={() => setFocused(null)}
     >
       {pill && (
@@ -103,7 +107,7 @@ export function NavLinks() {
             onFocus={() => setFocused(id)}
             onBlur={() => setFocused(null)}
             className={cn(
-              "relative z-10 rounded-full px-3.5 py-2 text-sm transition-colors duration-300",
+              "relative z-10 rounded-full px-3.5 py-2 text-sm whitespace-nowrap transition-colors duration-300",
               isActive ? "text-foreground" : "text-muted hover:text-foreground",
             )}
           >

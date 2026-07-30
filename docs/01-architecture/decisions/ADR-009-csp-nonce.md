@@ -5,6 +5,8 @@
 - **Decisores:** AppSec, Arquitecto Senior, Ingeniero de Performance
 - **Reemplaza:** la nota de ADR-005 que dejaba `'unsafe-inline'` en `script-src`.
 
+> ⚠️ **Actualización (Fase 10, [ADR-012](./ADR-012-single-dark-theme.md)).** Al retirarse `next-themes` desapareció el único script inline propio que había que firmar. El mecanismo **no cambia**: el layout sigue llamando a `await headers()`, ahora únicamente para forzar el render dinámico que el nonce exige. No es una llamada muerta; si se quita, la CSP con nonce deja de funcionar.
+
 ## Contexto
 
 §9/§12 exigen una CSP fuerte alineada con OWASP. La CSP inicial (Fase 0) mantenía

@@ -3,7 +3,8 @@ import AxeBuilder from "@axe-core/playwright";
 
 /**
  * Accesibilidad automatizada (§10, §13). Sin violaciones críticas/serias
- * (axe-core, WCAG 2.0/2.1 A y AA) en ambos temas.
+ * (axe-core, WCAG 2.0/2.1 A y AA). El sitio tiene un único tema oscuro
+ * (ADR-012), así que hay una sola paleta que auditar.
  *
  * Nota: axe cubre ~parte de WCAG; complementa (no sustituye) la revisión manual
  * de teclado/lector de pantalla documentada en docs/06-accessibility.
@@ -43,17 +44,20 @@ function seriousOrCritical(results: Awaited<ReturnType<typeof scan>>) {
   return results.violations.filter((v) => v.impact === "critical" || v.impact === "serious");
 }
 
-test("sin violaciones a11y críticas/serias (tema oscuro)", async ({ page }) => {
+test("sin violaciones a11y críticas/serias", async ({ page }) => {
   await page.goto("/");
   await settle(page);
   expect(seriousOrCritical(await scan(page))).toEqual([]);
 });
 
-test("sin violaciones a11y críticas/serias (tema claro)", async ({ page }) => {
-  // Tema fijado de forma determinista (localStorage) y cargado ya en claro.
-  await page.addInitScript(() => window.localStorage.setItem("theme", "light"));
+test("sin violaciones a11y críticas/serias con el deck en su última plataforma", async ({
+  page,
+}) => {
+  // El deck multiplataforma reescribe su panel al cambiar de destino (y retiñe
+  // el acento). Se audita también ese estado, no solo el inicial.
   await page.goto("/");
-  await expect(page.locator("html")).toHaveClass(/light/);
+  const tabs = page.getByRole("tab");
+  await tabs.last().click();
   await settle(page);
   expect(seriousOrCritical(await scan(page))).toEqual([]);
 });

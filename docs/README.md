@@ -29,9 +29,10 @@
 
 - ✅ **Fase 0 — Cimientos:** scaffold, tooling, estructura, tokens de diseño, layout raíz,
   cabeceras de seguridad, accesibilidad base. **Completada.**
-- ✅ **Fase 1 — Sistema de diseño y primitivos:** tema claro+oscuro con tokens, primitivos `ui/`
-  (Button, Card, Container, Input, Accordion), Header/Footer/Navegación accesibles y ThemeToggle.
-  **Completada.**
+- ✅ **Fase 1 — Sistema de diseño y primitivos:** tokens de color/tipografía, primitivos `ui/`
+  (Button, Card, Container, Input, Accordion) y Header/Footer/Navegación accesibles. **Completada.**
+  _(El tema claro y su alternador que se construyeron aquí se retiraron en la Fase 10 —
+  [ADR-012](./01-architecture/decisions/ADR-012-single-dark-theme.md).)_
 - ✅ **Fase 2 — Estructura y contenido estático:** las 9 secciones de la landing con el copy
   oficial, responsive y accesibles (contenido en `lib/constants`). **Completada.**
 - ✅ **Fase 3 — Capa de motion:** reveals al scroll con stagger (Framer Motion optimizado con
@@ -73,11 +74,23 @@
   afectaba a los usuarios con `prefers-reduced-motion` y una nueva política: el CSS es la fuente de
   verdad del movimiento reducido. Verificada con 49 unit + 18 E2E y Lighthouse 99/100/96/100.
   **Completada.**
+- ✅ **Fase 10 — Deck multiplataforma y tema único:** dos decisiones que se pagan entre sí.
+  ([ADR-012](./01-architecture/decisions/ADR-012-single-dark-theme.md)) se retira el **tema claro**,
+  su alternador y `next-themes`: la identidad de la marca es luz sobre negro y mantener dos mundos
+  duplicaba el diseño, la auditoría y el riesgo.
+  ([ADR-013](./01-architecture/decisions/ADR-013-platform-deck.md)) entra la sección
+  **`#plataformas`**, que en vez de contar dónde trabajamos **compila el destino elegido delante del
+  cliente**: el dispositivo se transforma entre navegador, teléfono y monitor, la escena se retiñe
+  con el acento de la plataforma, el mock-up se dibuja pieza a pieza y el puntero inclina un
+  holograma de dos capas. Además, **movimiento v4**: aurora de página, costura entre secciones con
+  nodo de luz y llegada de sección, todo ligado al scroll **en CSS puro**, sin un solo manejador en
+  JavaScript. **Cero dependencias nuevas** (~2 KB netos en el bundle). Ninguna sección previa se
+  retiró. Verificada con 66 unit + 24 E2E y Lighthouse 99/100/96/100 con **CLS 0**. **Completada.**
 
 ## Deuda técnica abierta
 
 | Tema                               | Detalle                                                                                                                       |
 | ---------------------------------- | ----------------------------------------------------------------------------------------------------------------------------- |
-| **Presupuesto de JS (§11)**        | ~288 KB brotli frente al objetivo < 200 KB. Origen y plan en [07-performance](./07-performance/performance-budgets.md).       |
+| **Presupuesto de JS (§11)**        | ~290 KB brotli frente al objetivo < 200 KB. Origen y plan en [07-performance](./07-performance/performance-budgets.md).       |
 | **La página no se muestra sin JS** | Consecuencia de la ruta dinámica que exige el nonce de la CSP. Ver [06-accessibility](./06-accessibility/a11y-guidelines.md). |
 | **Contenido pendiente (§19)**      | Datos reales de contacto, testimonios y las métricas del hero (hoy ilustrativas).                                             |

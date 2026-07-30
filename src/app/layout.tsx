@@ -26,15 +26,12 @@ export const metadata = baseMetadata;
 
 /**
  * Viewport (§12). `themeColor` va aquí (no en `metadata`, deprecado desde
- * Next 14). Se declara por esquema de color para que la barra del navegador
- * acompañe al tema claro/oscuro. `--bg` de cada tema en globals.css.
+ * Next 14). El sitio tiene un único tema oscuro (ADR-012), así que se declara
+ * un solo color, el mismo `--bg` de globals.css.
  */
 export const viewport: Viewport = {
-  colorScheme: "dark light",
-  themeColor: [
-    { media: "(prefers-color-scheme: dark)", color: "#0a0a0a" },
-    { media: "(prefers-color-scheme: light)", color: "#ffffff" },
-  ],
+  colorScheme: "dark",
+  themeColor: "#0a0a0a",
 };
 
 export default async function RootLayout({
@@ -42,19 +39,23 @@ export default async function RootLayout({
 }: Readonly<{
   children: React.ReactNode;
 }>) {
-  // Nonce de la CSP (lo fija el proxy). Leer `headers()` fuerza el render
-  // dinámico necesario para el nonce por petición (ADR-009). Se pasa a
-  // `next-themes` para que su script inline anti-parpadeo lleve el nonce.
-  const nonce = (await headers()).get("x-nonce") ?? undefined;
+  // Leer una cabecera de la petición fuerza el RENDER DINÁMICO, imprescindible
+  // para la CSP con nonce (ADR-009): Next extrae el nonce de la cabecera
+  // `Content-Security-Policy` que fija el proxy y lo aplica a sus scripts, pero
+  // solo puede hacerlo si la página se renderiza por petición — una página
+  // estática se genera en build, cuando todavía no existe ningún nonce.
+  await headers();
 
   return (
     <html
       lang="es"
-      // next-themes ajusta la clase del tema en cliente → evita mismatch de hidratación.
-      suppressHydrationWarning
       className={`${inter.variable} ${spaceGrotesk.variable} ${fraunces.variable} ${jetbrainsMono.variable}`}
     >
       <body className="flex min-h-dvh flex-col antialiased">
+        {/* Luz ambiental de toda la página: se desplaza con el avance del scroll
+            mediante CSS puro (`animation-timeline: scroll()`). Decorativa y sin
+            JavaScript; ver docs/02-design-system/motion.md. */}
+        <div aria-hidden="true" className="aurora" />
         {/* Sin JS: forzar visibles los elementos con animación de entrada (progressive enhancement). */}
         <noscript>
           <style
@@ -63,7 +64,7 @@ export default async function RootLayout({
             }}
           />
         </noscript>
-        <Providers nonce={nonce}>
+        <Providers>
           <ScrollProgress />
           {/* Skip link accesible (§10) — visible solo al enfocar con teclado. */}
           <a
