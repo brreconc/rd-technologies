@@ -86,11 +86,23 @@
   nodo de luz y llegada de sección, todo ligado al scroll **en CSS puro**, sin un solo manejador en
   JavaScript. **Cero dependencias nuevas** (~2 KB netos en el bundle). Ninguna sección previa se
   retiró. Verificada con 66 unit + 24 E2E y Lighthouse 99/100/96/100 con **CLS 0**. **Completada.**
+- ✅ **Fase 11 — El deck como instrumento:** se rehace el interior de `#plataformas`
+  ([ADR-014](./01-architecture/decisions/ADR-014-instrument-deck.md)). Los mock-ups dejan de ser
+  figuras SVG —"vectores sin terminar", en palabras del cliente— y pasan a ser **interfaces reales
+  y específicas** de cada plataforma: panel SaaS con gráfico y tabla, app Material 3 con FAB, app
+  HIG con isla dinámica, y consola de escritorio con árbol, log e inspector. El deck adopta un
+  **lenguaje de instrumento**: esquinas rectas, selector de canales numerados, corchetes de
+  encuadre, regla de ticks y una **cota que anuncia la resolución del destino y de la que se deriva
+  el marco del dispositivo** (con test que impide que se desincronicen). El interior escala con
+  **unidades de contenedor**, no con media queries. Se corrigen tres defectos graves del diseño de
+  partida: teclado que descartaba pulsaciones, desbordamiento horizontal y solo un destino visible
+  en móvil. **El bundle BAJA ~12 KB brotli.** Verificada con 66 unit + 26 E2E y Lighthouse
+  99/100/96/100 con **CLS 0**. **Completada.**
 
 ## Deuda técnica abierta
 
 | Tema                               | Detalle                                                                                                                       |
 | ---------------------------------- | ----------------------------------------------------------------------------------------------------------------------------- |
-| **Presupuesto de JS (§11)**        | ~290 KB brotli frente al objetivo < 200 KB. Origen y plan en [07-performance](./07-performance/performance-budgets.md).       |
+| **Presupuesto de JS (§11)**        | ~278 KB brotli frente al objetivo < 200 KB. Origen y plan en [07-performance](./07-performance/performance-budgets.md).       |
 | **La página no se muestra sin JS** | Consecuencia de la ruta dinámica que exige el nonce de la CSP. Ver [06-accessibility](./06-accessibility/a11y-guidelines.md). |
 | **Contenido pendiente (§19)**      | Datos reales de contacto, testimonios y las métricas del hero (hoy ilustrativas).                                             |

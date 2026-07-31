@@ -1,9 +1,15 @@
 # ADR-013 — Deck multiplataforma y sistema de movimiento v4
 
-- **Estado:** Aceptada
+- **Estado:** Aceptada — **§2 sustituida** por [ADR-014](./ADR-014-instrument-deck.md) (Fase 11)
 - **Fecha:** 2026-07-30
 - **Fase:** 10
 - **Continúa:** [ADR-010](./ADR-010-cinematic-motion-system.md) y [ADR-011](./ADR-011-secure-system-scenography.md)
+
+> ⚠️ **Vigencia.** El concepto del deck (§1), el sistema de movimiento v4 (§3) y todo lo de
+> accesibilidad, rendimiento e hidratación siguen en vigor. Lo que ya **no** describe la realidad es
+> la **§2, "Los mock-ups son DATOS, no JSX"**: en la Fase 11 los mock-ups SVG se sustituyeron por
+> componentes de interfaz real y `screens.ts`/`screens.test.ts` se retiraron. El motivo y el
+> contrato que ocupa su lugar están en [ADR-014](./ADR-014-instrument-deck.md).
 
 ## Contexto
 

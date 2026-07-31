@@ -94,6 +94,42 @@ test.describe("Deck multiplataforma", () => {
     expect(activaDespues).toBe(activaAhora);
   });
 
+  test("la cota y el mock-up cambian con el destino", async ({ page }) => {
+    await abrirDeck(page);
+
+    // La cota es el ancla de la metáfora: anuncia la resolución del destino y
+    // el marco se calcula a partir de ella. Si dejara de cambiar, el
+    // instrumento estaría mintiendo.
+    const cota = page.locator(".deck-readout");
+    await page.getByRole("tab", { name: /^Web/ }).click();
+    await expect(cota).toContainText("1440");
+
+    await page.getByRole("tab", { name: /iOS/ }).click();
+    await expect(cota).toContainText("393");
+    await expect(page.locator(".mk-ios")).toBeVisible();
+
+    await page.getByRole("tab", { name: /Escritorio/ }).click();
+    await expect(cota).toContainText("1920");
+    // Un mock-up por destino: nunca dos montados a la vez.
+    await expect(page.locator(".mk")).toHaveCount(1);
+    await expect(page.locator(".mk-desk")).toBeVisible();
+  });
+
+  test("los cuatro destinos se ven a la vez en móvil", async ({ page }) => {
+    // Regresión: con el rail como tira deslizable, tres de los cuatro destinos
+    // quedaban fuera de pantalla sin ninguna pista de que existieran.
+    await page.setViewportSize({ width: 375, height: 800 });
+    await abrirDeck(page);
+
+    const ancho = page.viewportSize()!.width;
+    for (const nombre of [/^Web/, /Android/, /iOS/, /Escritorio/]) {
+      const caja = await page.getByRole("tab", { name: nombre }).boundingBox();
+      expect(caja, `destino ${nombre}`).not.toBeNull();
+      expect(caja!.x).toBeGreaterThanOrEqual(0);
+      expect(caja!.x + caja!.width, `destino ${nombre}`).toBeLessThanOrEqual(ancho);
+    }
+  });
+
   test("ningún destino desborda a 320px", async ({ page }) => {
     await page.setViewportSize({ width: 320, height: 720 });
     await abrirDeck(page);

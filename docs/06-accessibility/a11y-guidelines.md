@@ -55,11 +55,19 @@ Si no puedes ofrecerlo, no la pongas en marcha sola.
 
 - `tablist` / `tab` / `tabpanel` de WAI-ARIA con `tabindex` rotatorio (solo la pestaña activa es
   tabulable; dentro se navega con flechas).
-- Se aceptan **los dos ejes** de flechas (`←→` y `↑↓`) porque el rail es horizontal en móvil y
+- Se aceptan **los dos ejes** de flechas (`←→` y `↑↓`) porque el rail es una rejilla en móvil y
   vertical en escritorio, más `Inicio` y `Fin`. La selección mueve también el foco.
+- **Ninguna pulsación se descarta.** Sin candados temporales ni banderas de "animando": si el
+  usuario pulsa cinco veces seguidas, se atienden las cinco. Suena obvio, pero el diseño del que
+  partió la Fase 11 traía un bloqueo de 700 ms que hacía inalcanzables dos de los cuatro destinos
+  desde el teclado. Hay un E2E que lo vigila.
 - El mock-up del dispositivo es decorativo (`aria-hidden`): toda la información está en el texto del
   panel. Una región `aria-live="polite"` anuncia el destino en pantalla, porque si no los cambios
   del recorrido automático pasarían inadvertidos a un lector de pantalla.
+- **Contraste por token, no por opacidad.** Todo el texto atenuado del deck usa `--deck-dim`
+  (`#8a8a8a`, ≥5:1 sobre las superficies del deck) en vez de blanco con transparencia, que es la
+  vía fácil para colar texto por debajo de AA sin enterarse. Ver
+  [colors-and-tokens](../02-design-system/colors-and-tokens.md#--deck-dim-un-único-gris-atenuado).
 
 ## Movimiento reducido (Fase 9 — ADR-011)
 

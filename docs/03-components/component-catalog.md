@@ -71,44 +71,54 @@ Detalle en [09-content-seo/seo](../09-content-seo/seo.md).
 
 Contenido tipado en `src/lib/constants` (no hardcodeado). Helpers: `SectionHeading`, `IconBadge`.
 
-| Sección           | Ancla                 | Fuente de contenido                                |
-| ----------------- | --------------------- | -------------------------------------------------- |
-| `Hero`            | —                     | copy inline (oficial) + `HeroBackdrop`/`HeroStage` |
-| `TechMarquee`     | —                     | `constants/tech`                                   |
-| `ValueProps`      | `#propuesta-de-valor` | `constants/value-props`                            |
-| `Services`        | `#servicios`          | `constants/services`                               |
-| `Platforms`       | `#plataformas`        | `constants/platforms` (deck interactivo, Fase 10)  |
-| `Differentiators` | `#por-que-elegirnos`  | `constants/differentiators`                        |
-| `Process`         | `#proceso`            | `constants/process` (línea de tiempo con scroll)   |
-| `UseCases`        | `#casos-de-uso`       | `constants/use-cases`                              |
-| `Testimonials`    | `#testimonios`        | `constants/testimonials` (ejemplos)                |
-| `FAQ`             | `#faq`                | `constants/faq` (Accordion)                        |
-| `FinalCTA`        | `#contacto`           | copy inline (oficial)                              |
+| Sección           | Ancla                 | Fuente de contenido                                   |
+| ----------------- | --------------------- | ----------------------------------------------------- |
+| `Hero`            | —                     | copy inline (oficial) + `HeroBackdrop`/`HeroStage`    |
+| `TechMarquee`     | —                     | `constants/tech`                                      |
+| `ValueProps`      | `#propuesta-de-valor` | `constants/value-props`                               |
+| `Services`        | `#servicios`          | `constants/services`                                  |
+| `Platforms`       | `#plataformas`        | `constants/platforms` (deck interactivo, Fases 10–11) |
+| `Differentiators` | `#por-que-elegirnos`  | `constants/differentiators`                           |
+| `Process`         | `#proceso`            | `constants/process` (línea de tiempo con scroll)      |
+| `UseCases`        | `#casos-de-uso`       | `constants/use-cases`                                 |
+| `Testimonials`    | `#testimonios`        | `constants/testimonials` (ejemplos)                   |
+| `FAQ`             | `#faq`                | `constants/faq` (Accordion)                           |
+| `FinalCTA`        | `#contacto`           | copy inline (oficial)                                 |
 
 > Todas las secciones usan HTML semántico (`section` + `aria-labelledby`, listas, headings
 > jerárquicos) y animaciones de entrada (ver abajo).
 
-### Deck multiplataforma (`sections/Platforms`) — Fase 10
+### Deck multiplataforma (`sections/Platforms`) — Fases 10 y 11
 
 La sección más interactiva del sitio. Responde de un vistazo a "¿pueden hacer LO MÍO?"
 compilando el destino elegido delante del cliente. Ver
-[ADR-013](../01-architecture/decisions/ADR-013-platform-deck.md).
+[ADR-013](../01-architecture/decisions/ADR-013-platform-deck.md) (concepto) y
+[ADR-014](../01-architecture/decisions/ADR-014-instrument-deck.md) (mock-ups y lenguaje visual).
 
-| Fichero            | Qué es                                                                                                                                                    |
-| ------------------ | --------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| `index.tsx`        | Server Component: encabezado, marco y el párrafo de cierre. Solo el deck baja al cliente.                                                                 |
-| `PlatformDeck.tsx` | Cliente. Patrón `tablist`/`tab`/`tabpanel`, morfismo del dispositivo, retinte por acento, inclinación 3D con el puntero y recorrido automático detenible. |
-| `screens.ts`       | Los mock-ups como **datos** (rectángulos y círculos por `viewBox`), no como JSX. Añadir una pantalla es añadir datos.                                     |
-| `screens.test.ts`  | Verifica sin montar nada que ninguna figura se sale de su `viewBox` y que cada `viewBox` cuadra con la proporción del dispositivo.                        |
+| Fichero               | Qué es                                                                                                                                                    |
+| --------------------- | --------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `index.tsx`           | Server Component: encabezado, marco y el párrafo de cierre. Solo el deck baja al cliente.                                                                 |
+| `PlatformDeck.tsx`    | Cliente. Patrón `tablist`/`tab`/`tabpanel`, morfismo del dispositivo, retinte por acento, inclinación 3D con el puntero y recorrido automático detenible. |
+| `mockups/index.tsx`   | Mapa `PlatformId → componente`. Solo hay **un** mock-up montado a la vez.                                                                                 |
+| `mockups/*Mockup.tsx` | Una interfaz creíble por destino: panel SaaS, app Material 3, app HIG y consola de escritorio. Decorativas (`aria-hidden`).                               |
+| `mockups/Glyph.tsx`   | Pictogramas de 1px dibujados a mano para el interior del mock-up. A 6–10 px no son identificables, así que no compensa arrastrar iconos reales al bundle. |
+
+**Tres invariantes que hay que respetar al tocar esto:**
+
+1. **`container-type: size` en `.deck-device`** es lo que hace que el mock-up escale con el marco.
+   Todo el interior dimensiona en `cqh` a partir de una única base (`font-size` de `.mk`) y de ahí
+   en `em`. Si se quita, las unidades se resuelven contra el viewport y la interfaz revienta.
+2. **La cota manda sobre la geometría.** `deviceFrame()` deriva el marco de `readout`, no al revés.
+3. **El copy sale solo de `platforms.ts`.** Nada de texto de producto escrito dentro de un mock-up.
 
 **Cómo añadir una plataforma:**
 
 1. Añade la entrada en [`lib/constants/platforms.ts`](../../src/lib/constants/platforms.ts) con su
-   acento (valida el contraste sobre `#0a0a0a`: se usa como texto) y su `frame` en porcentajes del
-   escenario.
-2. Añade su pantalla en `screens.ts` con un `viewBox` cuya proporción cuadre con ese `frame`.
-3. Ejecuta `pnpm test`: `screens.test.ts` avisa si la proporción no cuadra o si alguna figura se
-   sale. No hay que tocar `PlatformDeck.tsx`.
+   acento (valida el contraste sobre `#0a0a0a`: se usa como texto), su `readout` (resolución
+   nominal) y su `fit` (eje dominante, porcentaje del escenario y radio).
+2. Crea su componente en `mockups/` y regístralo en `mockups/index.tsx`.
+3. Ejecuta `pnpm test`: `platforms.test.ts` avisa si el marco no cuadra con la resolución que
+   anuncia la cota o si el dispositivo no cabe en el escenario. No hay que tocar `PlatformDeck.tsx`.
 
 ## Animaciones (`src/components/animations`)
 

@@ -50,19 +50,32 @@ lateral (`MobileNav`), que es una hoja completa con trampa de foco.
 El deck ([`sections/Platforms`](../../src/components/sections/Platforms)) reordena su rejilla con
 áreas explícitas en lugar de `order`, para que el orden de lectura tenga sentido en ambos casos:
 
-| Tamaño | Disposición                                                                        |
-| ------ | ---------------------------------------------------------------------------------- |
-| < `lg` | Rail horizontal con desplazamiento y anclaje (`snap`) → escenario → panel de texto |
-| ≥ `lg` | Rail vertical y panel a la izquierda; escenario a la derecha, pegajoso al scroll   |
+| Tamaño      | Disposición                                                                      |
+| ----------- | -------------------------------------------------------------------------------- |
+| < `sm`      | Rail en **rejilla 2×2** → escenario → panel de texto                             |
+| `sm` – `lg` | Rail en **una fila de 4** → escenario → panel de texto                           |
+| ≥ `lg`      | Rail vertical y panel a la izquierda; escenario a la derecha, pegajoso al scroll |
+
+> **Por qué rejilla y no una tira deslizable.** El primer diseño usaba una tira con desplazamiento
+> lateral, y a 375px dejaba **tres de los cuatro destinos fuera de pantalla** sin ninguna pista de
+> que existieran — en la sección cuyo mensaje entero es "cubrimos las cuatro". La rejilla los
+> muestra siempre. Hay un E2E que lo vigila: comprueba que las cuatro pestañas caben enteras dentro
+> del viewport a 375px.
+
+El número de canal (`Canal 01`…) solo aparece a partir de `lg`: por debajo, la fila es demasiado
+estrecha y competía con el rótulo.
 
 El dispositivo se dimensiona en **porcentajes de su escenario**, y el escenario tiene proporción
-fija. Por eso el morfismo entre destinos no cambia la altura de la página (**CLS 0**) y funciona
-igual a 320px que a 4K sin números mágicos en píxeles. `e2e/platforms.spec.ts` comprueba que
-**ningún destino desborda a 320px**.
+fija (5/4). Por eso el morfismo entre destinos no cambia la altura de la página (**CLS 0**) y
+funciona igual a 320px que a 4K sin números mágicos en píxeles. El interior del mock-up escala con
+**unidades de contenedor** (`cqh`), no con media queries, porque el dispositivo cambia de tamaño sin
+que cambie el viewport. `e2e/platforms.spec.ts` comprueba que **ningún destino desborda a 320px**.
 
 ## Pendiente por fase
 
-- **Container Queries** para componentes que dependen de su contenedor (Fases 1–2).
+- ~~**Container Queries** para componentes que dependen de su contenedor~~ — hecho en la Fase 11
+  para el interior del deck (`container-type: size` en `.deck-device`, todo el mock-up en `cqh`).
+  Sigue pendiente valorarlas en el resto de tarjetas.
 - **Safe-area insets** (`env(safe-area-inset-*)`) en header/footer fijos (Fase 1).
 - **Touch targets ≥ 44×44px** y `@media (hover: hover)` para no dejar acciones solo-hover en
   táctil (Fases 1–2). El shell ya usa `min-h-11` (44px) en los CTAs.

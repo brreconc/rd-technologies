@@ -5,62 +5,54 @@ import { m, useMotionValue, useSpring, useReducedMotion } from "framer-motion";
 import { Pause, Play } from "lucide-react";
 import { cn } from "@/lib/utils/cn";
 import { useMounted } from "@/lib/hooks/use-mounted";
-import { platforms, defaultPlatformId, type PlatformId } from "@/lib/constants/platforms";
-import { screens, type Shape } from "./screens";
+import {
+  platforms,
+  defaultPlatformId,
+  deviceFrame,
+  type PlatformId,
+} from "@/lib/constants/platforms";
+import { MOCKUPS } from "./mockups";
 
 /** Milisegundos que permanece cada destino cuando el deck avanza solo. */
-const AUTOPLAY_MS = 6000;
+const AUTOPLAY_MS = 7000;
 /** Inclinación 3D máxima del dispositivo, en grados. */
 const TILT = 9;
-/** Separación en profundidad entre las dos capas del mock-up (px). */
-const BASE_Z = 14;
-const FLOAT_Z = 34;
+/** Marcas de la regla vertical del escenario. */
+const RULER_TICKS = 9;
 
-const TONE_CLASS = { wire: "deck-wire", wire2: "deck-wire-2", accent: "deck-accent" } as const;
-
-/**
- * Una figura del mock-up. El retardo de entrada sale del índice, así que el
- * escalonado se mantiene solo al añadir o quitar piezas.
- */
-function ShapeNode({ shape, index }: { shape: Shape; index: number }) {
-  const common = {
-    className: cn("deck-el", TONE_CLASS[shape.k ?? "wire"]),
-    style: { "--d": `${index * 32}ms` } as React.CSSProperties,
-    ...(shape.o === undefined ? {} : { opacity: shape.o }),
-  };
-  return shape.t === "rect" ? (
-    <rect x={shape.x} y={shape.y} width={shape.w} height={shape.h} rx={shape.r} {...common} />
-  ) : (
-    <circle cx={shape.x} cy={shape.y} r={shape.rad} {...common} />
-  );
-}
+const pad2 = (n: number) => String(n).padStart(2, "0");
 
 /**
  * DECK DE DESPLIEGUE MULTIPLATAFORMA (ADR-013) — la pieza interactiva de §8.
  *
  * Idea: en vez de contar en qué plataformas trabajamos, se COMPILA una delante
- * del cliente. Al elegir un destino, el dispositivo del escenario se transforma
- * (proporción y radio), la escena entera se retiñe con el acento de esa
- * plataforma, un barrido de compilación recorre la pantalla y el mock-up se
- * dibuja pieza a pieza. Mover el puntero inclina el dispositivo y las dos capas
- * del mock-up se separan en profundidad: el holograma responde al usuario.
+ * del cliente. El rail es un selector de canales; al elegir uno, el dispositivo
+ * del escenario se transforma hasta la proporción real de ese destino, la escena
+ * se retiñe con su acento desde una sola variable, un barrido de compilación
+ * recorre la pantalla y dentro aparece una interfaz creíble de esa plataforma.
  *
- * Rendimiento (§11): cero dependencias nuevas y cero canvas. Son SVG estáticos
- * y animaciones CSS de `transform`/`opacity` que compone la GPU. Solo hay un
- * destino montado a la vez, y el avance automático no existe fuera de pantalla
- * (`IntersectionObserver`) — ahí no queda ni un temporizador vivo.
+ * El detalle que sostiene la metáfora es la COTA: el rótulo sobre el escenario
+ * anuncia la resolución del destino y el marco se calcula a partir de ese mismo
+ * dato (`deviceFrame`), así que la transformación es una medida, no un adorno.
+ * Un test unitario impide que ambos se separen.
+ *
+ * Rendimiento (§11): cero dependencias nuevas, cero canvas y un solo mock-up
+ * montado a la vez. Todo lo que se mueve es `transform`/`opacity`, salvo el
+ * morfismo del dispositivo, que ocurre dentro de un campo de proporción fija
+ * para que jamás desplace nada de la página (CLS 0). Fuera de pantalla no queda
+ * ni un temporizador vivo (`IntersectionObserver`).
  *
  * Accesibilidad (§10):
  *  - Patrón `tablist`/`tab`/`tabpanel` de WAI-ARIA con `tabindex` rotatorio y
- *    navegación por flechas, Inicio y Fin. Se aceptan los dos ejes porque el
- *    rail es vertical en escritorio y horizontal en móvil.
+ *    navegación por flechas, Inicio y Fin, en los dos ejes (el rail es vertical
+ *    en escritorio y una rejilla en móvil). No hay ningún candado temporal: cada
+ *    pulsación se atiende, por rápida que llegue.
  *  - El avance automático es movimiento que arranca solo, así que WCAG 2.2.2
  *    exige poder pararlo: hay un botón explícito, se pausa al pasar el puntero o
- *    al enfocar dentro, y elegir un destino a mano lo detiene (el usuario ha
- *    tomado el control). Con `prefers-reduced-motion` no llega a existir.
- *  - El mock-up es decorativo (`aria-hidden`): lo que importa está en el texto
- *    del panel. Una región `aria-live` discreta anuncia los cambios que provoca
- *    el avance automático, que si no pasarían desapercibidos.
+ *    al enfocar dentro, y elegir un destino a mano lo detiene definitivamente.
+ *    Con `prefers-reduced-motion` no llega a existir.
+ *  - Toda la instrumentación (cotas, regla, consola, mock-up) es decorativa y va
+ *    con `aria-hidden`: lo que importa está en el texto del panel.
  *
  * Hidratación (ADR-011): el markup NO se bifurca según `useReducedMotion()` —
  * el hook solo decide si se registran manejadores y si corre el temporizador,
@@ -81,7 +73,8 @@ export function PlatformDeck() {
 
   const active = platforms.find((p) => p.id === activeId) ?? platforms[0];
   const activeIndex = platforms.indexOf(active);
-  const screen = screens[active.id];
+  const frame = deviceFrame(active);
+  const Mockup = MOCKUPS[active.id];
 
   // --- Inclinación 3D del dispositivo, atada al puntero sobre el escenario.
   const rx = useSpring(useMotionValue(0), { stiffness: 140, damping: 20 });
@@ -107,7 +100,7 @@ export function PlatformDeck() {
     const host = rootRef.current;
     if (!host) return;
     const observer = new IntersectionObserver(([entry]) => setVisible(entry.isIntersecting), {
-      threshold: 0.35,
+      threshold: 0.3,
     });
     observer.observe(host);
     return () => observer.disconnect();
@@ -159,17 +152,20 @@ export function PlatformDeck() {
       onFocusCapture={() => setPaused(true)}
       onBlurCapture={() => setPaused(false)}
     >
-      {/* Rejilla explícita: en móvil el orden es rail → escenario → panel; en
-          escritorio el escenario ocupa la columna derecha entera. */}
-      <div className="grid gap-8 lg:grid-cols-[minmax(0,1fr)_minmax(0,1.05fr)] lg:gap-x-12 lg:gap-y-10">
+      <div className="grid gap-10 lg:grid-cols-[minmax(0,5fr)_minmax(0,7fr)] lg:gap-x-12 lg:gap-y-10">
         {/* ------------------------------------------------------- rail */}
+        {/* Rejilla 2×2 en móvil: una tira con desplazamiento lateral dejaba
+            tres de los cuatro destinos fuera de pantalla y sin ninguna pista
+            de que existieran, justo en la sección que dice "hacemos las
+            cuatro". Aquí siempre se ven los cuatro. */}
         <div
           role="tablist"
           aria-label="Plataformas que desarrollamos"
+          aria-orientation="vertical"
           onKeyDown={handleKeyDown}
-          className="deck-rail -mx-4 flex snap-x snap-mandatory gap-2 overflow-x-auto px-4 pb-2 lg:col-start-1 lg:row-start-1 lg:mx-0 lg:flex-col lg:gap-1.5 lg:overflow-visible lg:px-0 lg:pb-0"
+          className="deck-rail grid grid-cols-2 gap-2 sm:grid-cols-4 lg:col-start-1 lg:row-start-1 lg:grid-cols-1 lg:gap-1"
         >
-          {platforms.map((platform) => {
+          {platforms.map((platform, index) => {
             const selected = platform.id === active.id;
             const Icon = platform.icon;
             return (
@@ -186,16 +182,17 @@ export function PlatformDeck() {
                 aria-controls={`plataforma-panel-${platform.id}`}
                 tabIndex={selected ? 0 : -1}
                 onClick={() => select(platform.id)}
-                className={cn("deck-tab snap-start", selected && "deck-tab-on")}
+                className={cn("deck-tab", selected && "deck-tab-on")}
               >
                 <span aria-hidden="true" className="deck-tab-mark">
                   <Icon className="size-5" />
                 </span>
-                <span className="min-w-0 text-left">
-                  <span className="font-display block text-sm font-semibold whitespace-nowrap lg:text-base">
-                    {platform.label}
-                  </span>
-                  <span className="text-muted hidden text-xs lg:block">{platform.kicker}</span>
+                <span className="deck-tab-text">
+                  <span className="deck-tab-label">{platform.label}</span>
+                  <span className="deck-tab-kicker">{platform.kicker}</span>
+                </span>
+                <span aria-hidden="true" className="deck-tab-channel">
+                  Canal {pad2(index + 1)}
                 </span>
               </button>
             );
@@ -204,6 +201,16 @@ export function PlatformDeck() {
 
         {/* -------------------------------------------------- escenario */}
         <div className="lg:sticky lg:top-24 lg:col-start-2 lg:row-span-2 lg:row-start-1 lg:self-start">
+          {/* Cota: anuncia la resolución del destino, y el marco de abajo se
+              calcula a partir de ese mismo dato. */}
+          <p aria-hidden="true" className="deck-readout">
+            <span>
+              An {active.readout.w} × Al {active.readout.h}
+            </span>
+            <span className="deck-readout-rule" />
+            <span className="deck-readout-note">{active.readout.note}</span>
+          </p>
+
           <div
             className="deck-stage"
             onPointerMove={reduce ? undefined : handleStagePointer}
@@ -213,64 +220,66 @@ export function PlatformDeck() {
                 nunca desplaza nada de la página (CLS 0). */}
             <div className="deck-stage-field">
               <span aria-hidden="true" className="deck-stage-glow" />
-              <span aria-hidden="true" className="deck-stage-grid" />
+              <span aria-hidden="true" className="deck-stage-floor" />
+
+              {/* Corchetes de encuadre y regla: ornamento funcional, no adorno. */}
+              <span aria-hidden="true" className="deck-bracket deck-bracket-tl" />
+              <span aria-hidden="true" className="deck-bracket deck-bracket-tr" />
+              <span aria-hidden="true" className="deck-bracket deck-bracket-bl" />
+              <span aria-hidden="true" className="deck-bracket deck-bracket-br" />
+              <span aria-hidden="true" className="deck-ruler">
+                {Array.from({ length: RULER_TICKS }, (_, i) => (
+                  <i key={i} className={i % 4 === 0 ? "deck-tick deck-tick-long" : "deck-tick"} />
+                ))}
+              </span>
 
               <m.div
                 aria-hidden="true"
                 className="deck-device"
                 initial={false}
                 animate={{
-                  width: active.frame.width,
-                  height: active.frame.height,
-                  borderRadius: active.frame.radius,
+                  width: frame.width,
+                  height: frame.height,
+                  borderRadius: active.fit.radius,
                 }}
                 transition={
                   reduce
                     ? { duration: 0 }
-                    : { type: "spring", stiffness: 210, damping: 26, mass: 0.9 }
+                    : { type: "spring", stiffness: 190, damping: 25, mass: 0.9 }
                 }
                 style={{ rotateX: rx, rotateY: ry, transformPerspective: 1100 }}
               >
-                {/* Fondo de pantalla y barrido de compilación. Va aparte porque
-                    recorta, y recortar aplana la cadena `preserve-3d`. */}
-                <span className="deck-screen">
-                  <span key={active.id} className="deck-sweep" />
-                </span>
-
-                {/* Las dos capas del mock-up, separadas en profundidad: es lo
-                    que hace que el holograma se despliegue al inclinarlo. */}
-                <svg
-                  key={`${active.id}-base`}
-                  viewBox={`0 0 ${screen.vw} ${screen.vh}`}
-                  className="deck-layer"
-                  style={{ transform: `translateZ(${BASE_Z}px)` }}
-                >
-                  {screen.shapes.slice(0, screen.floatFrom).map((shape, index) => (
-                    <ShapeNode key={index} shape={shape} index={index} />
-                  ))}
-                </svg>
-                <svg
-                  key={`${active.id}-float`}
-                  viewBox={`0 0 ${screen.vw} ${screen.vh}`}
-                  className="deck-layer"
-                  style={{ transform: `translateZ(${FLOAT_Z}px)` }}
-                >
-                  {screen.shapes.slice(screen.floatFrom).map((shape, index) => (
-                    <ShapeNode key={index} shape={shape} index={screen.floatFrom + index} />
-                  ))}
-                </svg>
+                {/* `key` remonta el mock-up para que su entrada escalonada y el
+                    barrido de compilación vuelvan a correr en cada destino. */}
+                <div key={active.id} className="deck-screen">
+                  <Mockup />
+                  <span className="deck-sweep" />
+                </div>
               </m.div>
             </div>
-
-            {/* Consola de compilación: cierra la metáfora del deck. */}
-            <p aria-hidden="true" className="deck-console">
-              <span className="deck-console-dot" />
-              <span className="font-mono text-[0.7rem] tracking-wide">
-                compilando destino · {active.label}
-              </span>
-              <span key={active.id} className="deck-console-bar" />
-            </p>
           </div>
+
+          {/* Consola de compilación. */}
+          <p aria-hidden="true" className="deck-console">
+            <span className="deck-console-states">
+              <span className="deck-state">
+                <i className="deck-state-dot" />
+                compilando
+              </span>
+              <span className="deck-state">
+                <i className="deck-state-dot" />
+                firmado
+              </span>
+              <span className="deck-state">
+                <i className="deck-state-dot" />
+                desplegado
+              </span>
+            </span>
+            <span key={active.id} className="deck-console-bar" />
+            <span className="deck-console-build">
+              Build {pad2(activeIndex + 1)}/{pad2(platforms.length)}
+            </span>
+          </p>
 
           {/* Anuncio discreto para lectores de pantalla: sin esto, los cambios
               del avance automático pasarían inadvertidos. */}
@@ -285,7 +294,7 @@ export function PlatformDeck() {
               <button
                 type="button"
                 onClick={() => setAutoplay((on) => !on)}
-                className="text-muted hover:text-foreground border-border hover:border-accent-cyan/50 inline-flex items-center gap-2 rounded-full border px-3.5 py-2 text-xs transition-colors"
+                className="text-muted hover:text-foreground border-border hover:border-accent-cyan/50 inline-flex items-center gap-2 border px-3.5 py-2 text-xs transition-colors"
               >
                 {autoplay ? (
                   <Pause className="size-3.5" aria-hidden="true" />
@@ -306,7 +315,7 @@ export function PlatformDeck() {
           id={`plataforma-panel-${active.id}`}
           aria-labelledby={`plataforma-tab-${active.id}`}
           tabIndex={0}
-          className="deck-panel rounded-xl lg:col-start-1 lg:row-start-2"
+          className="deck-panel lg:col-start-1 lg:row-start-2"
         >
           <h3
             className="font-display deck-el text-foreground text-xl font-semibold text-balance sm:text-2xl"

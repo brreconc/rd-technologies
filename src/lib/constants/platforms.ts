@@ -2,6 +2,21 @@ import { Globe, Smartphone, TabletSmartphone, MonitorCog, type LucideIcon } from
 
 export type PlatformId = "web" | "android" | "ios" | "escritorio";
 
+/**
+ * Resolución nominal del destino. Es la fuente de verdad de DOS cosas a la vez:
+ * el rótulo de cota que se lee sobre el escenario y la proporción real del
+ * dispositivo. Un test unitario comprueba que no se separen — si alguien cambia
+ * la resolución y no el marco, el instrumento estaría mintiendo.
+ */
+export interface Readout {
+  /** Ancho nominal en px CSS. */
+  w: number;
+  /** Alto nominal en px CSS. */
+  h: number;
+  /** Segunda lectura, específica de la plataforma (densidad, escalado…). */
+  note: string;
+}
+
 export interface Platform {
   id: PlatformId;
   /** Etiqueta corta de la pestaña. */
@@ -25,11 +40,15 @@ export interface Platform {
    * retiñe la escena entera. Todos superan AA sobre `--bg` (#0a0a0a).
    */
   accent: string;
+  readout: Readout;
   /**
    * Geometría del dispositivo dentro del escenario, en PORCENTAJE del mismo:
    * así el morfismo es fluido en cualquier viewport sin números mágicos en px.
+   * El escenario tiene proporción 5/4, y aquí solo se fija la dimensión
+   * dominante: la otra la deduce `deviceFrame()` a partir de `readout`, que es
+   * lo que garantiza que marco y rótulo cuenten lo mismo.
    */
-  frame: { width: string; height: string; radius: number };
+  fit: { axis: "width" | "height"; pct: number; radius: number };
 }
 
 /**
@@ -38,9 +57,6 @@ export interface Platform {
  * El mensaje es deliberadamente breve: el cliente no viene a leer, viene a
  * comprobar de un vistazo que cubrimos su pantalla. El peso lo lleva el deck
  * interactivo (`PlatformDeck`), que compila un mock-up del destino elegido.
- *
- * Los `viewBox` de los mock-ups (ver `DeviceScreens`) están calculados para la
- * proporción de cada `frame`; si se cambia uno hay que cambiar el otro.
  */
 export const platforms = [
   {
@@ -59,7 +75,8 @@ export const platforms = [
     stack: ["Next.js", "React", "TypeScript", "PWA"],
     deliverable: "Despliegue continuo · SEO técnico · Auditoría de seguridad",
     accent: "#00f5ff",
-    frame: { width: "98%", height: "60.7%", radius: 14 },
+    readout: { w: 1440, h: 900, note: "escala 1.0" },
+    fit: { axis: "width", pct: 94, radius: 0 },
   },
   {
     id: "android",
@@ -77,7 +94,8 @@ export const platforms = [
     stack: ["Kotlin", "Jetpack Compose", "React Native", "Flutter"],
     deliverable: "AAB firmado · Ficha en Google Play · Canal de actualizaciones",
     accent: "#4ade80",
-    frame: { width: "47%", height: "94%", radius: 28 },
+    readout: { w: 412, h: 915, note: "420 dpi" },
+    fit: { axis: "height", pct: 94, radius: 26 },
   },
   {
     id: "ios",
@@ -95,7 +113,8 @@ export const platforms = [
     stack: ["Swift", "SwiftUI", "React Native"],
     deliverable: "IPA firmado · Ficha en App Store · TestFlight para tu equipo",
     accent: "#a78bfa",
-    frame: { width: "47%", height: "94%", radius: 40 },
+    readout: { w: 393, h: 852, note: "@3x · 120 Hz" },
+    fit: { axis: "height", pct: 94, radius: 38 },
   },
   {
     id: "escritorio",
@@ -113,9 +132,29 @@ export const platforms = [
     stack: ["Electron", "Tauri", ".NET", "Rust"],
     deliverable: "Instalador firmado · Despliegue por política · Actualización automática",
     accent: "#ffd93d",
-    frame: { width: "96%", height: "61.4%", radius: 10 },
+    readout: { w: 1920, h: 1080, note: "escalado 125%" },
+    fit: { axis: "width", pct: 97, radius: 0 },
   },
 ] satisfies Platform[];
 
 /** Plataforma que se muestra al cargar (y en el HTML del servidor). */
 export const defaultPlatformId: PlatformId = platforms[0].id;
+
+/** Proporción del escenario (ancho / alto). Debe coincidir con `.deck-stage-field`. */
+export const STAGE_RATIO = 5 / 4;
+
+/**
+ * Traduce `fit` + `readout` a los porcentajes que consume el morfismo.
+ *
+ * Solo se declara la dimensión dominante y la otra se DEDUCE de la resolución
+ * nominal, así que el dispositivo siempre tiene la proporción que anuncia su
+ * rótulo. Es el detalle que convierte la transformación en algo medido en vez
+ * de decorativo, y hace imposible que marco y cota se desincronicen.
+ */
+export function deviceFrame(platform: Platform): { width: string; height: string } {
+  const { axis, pct } = platform.fit;
+  const aspect = platform.readout.w / platform.readout.h;
+  return axis === "width"
+    ? { width: `${pct}%`, height: `${(pct * STAGE_RATIO) / aspect}%` }
+    : { width: `${(pct * aspect) / STAGE_RATIO}%`, height: `${pct}%` };
+}

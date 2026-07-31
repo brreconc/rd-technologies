@@ -90,6 +90,21 @@ activo. Los valores viven en [`lib/constants/platforms.ts`](../../src/lib/consta
 Todos superan AA con holgura. Si se añade un destino nuevo, su acento debe validarse igual: se usa
 como **texto** en la línea "Entregable:".
 
+#### `--deck-dim`: un único gris atenuado
+
+Dentro del deck, todo el texto secundario (kickers, números de canal, chips, cotas, etiquetas del
+mock-up) usa `--deck-dim: #8a8a8a` y **nunca** opacidades sobre blanco. El motivo es práctico: con
+`color: rgb(255 255 255 / 0.3)` es trivial colar texto por debajo de AA sin darse cuenta, y el
+diseño de partida lo hacía en una docena de sitios. Con un token medido (≥5:1 sobre `#0a0a0a`,
+`#141414` y `#1a1a1a`) el suelo de contraste está garantizado por construcción.
+
+#### Radio 0 en el deck
+
+El deck es la única zona del sitio con esquinas rectas — salvo los teléfonos del escenario y los
+puntos de estado. Es deliberado: se lee como un instrumento dentro de una página de tarjetas
+redondeadas. Si se toca, hay que tocarlo entero o no tocarlo.
+Ver [ADR-014](../01-architecture/decisions/ADR-014-instrument-deck.md).
+
 Ver [ADR-004](../01-architecture/decisions/ADR-004-tailwind-v4-tokens.md) (tokens en CSS con
 Tailwind v4) y [ADR-006](../01-architecture/decisions/ADR-006-fase1-defaults.md) (decisión original
 de incluir tema claro, superada por ADR-012).

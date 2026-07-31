@@ -44,6 +44,7 @@ El objetivo de **< 200 KB** (§11) está incumplido. Trazabilidad de la medició
 | Fase 8.1 (`ef94c15`) | ~328 KB | ~284 KB |
 | Fase 9               | ~332 KB | ~288 KB |
 | Fase 10              | ~335 KB | ~290 KB |
+| Fase 11              | ~342 KB | ~278 KB |
 
 El salto lo produjo la **Fase 8**, cuando las tarjetas de sección pasaron de Server Components
 (`Card`) a Client Components (`SpotlightCard`) y se añadieron formularios y menú interactivos. La
@@ -52,7 +53,13 @@ Fase 9 aportó ~4 KB.
 **La Fase 10 aporta ~2 KB netos**, y eso incluye una sección entera nueva. El deck multiplataforma
 casi se paga solo porque en la misma fase se retiró `next-themes` con el tema claro
 ([ADR-012](../01-architecture/decisions/ADR-012-single-dark-theme.md)). El deck no trajo ninguna
-dependencia: son SVG estáticos y CSS ([ADR-013](../01-architecture/decisions/ADR-013-platform-deck.md)).
+dependencia.
+
+**La Fase 11 RESTA ~12 KB brotli** pese a rehacer los cuatro mock-ups con mucho más detalle
+([ADR-014](../01-architecture/decisions/ADR-014-instrument-deck.md)). Dos motivos: se retiraron los
+arrays de figuras SVG (`screens.ts`), y los iconos del interior del mock-up pasaron de
+`lucide-react` a trazos dibujados a mano en `Glyph.tsx` — a 6–10 px ninguno era identificable, así
+que se pagaba bundle por pintar manchas. El CSS sube a 12,8 KB brotli, que sigue siendo ruido.
 
 **Importante:** el desvío es de _bytes_, no de experiencia medida — Lighthouse sigue en
 **Performance 99** con **LCP 0,8 s · CLS 0 · TBT 0 ms**, porque casi todo ese JS no bloquea el
@@ -78,13 +85,25 @@ build indexable):
 | Best Practices | 96     | 96     | **96**      |
 | SEO            | 100    | 100    | **100**     |
 
-Métricas de la Fase 10: **LCP 0,9 s · CLS 0 · TBT 0 ms · FCP 0,3 s · Speed Index 0,6 s**.
+Métricas de la Fase 11: **LCP 0,8–0,9 s · CLS 0 · TBT 0 ms**.
 
 > Ni la escenografía de la Fase 9 (canvas del hero, revelados por scroll, línea de tiempo) ni el
-> deck de la Fase 10 movieron ninguna métrica. El canvas se pinta después del texto y se pausa fuera
-> de pantalla; el deck no usa canvas ni librerías, su escenario tiene **proporción fija** (por eso
-> el morfismo del dispositivo mantiene **CLS 0**) y su recorrido automático **no existe fuera de
-> pantalla**: un `IntersectionObserver` lo apaga y no deja ni un temporizador vivo.
+> deck de las Fases 10–11 movieron ninguna métrica. El canvas se pinta después del texto y se pausa
+> fuera de pantalla; el deck no usa canvas ni librerías, su escenario tiene **proporción fija** (por
+> eso el morfismo del dispositivo mantiene **CLS 0**) y su recorrido automático **no existe fuera de
+> pantalla**: un `IntersectionObserver` lo apaga y no deja ni un temporizador vivo. Los mock-ups en
+> DOM de la Fase 11 son más nodos que los SVG anteriores (~120 en el de escritorio, el más denso),
+> pero solo hay **uno montado a la vez** y el TBT sigue en 0 ms.
+
+### Un CLS intermitente que NO es del deck
+
+Aproximadamente uno de cada tres pases de Lighthouse marca **CLS 0,372** en lugar de 0. Se investigó
+y **es previo a la Fase 11**: el desplazamiento lo produce el `<footer>`, que se pinta alto en la
+página antes de que llegue el contenido de `<main>` en streaming y luego baja de golpe. Se comprobó
+quitando la sección `Platforms` del árbol y reconstruyendo: el valor sale **idéntico**, 0,3682.
+
+Queda como deuda anotada, con el sospechoso ya identificado: `body` es un flex vertical con
+`min-h-dvh`, y el footer no tiene reserva de espacio mientras `main` está vacío.
 
 ### Nota sobre las animaciones ligadas al scroll
 

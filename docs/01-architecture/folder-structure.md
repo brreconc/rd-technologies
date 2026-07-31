@@ -14,6 +14,8 @@ src/
 ├── components/
 │   ├── ui/                 # Primitivos reutilizables (button, card, input…) — Fase 1
 │   ├── sections/           # Secciones de la landing (Hero, Services, Platforms, FAQ…)
+│   │   └── Platforms/
+│   │       └── mockups/    # Una interfaz simulada por destino + Glyph — Fase 11 (ADR-014)
 │   ├── shared/             # Header, Footer, Navegación, Logo — Fase 1
 │   ├── animations/         # Wrappers de animación (FadeIn, Reveal…) — Fase 3
 │   └── forms/              # ContactForm, NewsletterForm — Fase 4
