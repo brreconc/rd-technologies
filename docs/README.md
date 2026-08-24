@@ -110,6 +110,17 @@
   usaba un umbral por fracción del elemento, inalcanzable en cuanto el deck creció más que la
   ventana. **+1 KB brotli.** Verificada con 70 unit + 28 E2E y Lighthouse 99/100/96/100 con **CLS 0
   en las tres pasadas**. **Completada.**
+- ✅ **Fase 13 — El proceso se cuenta solo:**
+  ([ADR-016](./01-architecture/decisions/ADR-016-horizontal-process-timeline.md)). `#proceso` pasa de
+  un recorrido VERTICAL atado al scroll —casi tres pantallas para decir seis frases, y que solo se
+  contaba si el visitante bajaba— a un **raíl horizontal que se ejecuta solo**. Un cometa vuela de un
+  hito al siguiente y cada llegada **detona**: floración de color, dos ondas de choque y diez radios
+  de luz. Los seis pasos tienen acento propio y **recorren el círculo cromático**, así que el raíl
+  acabado se lee como un viaje sin leer una palabra. Toda la animación es CSS: React solo guarda el
+  índice activo, y **se retira Framer Motion de la sección**. Las seis tarjetas comparten celda de
+  rejilla → **CLS 0** al cambiar de paso, con E2E que lo mide. Los seis pasos siguen completos en el
+  DOM en una `<ol>`: la animación nunca es la única forma de llegar al texto. **+1 KB de JS y +1 KB
+  de CSS.** Verificada con 86 unit + 36 E2E y Lighthouse 99/100/96/100. **Completada.**
 
 ## Deuda técnica abierta
 

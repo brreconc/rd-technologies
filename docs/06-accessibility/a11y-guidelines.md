@@ -33,9 +33,17 @@
   exentos del contraste (WCAG 1.4.3). El escaneo axe los excluye a propósito; el contenido que sí
   leen las ayudas técnicas se audita al completo. Ver [08-testing](../08-testing/testing-strategy.md).
 
-## Contenido que se mueve solo — WCAG 2.2.2 (Fase 10 — ADR-013)
+## Contenido que se mueve solo — WCAG 2.2.2 (Fases 10 y 13)
 
-El **deck multiplataforma** recorre sus cinco destinos por su cuenta. Eso es contenido en
+Hay **dos** piezas que se mueven solas: el **deck multiplataforma** (ADR-013) recorre sus cinco
+destinos y el **recorrido del proceso** (ADR-016) sus seis pasos.
+
+> **Sus controles se llaman distinto a propósito.** Antes ambos decían "Detener el recorrido…", y
+> dos botones con el mismo nombre accesible son indistinguibles para quien navega por lista de
+> controles. Ahora son "Detener el recorrido **del proceso**" y "Detener el recorrido **de
+> plataformas**". Al añadir cualquier otro control repetido, nómbralo igual de explícito.
+
+El deck recorre sus cinco destinos por su cuenta. Eso es contenido en
 movimiento que arranca automáticamente y dura más de cinco segundos, así que el criterio 2.2.2
 (_Pausar, detener, ocultar_) obliga a que el usuario pueda pararlo. Se cubre por triplicado:
 

@@ -23,15 +23,15 @@ Requisito §11.
   por lotes, DPR ≤ 2, nº de nodos por área, pausa fuera del viewport y degradación automática.
 - ✅ **Lighthouse CI** con presupuestos que fallan la build ([`lighthouserc.json`](../../lighthouserc.json), Fase 6).
 
-## Medición actual (Fase 12, ruta `/`)
+## Medición actual (Fase 13, ruta `/`)
 
 Medido sobre `pnpm start`, sumando los recursos reales de la ruta (18 ficheros):
 
 | Compresión                       | First Load JS | Objetivo    |
 | -------------------------------- | ------------- | ----------- |
-| **Brotli** (lo que sirve un CDN) | **~258 KB**   | < 200 KB ❌ |
+| **Brotli** (lo que sirve un CDN) | **~259 KB**   | < 200 KB ❌ |
 
-CSS: ~13 KB brotli.
+CSS: ~14 KB brotli.
 
 > Next 16 + Turbopack no imprime la tabla de tamaños en el build; se mide sirviendo la ruta.
 
@@ -59,6 +59,7 @@ El objetivo de **< 200 KB** (§11) está incumplido. Trazabilidad de la medició
 | Fase 11              | ~342 KB | ~278 KB |
 | Fase 11 (re-medida)  | —       | ~257 KB |
 | Fase 12              | —       | ~258 KB |
+| Fase 13              | —       | ~259 KB |
 
 El salto lo produjo la **Fase 8**, cuando las tarjetas de sección pasaron de Server Components
 (`Card`) a Client Components (`SpotlightCard`) y se añadieron formularios y menú interactivos. La
@@ -68,6 +69,12 @@ Fase 9 aportó ~4 KB.
 casi se paga solo porque en la misma fase se retiró `next-themes` con el tema claro
 ([ADR-012](../01-architecture/decisions/ADR-012-single-dark-theme.md)). El deck no trajo ninguna
 dependencia.
+
+**La Fase 13 cuesta +1 KB de JS y +1 KB de CSS.** El recorrido del proceso
+([ADR-016](../01-architecture/decisions/ADR-016-horizontal-process-timeline.md)) **retira Framer
+Motion de esa sección** —ya no usa `useScroll`/`useSpring`/`useTransform`— y pasa toda la animación a
+CSS. No baja el bundle porque Framer sigue haciendo falta en otras secciones, pero sí quita trabajo
+del hilo principal en cada fotograma de scroll.
 
 **La Fase 12 cuesta +1 KB brotli** (medido contra `d018fb1` con el método de arriba), pese a añadir
 un destino entero con su mock-up. Lighthouse no se movió: **99 · 100 · 96 · 100**, LCP 0,9 s,

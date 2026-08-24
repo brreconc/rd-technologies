@@ -79,7 +79,7 @@ Contenido tipado en `src/lib/constants` (no hardcodeado). Helpers: `SectionHeadi
 | `Services`        | `#servicios`          | `constants/services`                                  |
 | `Platforms`       | `#plataformas`        | `constants/platforms` (deck interactivo, Fases 10–11) |
 | `Differentiators` | `#por-que-elegirnos`  | `constants/differentiators`                           |
-| `Process`         | `#proceso`            | `constants/process` (línea de tiempo con scroll)      |
+| `Process`         | `#proceso`            | `constants/process` (recorrido horizontal, Fase 13)   |
 | `UseCases`        | `#casos-de-uso`       | `constants/use-cases`                                 |
 | `Testimonials`    | `#testimonios`        | `constants/testimonials` (ejemplos)                   |
 | `FAQ`             | `#faq`                | `constants/faq` (Accordion)                           |
@@ -87,6 +87,33 @@ Contenido tipado en `src/lib/constants` (no hardcodeado). Helpers: `SectionHeadi
 
 > Todas las secciones usan HTML semántico (`section` + `aria-labelledby`, listas, headings
 > jerárquicos) y animaciones de entrada (ver abajo).
+
+### Recorrido del proceso (`sections/Process`) — Fase 13
+
+Seis pasos en un raíl **horizontal que se cuenta solo**: un cometa vuela de un hito al siguiente y
+cada llegada detona en el color de ese paso. Ver
+[ADR-016](../01-architecture/decisions/ADR-016-horizontal-process-timeline.md).
+
+| Fichero        | Qué es                                                                                                               |
+| -------------- | -------------------------------------------------------------------------------------------------------------------- |
+| `index.tsx`    | Server Component: encabezado y marco.                                                                                |
+| `Timeline.tsx` | Cliente. El ÚNICO estado es el índice del hito activo; el resto lo resuelve el CSS desde `data-state`/`data-filled`. |
+
+**Tres invariantes que hay que respetar al tocar esto:**
+
+1. **Las seis tarjetas comparten celda de rejilla** (`grid-area: 1 / 1`). Es lo que hace que el alto
+   lo fije la más larga y que cambiar de paso no mueva nada (**CLS 0**). Si alguien las apila o las
+   posiciona en absoluto, vuelve el desplazamiento.
+2. **Los seis pasos están SIEMPRE en el DOM**, en una `<ol>` y en orden. La animación es una capa
+   visual, nunca la única forma de llegar al texto. Hay E2E que lo vigila.
+3. **El acento de cada paso se usa como color de TEXTO**, así que tiene que pasar AA sobre `--bg`.
+   `process.test.ts` calcula el contraste y falla si no.
+
+**Cómo añadir o reordenar un paso:** toca solo
+[`lib/constants/process.ts`](../../src/lib/constants/process.ts) — título, descripción, icono y
+acento. El raíl saca sus columnas de `--steps`, que el componente fija desde ese mismo array, así que
+no hay que tocar el CSS. Ejecuta `pnpm test` (el contraste del acento nuevo se comprueba solo) y mira
+el raíl a 320px: los hitos son círculos con un número y a partir de siete empiezan a apretarse.
 
 ### Deck multiplataforma (`sections/Platforms`) — Fases 10 a 12
 

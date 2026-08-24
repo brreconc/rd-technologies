@@ -92,7 +92,7 @@ test.describe("Deck multiplataforma", () => {
     });
 
     // El control lo detiene, y a partir de ahí el destino ya no cambia solo.
-    const detener = page.getByRole("button", { name: /Detener el recorrido/i });
+    const detener = page.getByRole("button", { name: /Detener el recorrido de plataformas/i });
     await expect(detener).toBeVisible();
     await detener.click();
 
@@ -210,7 +210,7 @@ test.describe("Deck con movimiento reducido", () => {
 
     // El primer destino queda fijo: sin movimiento no hay recorrido que parar,
     // así que el control ni siquiera se ofrece.
-    await expect(page.getByRole("button", { name: /recorrido automático/i })).toHaveCount(0);
+    await expect(page.getByRole("button", { name: /recorrido de plataformas/i })).toHaveCount(0);
     const activaAntes = await page
       .getByRole("tab")
       .and(page.locator('[aria-selected="true"]'))

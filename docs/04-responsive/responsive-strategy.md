@@ -81,6 +81,24 @@ El **bisel** de los destinos de esquina redonda también va en unidades de conte
 la esquina se comía la barra de estado y la navegación inferior. Ver
 [ADR-015](../01-architecture/decisions/ADR-015-crisp-deck-and-ecommerce.md).
 
+## El recorrido del proceso en cada tamaño
+
+El raíl es una rejilla de **seis columnas iguales desde 320px**, y cabe porque los hitos son números
+en un círculo, no rótulos. Lo que cambia con el ancho es el texto:
+
+| Tamaño  | Qué se ve                                                                  |
+| ------- | -------------------------------------------------------------------------- |
+| < `sm`  | Seis hitos numerados; el título del paso vive solo en la tarjeta de abajo. |
+| ≥ `sm`  | Aparece además el título bajo cada hito.                                   |
+| ≥ `2xl` | El raíl deja de estirarse (`max-width: 62rem`) y se centra.                |
+
+El tope de ancho no es estético: sin él, a 2560px los hitos quedan tan separados que dejan de leerse
+como una secuencia y el recorrido pierde el sentido.
+
+El tamaño del hito es `clamp(2.15rem, 7.2vw, 3.25rem)`, así que el raíl escala con el viewport sin un
+solo breakpoint. `e2e/process.spec.ts` recorre los seis pasos a 320px comprobando que **ninguno
+provoca scroll horizontal**.
+
 ## Pendiente por fase
 
 - ~~**Container Queries** para componentes que dependen de su contenedor~~ — hecho en la Fase 11

@@ -110,6 +110,13 @@ En los destinos con radio > 0 ese radio **no es solo estético**: activa el bise
 estado y la navegación inferior del mock-up. Ver
 [ADR-015](../01-architecture/decisions/ADR-015-crisp-deck-and-ecommerce.md).
 
+Acentos por paso del proceso (`lib/constants/process.ts`): `#00f5ff` → `#a78bfa` → `#ff5f9e` →
+`#fb923c` → `#ffd93d` → `#4ade80`. Recorren el círculo cromático a propósito: cuando el recorrido
+termina, el raíl queda pintado como un espectro y la sección se lee como un viaje sin leer una
+palabra. Los seis pasan AA sobre `#0a0a0a` porque se usan como color de **texto**, y hay un test
+unitario que lo calcula. Ver
+[ADR-016](../01-architecture/decisions/ADR-016-horizontal-process-timeline.md).
+
 Acentos por destino: web `#00f5ff` · e-commerce `#ff5f9e` · android `#4ade80` · ios `#a78bfa` ·
 escritorio `#ffd93d`. Los cinco superan AA sobre `#0a0a0a`, porque se usan como color de texto.
 

@@ -109,10 +109,35 @@ instrumento estaría mintiendo. Se comprueba destino por destino:
 8. **Movimiento reducido:** no hay recorrido automático, el botón no se ofrece, el contenido está
    completo y **no hay ni un error de consola** (guardia contra desajustes de hidratación).
 
+### `process.test.ts` y `process.spec.ts` — el recorrido del proceso (Fase 13)
+
+El acento de cada paso se usa como color de **texto**, así que `process.test.ts` calcula el contraste
+real contra `#0a0a0a` y exige AA. Es la clase de fallo que a simple vista sobre negro no se ve: un
+color bonito pero flojo pasa desapercibido hasta que alguien lo audita.
+
+También comprueba que no haya dos pasos consecutivos del mismo color —sin degradado, el tramo entre
+ellos se leería como una pausa— y que una vuelta completa dure menos de medio minuto: si se alargara,
+quien llega al final de la página nunca habría visto el proceso entero.
+
+En E2E ([`process.spec.ts`](../../e2e/process.spec.ts)):
+
+1. **Los seis pasos están completos en el DOM desde el primer render** — se busca el título de los
+   seis y la descripción del último. Es EL contrato de la sección: la animación es una capa visual,
+   nunca la única forma de llegar al texto.
+2. **El recorrido avanza solo Y se puede detener** (WCAG 2.2.2), con la ventana más baja que la
+   sección.
+3. **Elegir un hito a mano toma el control y no se lo devuelve.**
+4. **Cambiar de paso no mueve nada de sitio** — se compara la caja del panel antes y después. Es la
+   guardia de CLS 0: las seis tarjetas comparten celda de rejilla justamente para eso.
+5. **Teclado:** los hitos se alcanzan con el tabulador y se activan con Intro.
+6. **Ningún paso desborda a 320px**, recorriendo los seis.
+7. **Movimiento reducido:** no hay recorrido, el control no se ofrece, el contenido está completo y no
+   hay ni un error de consola.
+
 ## Resultados (última corrida local, Chromium)
 
-- **Unit (Vitest):** 70 tests en verde (incluye el motor de la malla neuronal y la geometría del deck).
-- **E2E + responsive + a11y (Playwright):** 28 tests en verde.
+- **Unit (Vitest):** 86 tests en verde (incluye el motor de la malla neuronal y la geometría del deck).
+- **E2E + responsive + a11y (Playwright):** 36 tests en verde.
 - **Lighthouse (build indexable):** Performance **99**, Accessibility **100**,
   Best Practices **96**, SEO **100**; LCP 0,9 s · CLS 0 · TBT 0 ms.
 - **`pnpm audit --prod`:** sin vulnerabilidades.

@@ -359,7 +359,12 @@ export function PlatformDeck() {
                 ) : (
                   <Play className="size-3.5" aria-hidden="true" />
                 )}
-                {autoplay ? "Detener el recorrido automático" : "Reanudar el recorrido automático"}
+                {/* Nombra SU recorrido: la sección "Proceso" tiene otro control
+                    igual, y dos botones con el mismo nombre accesible son
+                    indistinguibles al navegar por lista de controles. */}
+                {autoplay
+                  ? "Detener el recorrido de plataformas"
+                  : "Reanudar el recorrido de plataformas"}
               </button>
             </div>
           )}
