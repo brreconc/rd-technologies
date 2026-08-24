@@ -5,11 +5,16 @@
 - **Fase:** 10
 - **Continúa:** [ADR-010](./ADR-010-cinematic-motion-system.md) y [ADR-011](./ADR-011-secure-system-scenography.md)
 
-> ⚠️ **Vigencia.** El concepto del deck (§1), el sistema de movimiento v4 (§3) y todo lo de
-> accesibilidad, rendimiento e hidratación siguen en vigor. Lo que ya **no** describe la realidad es
-> la **§2, "Los mock-ups son DATOS, no JSX"**: en la Fase 11 los mock-ups SVG se sustituyeron por
-> componentes de interfaz real y `screens.ts`/`screens.test.ts` se retiraron. El motivo y el
-> contrato que ocupa su lugar están en [ADR-014](./ADR-014-instrument-deck.md).
+> ⚠️ **Vigencia.** El concepto del deck (§1) y todo lo de accesibilidad, rendimiento e hidratación
+> siguen en vigor. Han quedado atrás dos partes:
+>
+> - **§2, "Los mock-ups son DATOS, no JSX"** — en la Fase 11 los mock-ups SVG se sustituyeron por
+>   componentes de interfaz real y `screens.ts`/`screens.test.ts` se retiraron. Ver
+>   [ADR-014](./ADR-014-instrument-deck.md).
+> - **§3, la inclinación 3D del dispositivo con el puntero** — en la Fase 12 se retiró: una capa con
+>   transformación 3D la rasteriza Chromium una sola vez y la remuestrea, y eso desenfocaba el texto
+>   pequeño del mock-up justo al acercarse a mirarlo. La sustituyen el paralaje del suelo y la mira
+>   de inspección. Ver [ADR-015](./ADR-015-crisp-deck-and-ecommerce.md).
 
 ## Contexto
 

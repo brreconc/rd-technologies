@@ -1,6 +1,13 @@
-import { Globe, Smartphone, TabletSmartphone, MonitorCog, type LucideIcon } from "lucide-react";
+import {
+  Globe,
+  ShoppingBag,
+  Smartphone,
+  TabletSmartphone,
+  MonitorCog,
+  type LucideIcon,
+} from "lucide-react";
 
-export type PlatformId = "web" | "android" | "ios" | "escritorio";
+export type PlatformId = "web" | "ecommerce" | "android" | "ios" | "escritorio";
 
 /**
  * Resolución nominal del destino. Es la fuente de verdad de DOS cosas a la vez:
@@ -52,7 +59,7 @@ export interface Platform {
 }
 
 /**
- * Sección "Plataformas" (§8) — los cuatro destinos que sabemos construir.
+ * Sección "Plataformas" (§8) — los cinco destinos que sabemos construir.
  *
  * El mensaje es deliberadamente breve: el cliente no viene a leer, viene a
  * comprobar de un vistazo que cubrimos su pantalla. El peso lo lleva el deck
@@ -77,6 +84,25 @@ export const platforms = [
     accent: "#00f5ff",
     readout: { w: 1440, h: 900, note: "escala 1.0" },
     fit: { axis: "width", pct: 94, radius: 0 },
+  },
+  {
+    id: "ecommerce",
+    label: "E-commerce",
+    kicker: "Tiendas online y pagos",
+    icon: ShoppingBag,
+    headline: "Tiendas online que venden",
+    description:
+      "Catálogo, carrito y pasarela sobre una base rápida y segura, con el panel desde el que gestionas los pedidos cada día.",
+    capabilities: [
+      "Catálogo, carrito y pago pensados para convertir en el móvil",
+      "Cobros con tarjeta y pasarelas locales sin almacenar datos de tarjeta",
+      "Panel de pedidos, stock y facturación conectado a tu operación",
+    ],
+    stack: ["Next.js", "Stripe", "Shopify", "WooCommerce"],
+    deliverable: "Catálogo migrado · Cobros en producción · Panel de pedidos",
+    accent: "#ff5f9e",
+    readout: { w: 834, h: 1194, note: "@2x · táctil" },
+    fit: { axis: "height", pct: 94, radius: 20 },
   },
   {
     id: "android",

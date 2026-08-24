@@ -35,7 +35,7 @@
 
 ## Contenido que se mueve solo — WCAG 2.2.2 (Fase 10 — ADR-013)
 
-El **deck multiplataforma** recorre sus cuatro destinos por su cuenta. Eso es contenido en
+El **deck multiplataforma** recorre sus cinco destinos por su cuenta. Eso es contenido en
 movimiento que arranca automáticamente y dura más de cinco segundos, así que el criterio 2.2.2
 (_Pausar, detener, ocultar_) obliga a que el usuario pueda pararlo. Se cubre por triplicado:
 
@@ -59,7 +59,7 @@ Si no puedes ofrecerlo, no la pongas en marcha sola.
   vertical en escritorio, más `Inicio` y `Fin`. La selección mueve también el foco.
 - **Ninguna pulsación se descarta.** Sin candados temporales ni banderas de "animando": si el
   usuario pulsa cinco veces seguidas, se atienden las cinco. Suena obvio, pero el diseño del que
-  partió la Fase 11 traía un bloqueo de 700 ms que hacía inalcanzables dos de los cuatro destinos
+  partió la Fase 11 traía un bloqueo de 700 ms que hacía inalcanzables dos de los destinos
   desde el teclado. Hay un E2E que lo vigila.
 - El mock-up del dispositivo es decorativo (`aria-hidden`): toda la información está en el texto del
   panel. Una región `aria-live="polite"` anuncia el destino en pantalla, porque si no los cambios

@@ -9,19 +9,28 @@ import { test, expect, type Page } from "@playwright/test";
  * degradación limpia con `prefers-reduced-motion`.
  */
 
-/** Deja el deck a la vista y con la escena asentada. */
+/**
+ * Deja el deck a la vista y con la escena asentada.
+ *
+ * El orden importa: primero se espera a que el rail exista y sea visible —es
+ * decir, a que React haya hidratado— y SOLO DESPUÉS se hace scroll. Al revés,
+ * `scrollIntoViewIfNeeded` corría contra la hidratación y fallaba de vez en
+ * cuando con "Element is not attached to the DOM".
+ */
 async function abrirDeck(page: Page) {
   await page.goto("/#plataformas");
-  await page.locator("#plataformas").scrollIntoViewIfNeeded();
   await expect(page.getByRole("tab").first()).toBeVisible();
+  await page.locator("#plataformas").scrollIntoViewIfNeeded();
+  // El observador del recorrido automático necesita un fotograma para resolver.
+  await page.waitForTimeout(300);
 }
 
 test.describe("Deck multiplataforma", () => {
-  test("expone cuatro destinos con un único seleccionado", async ({ page }) => {
+  test("expone cinco destinos con un único seleccionado", async ({ page }) => {
     await abrirDeck(page);
 
     const tabs = page.getByRole("tab");
-    await expect(tabs).toHaveCount(4);
+    await expect(tabs).toHaveCount(5);
     await expect(tabs.filter({ has: page.locator(':scope[aria-selected="true"]') })).toHaveCount(1);
 
     // El panel visible es el que declara la pestaña seleccionada.
@@ -70,6 +79,11 @@ test.describe("Deck multiplataforma", () => {
   });
 
   test("el recorrido automático avanza solo y se puede detener (WCAG 2.2.2)", async ({ page }) => {
+    // Ventana deliberadamente MÁS BAJA que el deck. Regresión: el observador
+    // pedía que se viera el 30% del elemento, y esa fracción tiene como techo
+    // `alturaVentana / alturaDeck`; al crecer el deck se volvió inalcanzable y
+    // el recorrido no arrancaba nunca. Ahora la condición es de posición.
+    await page.setViewportSize({ width: 1280, height: 640 });
     await abrirDeck(page);
 
     // Sin tocar nada, el deck pasa al siguiente destino.
@@ -104,6 +118,10 @@ test.describe("Deck multiplataforma", () => {
     await page.getByRole("tab", { name: /^Web/ }).click();
     await expect(cota).toContainText("1440");
 
+    await page.getByRole("tab", { name: /E-commerce/ }).click();
+    await expect(cota).toContainText("834");
+    await expect(page.locator(".mk-ec")).toBeVisible();
+
     await page.getByRole("tab", { name: /iOS/ }).click();
     await expect(cota).toContainText("393");
     await expect(page.locator(".mk-ios")).toBeVisible();
@@ -115,14 +133,14 @@ test.describe("Deck multiplataforma", () => {
     await expect(page.locator(".mk-desk")).toBeVisible();
   });
 
-  test("los cuatro destinos se ven a la vez en móvil", async ({ page }) => {
-    // Regresión: con el rail como tira deslizable, tres de los cuatro destinos
+  test("los cinco destinos se ven a la vez en móvil", async ({ page }) => {
+    // Regresión: con el rail como tira deslizable, casi todos los destinos
     // quedaban fuera de pantalla sin ninguna pista de que existieran.
     await page.setViewportSize({ width: 375, height: 800 });
     await abrirDeck(page);
 
     const ancho = page.viewportSize()!.width;
-    for (const nombre of [/^Web/, /Android/, /iOS/, /Escritorio/]) {
+    for (const nombre of [/^Web/, /E-commerce/, /Android/, /iOS/, /Escritorio/]) {
       const caja = await page.getByRole("tab", { name: nombre }).boundingBox();
       expect(caja, `destino ${nombre}`).not.toBeNull();
       expect(caja!.x).toBeGreaterThanOrEqual(0);
@@ -130,11 +148,46 @@ test.describe("Deck multiplataforma", () => {
     }
   });
 
+  test("el dispositivo no se transforma con el puntero encima", async ({ page }) => {
+    // Regresión de la nitidez (ADR-015): una capa con transformación 3D la
+    // rasteriza Chromium una vez y la remuestrea, y el texto de 6–10 px del
+    // mock-up se volvía una mancha justo al acercarse a mirarlo. La respuesta al
+    // puntero vive ahora en el suelo y en la mira; la pantalla no se toca.
+    await abrirDeck(page);
+
+    const escenario = page.locator(".deck-stage");
+    const caja = await escenario.boundingBox();
+    await page.mouse.move(caja!.x + caja!.width * 0.85, caja!.y + caja!.height * 0.2);
+    await page.waitForTimeout(600);
+
+    const transform = await page
+      .locator(".deck-device")
+      .evaluate((el) => getComputedStyle(el).transform);
+    expect(transform === "none" || transform === "matrix(1, 0, 0, 1, 0, 0)").toBe(true);
+
+    // Y la mira sí responde: es lo que sustituyó a la inclinación.
+    await expect(page.locator(".deck-cross-read")).not.toBeEmpty();
+  });
+
+  test("el nombre de ningún destino se recorta", async ({ page }) => {
+    // El rótulo de la pestaña es la palabra que la sección existe para decir.
+    // A dos columnas, "E-commerce" no cabía en un teléfono y salía "E-comme…";
+    // por eso el rail baja a una sola columna por debajo de `sm`.
+    for (const ancho of [320, 375, 768, 1024]) {
+      await page.setViewportSize({ width: ancho, height: 900 });
+      await abrirDeck(page);
+      const recortados = await page.$$eval(".deck-tab-label", (els) =>
+        els.filter((el) => el.scrollWidth > el.clientWidth + 1).map((el) => el.textContent),
+      );
+      expect(recortados, `a ${ancho}px`).toEqual([]);
+    }
+  });
+
   test("ningún destino desborda a 320px", async ({ page }) => {
     await page.setViewportSize({ width: 320, height: 720 });
     await abrirDeck(page);
 
-    for (const nombre of [/Web/, /Android/, /iOS/, /Escritorio/]) {
+    for (const nombre of [/^Web/, /E-commerce/, /Android/, /iOS/, /Escritorio/]) {
       await page.getByRole("tab", { name: nombre }).click();
       const desbordamiento = await page.evaluate(
         () => document.documentElement.scrollWidth - document.documentElement.clientWidth,

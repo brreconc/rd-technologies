@@ -15,8 +15,12 @@ import { MOCKUPS } from "./mockups";
 
 /** Milisegundos que permanece cada destino cuando el deck avanza solo. */
 const AUTOPLAY_MS = 7000;
-/** Inclinación 3D máxima del dispositivo, en grados. */
-const TILT = 9;
+/**
+ * Desplazamiento máximo del suelo en perspectiva, en px, cuando el puntero
+ * recorre el escenario. Es lo que ha sustituido a la inclinación 3D del
+ * dispositivo: la profundidad la ponen las capas de gráfico, no la pantalla.
+ */
+const PARALLAX = 22;
 /** Marcas de la regla vertical del escenario. */
 const RULER_TICKS = 9;
 
@@ -70,15 +74,26 @@ export function PlatformDeck() {
 
   const rootRef = React.useRef<HTMLDivElement>(null);
   const tabsRef = React.useRef(new Map<PlatformId, HTMLButtonElement>());
+  const probeRef = React.useRef<HTMLSpanElement>(null);
 
   const active = platforms.find((p) => p.id === activeId) ?? platforms[0];
   const activeIndex = platforms.indexOf(active);
   const frame = deviceFrame(active);
   const Mockup = MOCKUPS[active.id];
 
-  // --- Inclinación 3D del dispositivo, atada al puntero sobre el escenario.
-  const rx = useSpring(useMotionValue(0), { stiffness: 140, damping: 20 });
-  const ry = useSpring(useMotionValue(0), { stiffness: 140, damping: 20 });
+  /**
+   * Paralaje del suelo en perspectiva, atado al puntero.
+   *
+   * NO se inclina el dispositivo. Chromium rasteriza UNA sola vez toda capa con
+   * rotación 3D y luego la remuestrea en la GPU, así que un `rotateX/rotateY`
+   * sobre el marco convertía el texto de 6–10 px del mock-up en una mancha justo
+   * cuando el visitante se acercaba a mirarlo. La pantalla se queda sin ninguna
+   * transformación —nítida al píxel siempre— y la profundidad la ponen el suelo,
+   * el resplandor y la mira, que son degradados y filetes donde el remuestreo no
+   * se nota. Ver ADR-015.
+   */
+  const fx = useSpring(useMotionValue(0), { stiffness: 120, damping: 22 });
+  const fy = useSpring(useMotionValue(0), { stiffness: 120, damping: 22 });
 
   const handleStagePointer = (event: React.PointerEvent<HTMLDivElement>) => {
     const rect = event.currentTarget.getBoundingClientRect();
@@ -86,21 +101,41 @@ export function PlatformDeck() {
     const py = (event.clientY - rect.top) / rect.height;
     event.currentTarget.style.setProperty("--mx", `${px * 100}%`);
     event.currentTarget.style.setProperty("--my", `${py * 100}%`);
-    ry.set((px - 0.5) * TILT * 2);
-    rx.set((0.5 - py) * TILT * 2);
+    fx.set((0.5 - px) * PARALLAX * 2);
+    fy.set((0.5 - py) * PARALLAX * 0.5);
+    // Lectura de la mira, en píxeles NOMINALES del destino. Se escribe por `ref`
+    // y no por estado: si esto provocara un render de React, el deck volvería a
+    // renderizarse entero a 60 Hz mientras se mueve el ratón.
+    if (probeRef.current) {
+      probeRef.current.textContent = `x ${Math.round(px * active.readout.w)} · y ${Math.round(
+        py * active.readout.h,
+      )}`;
+    }
   };
 
   const resetStage = () => {
-    rx.set(0);
-    ry.set(0);
+    fx.set(0);
+    fy.set(0);
   };
 
   // --- El deck solo avanza cuando está a la vista (§11).
   React.useEffect(() => {
     const host = rootRef.current;
     if (!host) return;
+    /**
+     * "A la vista" = el deck cruza la banda central del viewport.
+     *
+     * NO se usa un `threshold` por fracción del elemento: esa fracción tiene como
+     * techo `alturaVentana / alturaDeck`, así que en cuanto el deck es más alto
+     * que la ventana el umbral se vuelve inalcanzable y el recorrido automático
+     * no arranca nunca. Pasó de verdad al añadir el quinto destino: 821 px de
+     * deck contra 720 px de ventana daban un máximo de 0,293 frente a un umbral
+     * de 0,3. Con `rootMargin` la condición depende de dónde está el deck, no de
+     * lo que mide, que es lo que de verdad queríamos preguntar.
+     */
     const observer = new IntersectionObserver(([entry]) => setVisible(entry.isIntersecting), {
-      threshold: 0.3,
+      rootMargin: "-20% 0px -20% 0px",
+      threshold: 0,
     });
     observer.observe(host);
     return () => observer.disconnect();
@@ -154,16 +189,19 @@ export function PlatformDeck() {
     >
       <div className="grid gap-10 lg:grid-cols-[minmax(0,5fr)_minmax(0,7fr)] lg:gap-x-12 lg:gap-y-10">
         {/* ------------------------------------------------------- rail */}
-        {/* Rejilla 2×2 en móvil: una tira con desplazamiento lateral dejaba
-            tres de los cuatro destinos fuera de pantalla y sin ninguna pista
-            de que existieran, justo en la sección que dice "hacemos las
-            cuatro". Aquí siempre se ven los cuatro. */}
+        {/* Rejilla, nunca una tira deslizable: esa dejaba casi todos los destinos
+            fuera de pantalla y sin ninguna pista de que existieran, justo en la
+            sección cuyo mensaje es "los hacemos todos". Aquí se ven los cinco.
+            Una sola columna por debajo de `sm`: a dos columnas, "E-commerce" no
+            cabe en un teléfono y se recortaba con puntos suspensivos, que es
+            precisamente la palabra que hay que poder leer. De `sm` a `lg` van a
+            dos, y como son impares el último ocupa la fila entera. */}
         <div
           role="tablist"
           aria-label="Plataformas que desarrollamos"
           aria-orientation="vertical"
           onKeyDown={handleKeyDown}
-          className="deck-rail grid grid-cols-2 gap-2 sm:grid-cols-4 lg:col-start-1 lg:row-start-1 lg:grid-cols-1 lg:gap-1"
+          className="deck-rail grid grid-cols-1 gap-2 sm:grid-cols-2 lg:col-start-1 lg:row-start-1 lg:grid-cols-1 lg:gap-1"
         >
           {platforms.map((platform, index) => {
             const selected = platform.id === active.id;
@@ -182,7 +220,10 @@ export function PlatformDeck() {
                 aria-controls={`plataforma-panel-${platform.id}`}
                 tabIndex={selected ? 0 : -1}
                 onClick={() => select(platform.id)}
-                className={cn("deck-tab", selected && "deck-tab-on")}
+                className={cn(
+                  "deck-tab sm:last:col-span-2 lg:last:col-span-1",
+                  selected && "deck-tab-on",
+                )}
               >
                 <span aria-hidden="true" className="deck-tab-mark">
                   <Icon className="size-5" />
@@ -220,7 +261,20 @@ export function PlatformDeck() {
                 nunca desplaza nada de la página (CLS 0). */}
             <div className="deck-stage-field">
               <span aria-hidden="true" className="deck-stage-glow" />
-              <span aria-hidden="true" className="deck-stage-floor" />
+              {/* El paralaje va en un envoltorio: el suelo ya usa su propio
+                  `transform` para la perspectiva y no puede compartirlo. */}
+              <m.span aria-hidden="true" className="deck-floor-wrap" style={{ x: fx, y: fy }}>
+                <span className="deck-stage-floor" />
+              </m.span>
+
+              {/* Mira de inspección: sustituye a la inclinación como respuesta al
+                  puntero y, a diferencia de ella, AÑADE información — lee la
+                  posición en píxeles nominales del destino. */}
+              <span aria-hidden="true" className="deck-cross">
+                <i className="deck-cross-h" />
+                <i className="deck-cross-v" />
+                <span ref={probeRef} className="deck-cross-read" />
+              </span>
 
               {/* Corchetes de encuadre y regla: ornamento funcional, no adorno. */}
               <span aria-hidden="true" className="deck-bracket deck-bracket-tl" />
@@ -247,7 +301,11 @@ export function PlatformDeck() {
                     ? { duration: 0 }
                     : { type: "spring", stiffness: 190, damping: 25, mass: 0.9 }
                 }
-                style={{ rotateX: rx, rotateY: ry, transformPerspective: 1100 }}
+                // Sin `transform`: es lo que mantiene el mock-up nítido al píxel.
+                // `--dev-radius` deja que el bisel calcule el radio de la
+                // pantalla interior (radio exterior menos el grosor del marco).
+                style={{ "--dev-radius": `${active.fit.radius}px` } as React.CSSProperties}
+                data-rounded={active.fit.radius > 0 ? "" : undefined}
               >
                 {/* `key` remonta el mock-up para que su entrada escalonada y el
                     barrido de compilación vuelvan a correr en cada destino. */}

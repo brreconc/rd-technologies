@@ -52,15 +52,20 @@ El deck ([`sections/Platforms`](../../src/components/sections/Platforms)) reorde
 
 | Tamaño      | Disposición                                                                      |
 | ----------- | -------------------------------------------------------------------------------- |
-| < `sm`      | Rail en **rejilla 2×2** → escenario → panel de texto                             |
-| `sm` – `lg` | Rail en **una fila de 4** → escenario → panel de texto                           |
+| < `sm`      | Rail en **una columna** de 5 filas → escenario → panel de texto                  |
+| `sm` – `lg` | Rail en **rejilla de 2 columnas**, el último ocupa la fila entera                |
 | ≥ `lg`      | Rail vertical y panel a la izquierda; escenario a la derecha, pegajoso al scroll |
 
 > **Por qué rejilla y no una tira deslizable.** El primer diseño usaba una tira con desplazamiento
-> lateral, y a 375px dejaba **tres de los cuatro destinos fuera de pantalla** sin ninguna pista de
-> que existieran — en la sección cuyo mensaje entero es "cubrimos las cuatro". La rejilla los
-> muestra siempre. Hay un E2E que lo vigila: comprueba que las cuatro pestañas caben enteras dentro
-> del viewport a 375px.
+> lateral, y a 375px dejaba **casi todos los destinos fuera de pantalla** sin ninguna pista de que
+> existieran — en la sección cuyo mensaje entero es "los hacemos todos". Hay un E2E que lo vigila:
+> comprueba que las cinco pestañas caben enteras dentro del viewport a 375px.
+>
+> **Por qué una sola columna por debajo de `sm`.** Con el quinto destino, a dos columnas
+> "E-commerce" no cabe en un teléfono y se recortaba como "E-comme…". Recortar el nombre de la
+> plataforma es justo lo contrario de lo que la sección va a hacer, así que el rail baja a una
+> columna antes que perder la palabra. Un E2E comprueba que **ningún rótulo se recorta** a 320, 375
+> y 768px comparando `scrollWidth` con `clientWidth`.
 
 El número de canal (`Canal 01`…) solo aparece a partir de `lg`: por debajo, la fila es demasiado
 estrecha y competía con el rótulo.
@@ -70,6 +75,11 @@ fija (5/4). Por eso el morfismo entre destinos no cambia la altura de la página
 funciona igual a 320px que a 4K sin números mágicos en píxeles. El interior del mock-up escala con
 **unidades de contenedor** (`cqh`), no con media queries, porque el dispositivo cambia de tamaño sin
 que cambie el viewport. `e2e/platforms.spec.ts` comprueba que **ningún destino desborda a 320px**.
+
+El **bisel** de los destinos de esquina redonda también va en unidades de contenedor
+(`clamp(3px, 1.9cqw, 9px)`): un teléfono tiene marco de teléfono a 320px y a 4K. Sin él, el arco de
+la esquina se comía la barra de estado y la navegación inferior. Ver
+[ADR-015](../01-architecture/decisions/ADR-015-crisp-deck-and-ecommerce.md).
 
 ## Pendiente por fase
 

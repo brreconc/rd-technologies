@@ -7,8 +7,8 @@ import { PlatformDeck } from "./PlatformDeck";
  * Sección "Plataformas" (§8) — dónde corre lo que construimos.
  *
  * Responde de un vistazo a la única pregunta que el cliente trae en la cabeza:
- * "¿pueden hacer LO MÍO?". Web, Android, iOS y escritorio, con el mismo núcleo
- * y la misma exigencia de seguridad.
+ * "¿pueden hacer LO MÍO?". Web, e-commerce, Android, iOS y escritorio, con el
+ * mismo núcleo y la misma exigencia de seguridad.
  *
  * Server Component: el encabezado y el marco son HTML plano; solo el deck
  * interactivo (`PlatformDeck`) baja al cliente.

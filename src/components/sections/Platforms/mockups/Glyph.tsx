@@ -30,6 +30,12 @@ const PATHS = {
   chevron: "m9 5 7 7-7 7",
   list: "M4 6h16M4 12h16M4 18h16",
   box: "m12 2 9 5v10l-9 5-9-5V7Z",
+  cart: "M3 4h2.2l2.4 11.2h10.1L20 7H6.2M9 20h.01M18 20h.01",
+  star: "m12 3 2.9 5.9 6.6.9-4.8 4.6 1.2 6.5L12 17.8 6.1 20.9l1.2-6.5L2.5 9.8l6.6-.9Z",
+  truck: "M3 6h11v10H3Zm11 4h4l3 3v3h-7ZM7 19h.01M18 19h.01",
+  card: "M2 6h20v12H2Zm0 4h20M5 14h4",
+  heart:
+    "M12 20S3.5 14.6 3.5 8.9A4.4 4.4 0 0 1 12 6.8a4.4 4.4 0 0 1 8.5 2.1C20.5 14.6 12 20 12 20Z",
 } as const;
 
 export type GlyphName = keyof typeof PATHS;

@@ -685,6 +685,12 @@
   line-height: 1.25;
   color: var(--fg);
   transition: color 0.35s ease;
+  /* El nombre de un destino no se parte: Chromium corta "E-commerce" por el
+     guion y lo deja en dos líneas. Con `min-width: 0` en el contenedor, si
+     alguna vez no cupiera se recortaría con puntos en vez de desbordar. */
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
 }
 
 .deck-tab-on .deck-tab-label {
@@ -844,6 +850,15 @@
   z-index: 0;
 }
 
+/* Envoltorio de paralaje del suelo: recibe el `transform` del puntero para no
+   pisar la perspectiva que el suelo ya lleva en el suyo. */
+.deck-floor-wrap {
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  z-index: 0;
+}
+
 /* Suelo en perspectiva. `overflow: hidden` del campo lo recorta. */
 .deck-stage-floor {
   position: absolute;
@@ -869,6 +884,62 @@
   mask-image: linear-gradient(to top, #000, transparent 78%);
   pointer-events: none;
   z-index: 0;
+}
+
+/* --- Mira de inspección ------------------------------------------------------
+   Lo que responde al puntero desde que el dispositivo dejó de inclinarse. Dos
+   filetes de 1px y una lectura numérica: en vez de deformar la imagen, MIDE
+   sobre ella, que es el lenguaje de toda la sección. Solo con ratón. */
+.deck-cross {
+  position: absolute;
+  inset: 0;
+  opacity: 0;
+  pointer-events: none;
+  z-index: 5;
+  transition: opacity 0.28s ease;
+}
+
+@media (hover: hover) {
+  .deck-stage:hover .deck-cross {
+    opacity: 1;
+  }
+}
+
+.deck-cross-h,
+.deck-cross-v {
+  position: absolute;
+  display: block;
+  background-color: color-mix(in srgb, var(--platform-accent) 42%, transparent);
+}
+
+.deck-cross-h {
+  left: 0;
+  right: 0;
+  top: var(--my, 50%);
+  height: 1px;
+}
+
+.deck-cross-v {
+  top: 0;
+  bottom: 0;
+  left: var(--mx, 50%);
+  width: 1px;
+}
+
+.deck-cross-read {
+  position: absolute;
+  /* Sujeta al campo: pegada al puntero, pero sin salirse nunca por el borde.
+     Los porcentajes de `--mx`/`--my` se resuelven contra el propio escenario. */
+  top: clamp(0.4rem, calc(var(--my, 50%) + 0.4rem), calc(100% - 1.7rem));
+  left: clamp(0.4rem, calc(var(--mx, 50%) + 0.4rem), calc(100% - 8.5rem));
+  padding: 0.15rem 0.35rem;
+  border: 1px solid color-mix(in srgb, var(--platform-accent) 35%, transparent);
+  background-color: rgb(0 0 0 / 0.72);
+  font-family: var(--font-jetbrains-mono), monospace;
+  font-size: 0.58rem;
+  letter-spacing: 0.08em;
+  white-space: nowrap;
+  color: var(--platform-accent);
 }
 
 /* --- Ornamento funcional: corchetes y regla --------------------------------- */
@@ -937,6 +1008,10 @@
 .deck-device {
   position: relative;
   z-index: 2;
+  /* Grosor del marco físico. En unidades de contenedor para que un teléfono
+     tenga marco de teléfono tanto a 320px como a 4K. Los destinos de esquina
+     recta (web, escritorio) no lo llevan: ahí la pantalla ES el marco. */
+  --dev-bezel: 0px;
   border: 1px solid color-mix(in srgb, var(--platform-accent) 38%, var(--border));
   background-color: #0d0d0d;
   /* Luz de canto en vez de sombra proyectada. */
@@ -947,13 +1022,39 @@
      interfaz interior escala con el dispositivo sin un solo número mágico. */
   container-type: size;
   overflow: hidden;
-  transition: border-color 0.5s ease;
+  transition:
+    border-color 0.5s ease,
+    box-shadow 0.4s ease;
+}
+
+/* IMPORTANTE: aquí no puede entrar NINGUNA transformación (ni `rotate`, ni
+   `scale`, ni `translate`). Una capa transformada la rasteriza Chromium una vez
+   y la remuestrea, y el texto de 6–10 px del mock-up se vuelve una mancha. La
+   respuesta al puntero vive en `.deck-floor-wrap` y `.deck-cross`. Ver ADR-015. */
+.deck-device[data-rounded] {
+  --dev-bezel: clamp(3px, 1.9cqw, 9px);
 }
 
 .deck-screen {
   position: absolute;
-  inset: 0;
+  /* El bisel evita que la curva del marco se coma las esquinas de la interfaz:
+     barra de estado, navegación inferior y tarjetas quedaban recortadas. */
+  inset: var(--dev-bezel);
+  border-radius: max(0px, calc(var(--dev-radius, 0px) - var(--dev-bezel)));
+  background-color: #000;
   overflow: hidden;
+  transition: border-radius 0.45s ease;
+}
+
+/* Al acercarse a mirar, el instrumento se enciende: el canto brilla y la mira
+   aparece. Nada de esto toca la nitidez del contenido. */
+@media (hover: hover) {
+  .deck-stage:hover .deck-device {
+    border-color: color-mix(in srgb, var(--platform-accent) 70%, var(--border));
+    box-shadow:
+      0 0 0 1px color-mix(in srgb, var(--platform-accent) 22%, transparent),
+      0 0 64px color-mix(in srgb, var(--platform-accent) 22%, transparent);
+  }
 }
 
 /* Barrido de compilación al aterrizar en un destino. */
@@ -2013,6 +2114,389 @@
   background-color: var(--platform-accent);
 }
 
+/* --- Mock-up E-commerce -------------------------------------------------------
+   El escaparate en tablet vertical. Lo que lo separa del mock-up Web no es el
+   estilo sino QUÉ mide: aquí todo lo que se enseña es precio y disponibilidad,
+   que es lo que mira quien tiene una tienda. */
+.mk-ec-bar {
+  display: flex;
+  align-items: center;
+  gap: 0.6em;
+  padding: 0.35em 1em 0.55em;
+  border-bottom: 1px solid var(--border);
+}
+
+.mk-ec-brand {
+  font-family: var(--font-space-grotesk), sans-serif;
+  font-size: 0.68em;
+  font-weight: 700;
+  letter-spacing: 0.14em;
+  color: var(--fg);
+  flex-shrink: 0;
+}
+
+.mk-ec-search {
+  display: flex;
+  flex: 1;
+  min-width: 0;
+  align-items: center;
+  gap: 0.4em;
+  padding: 0.3em 0.55em;
+  border: 1px solid var(--border);
+  border-radius: 999px;
+  font-size: 0.55em;
+  color: var(--deck-dim);
+  white-space: nowrap;
+  overflow: hidden;
+}
+
+.mk-ec-acts {
+  display: flex;
+  align-items: center;
+  gap: 0.7em;
+  flex-shrink: 0;
+  font-size: 0.8em;
+  color: var(--deck-dim);
+}
+
+.mk-ec-cart {
+  position: relative;
+  display: block;
+  color: var(--platform-accent);
+}
+
+@keyframes mk-ec-badge {
+  0%,
+  62%,
+  100% {
+    transform: scale(1);
+  }
+  70% {
+    transform: scale(1.45);
+  }
+  80% {
+    transform: scale(1);
+  }
+}
+
+/* El contador del carrito late una vez por ciclo, sincronizado con el aviso de
+   "añadido al carrito": es la conversión ocurriendo. */
+.mk-ec-badge {
+  position: absolute;
+  top: -0.35em;
+  right: -0.45em;
+  display: grid;
+  place-items: center;
+  min-width: 1.15em;
+  height: 1.15em;
+  padding: 0 0.2em;
+  border-radius: 999px;
+  background-color: var(--platform-accent);
+  color: #12030a;
+  font-size: 0.52em;
+  font-style: normal;
+  font-weight: 700;
+  animation: mk-ec-badge 4.5s ease-in-out infinite;
+}
+
+.mk-ec-hero {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  gap: 0.28em;
+  margin: 0.7em 1em 0;
+  padding: 0.85em 0.95em;
+  border: 1px solid color-mix(in srgb, var(--platform-accent) 28%, var(--border));
+  border-radius: 0.4em;
+  background-image: linear-gradient(
+    115deg,
+    color-mix(in srgb, var(--platform-accent) 16%, transparent),
+    transparent 62%
+  );
+  overflow: hidden;
+}
+
+.mk-ec-hero-k {
+  font-family: var(--font-jetbrains-mono), monospace;
+  font-size: 0.46em;
+  letter-spacing: 0.16em;
+  text-transform: uppercase;
+  color: var(--platform-accent);
+}
+
+.mk-ec-hero-t {
+  font-family: var(--font-space-grotesk), sans-serif;
+  font-size: 0.78em;
+  font-weight: 700;
+  line-height: 1.15;
+  color: var(--fg);
+  max-width: 80%;
+}
+
+.mk-ec-hero-c {
+  align-self: flex-start;
+  margin-top: 0.25em;
+  padding: 0.25em 0.7em;
+  border-radius: 999px;
+  background-color: var(--platform-accent);
+  color: #12030a;
+  font-size: 0.5em;
+  font-weight: 700;
+}
+
+/* Bulto de producto insinuado en el banner: da peso a la derecha sin pedir una
+   imagen que no existe. */
+.mk-ec-hero-art {
+  position: absolute;
+  right: -1.4em;
+  bottom: -1.8em;
+  width: 5em;
+  height: 5em;
+  border-radius: 50%;
+  background-image: radial-gradient(
+    circle at 35% 30%,
+    color-mix(in srgb, var(--platform-accent) 42%, transparent),
+    transparent 68%
+  );
+}
+
+.mk-ec-count {
+  margin-inline-start: auto;
+  align-self: center;
+  font-family: var(--font-jetbrains-mono), monospace;
+  font-size: 0.48em;
+  letter-spacing: 0.08em;
+  color: var(--deck-dim);
+}
+
+.mk-ec-grid {
+  position: relative;
+  display: grid;
+  flex: 1;
+  min-height: 0;
+  grid-template-columns: 1fr 1fr;
+  gap: 0.6em;
+  padding: 0.2em 1em 0.6em;
+  overflow: hidden;
+}
+
+.mk-ec-card {
+  display: flex;
+  flex-direction: column;
+  gap: 0.22em;
+  min-height: 0;
+  padding: 0.4em;
+  border: 1px solid var(--border);
+  border-radius: 0.35em;
+  background-color: color-mix(in srgb, var(--surface) 60%, transparent);
+}
+
+/* Sin fotografía: un plano de color con la geometría del producto. Enseñar un
+   pantallazo inventado sería mentir sobre trabajo que no existe (§19). */
+.mk-ec-shot {
+  position: relative;
+  flex: 1;
+  min-height: 0;
+  border-radius: 0.25em;
+  background-image: linear-gradient(
+    150deg,
+    color-mix(in srgb, var(--platform-accent) 24%, #16151a),
+    #101014 72%
+  );
+}
+
+.mk-ec-shot-2 {
+  background-image: linear-gradient(150deg, #23202b, #101014 70%);
+}
+.mk-ec-shot-3 {
+  background-image: linear-gradient(
+    150deg,
+    color-mix(in srgb, var(--platform-accent) 34%, #16151a),
+    #12111a 76%
+  );
+}
+.mk-ec-shot-4 {
+  background-image: linear-gradient(150deg, #1d1b24, #0f0f13 68%);
+}
+
+.mk-ec-badge-t {
+  position: absolute;
+  top: 0.3em;
+  left: 0.3em;
+  padding: 0.1em 0.32em;
+  border-radius: 0.2em;
+  background-color: var(--platform-accent);
+  color: #12030a;
+  font-family: var(--font-jetbrains-mono), monospace;
+  font-size: 0.42em;
+  font-style: normal;
+  font-weight: 700;
+  letter-spacing: 0.06em;
+}
+
+.mk-ec-name {
+  font-size: 0.55em;
+  color: var(--fg);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.mk-ec-price {
+  display: flex;
+  align-items: baseline;
+  gap: 0.4em;
+}
+.mk-ec-price b {
+  font-family: var(--font-jetbrains-mono), monospace;
+  font-size: 0.58em;
+  font-weight: 500;
+  color: var(--platform-accent);
+}
+.mk-ec-price s {
+  font-family: var(--font-jetbrains-mono), monospace;
+  font-size: 0.46em;
+  color: var(--deck-dim);
+}
+
+.mk-ec-meta {
+  display: flex;
+  align-items: center;
+  gap: 0.3em;
+  font-family: var(--font-jetbrains-mono), monospace;
+  font-size: 0.46em;
+  color: var(--deck-dim);
+}
+
+/* Barra de existencias: el dato que de verdad decide una compra. */
+.mk-ec-stock {
+  flex: 1;
+  height: 2px;
+  margin-inline-start: 0.25em;
+  background-color: var(--border);
+}
+.mk-ec-stock i {
+  display: block;
+  height: 100%;
+  background-color: color-mix(in srgb, var(--platform-accent) 75%, transparent);
+}
+
+@keyframes mk-ec-toast {
+  0%,
+  58% {
+    opacity: 0;
+    transform: translateY(0.8em);
+  }
+  68%,
+  88% {
+    opacity: 1;
+    transform: translateY(0);
+  }
+  100% {
+    opacity: 0;
+    transform: translateY(0.8em);
+  }
+}
+
+.mk-ec-toast {
+  position: absolute;
+  left: 1em;
+  right: 1em;
+  bottom: 0.6em;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.4em;
+  padding: 0.35em;
+  border: 1px solid color-mix(in srgb, var(--platform-accent) 45%, transparent);
+  border-radius: 0.3em;
+  background-color: rgb(10 6 9 / 0.92);
+  font-size: 0.52em;
+  color: var(--platform-accent);
+  animation: mk-ec-toast 4.5s ease-in-out infinite;
+}
+
+.mk-ec-pay {
+  display: flex;
+  align-items: center;
+  gap: 0.7em;
+  padding-block: 0.55em 0.7em;
+  border-top: 1px solid var(--border);
+  background-color: color-mix(in srgb, var(--surface) 70%, transparent);
+}
+
+.mk-ec-total {
+  display: flex;
+  flex-direction: column;
+}
+.mk-ec-total em {
+  font-size: 0.44em;
+  font-style: normal;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  color: var(--deck-dim);
+}
+.mk-ec-total b {
+  font-family: var(--font-jetbrains-mono), monospace;
+  font-size: 0.66em;
+  font-weight: 500;
+  color: var(--fg);
+}
+
+@keyframes mk-ec-cta {
+  from {
+    background-position: -140% 0;
+  }
+  to {
+    background-position: 240% 0;
+  }
+}
+
+.mk-ec-cta {
+  flex: 1;
+  padding: 0.4em 0;
+  border-radius: 0.3em;
+  background-color: var(--platform-accent);
+  background-image: linear-gradient(
+    100deg,
+    transparent 35%,
+    rgb(255 255 255 / 0.55) 50%,
+    transparent 65%
+  );
+  background-size: 220% 100%;
+  color: #12030a;
+  font-size: 0.6em;
+  font-weight: 700;
+  text-align: center;
+  animation: mk-ec-cta 3.6s linear infinite;
+}
+
+.mk-ec-trust {
+  display: flex;
+  gap: 0.4em;
+  font-size: 0.72em;
+  color: var(--deck-dim);
+}
+
+/* --- Margen de seguridad contra la curva del marco ----------------------------
+   La esquina redondeada recorta un arco de radio R en cada vértice, así que todo
+   lo que viva en la PRIMERA o la ÚLTIMA fila tiene que empezar pasado ese arco.
+   Sin esto, la hora, la batería y los rótulos de la navegación inferior salían
+   mordidos por el borde del teléfono. Va al final del bloque a propósito: las
+   reglas de cada barra usan el atajo `padding`, que ganaría por orden. */
+.mk-android .mk-status,
+.mk-ios .mk-status,
+.mk-ec .mk-status {
+  padding-inline: 2em;
+  padding-top: 0.7em;
+}
+
+.mk-android .mk-navbar,
+.mk-ios .mk-tabbar,
+.mk-ec .mk-ec-pay {
+  padding-inline: 1.8em;
+}
+
 /* --- Movimiento reducido ------------------------------------------------------ */
 /* El bloque global de `prefers-reduced-motion` ya neutraliza duraciones, pero
    estas animaciones son de entrada: hay que garantizar además que el estado
@@ -2032,7 +2516,19 @@
     animation: none;
     opacity: 1;
   }
-  .deck-stage-glow {
+  /* El escaparate se queda quieto y con el aviso ya puesto: el mensaje sigue
+     leyéndose sin que nada parpadee ni se desplace. */
+  .mk-ec-badge,
+  .mk-ec-cta {
+    animation: none;
+  }
+  .mk-ec-toast {
+    animation: none;
+    opacity: 1;
+    transform: none;
+  }
+  .deck-stage-glow,
+  .deck-cross {
     transition: none;
   }
 }

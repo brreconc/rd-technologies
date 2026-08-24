@@ -14,8 +14,8 @@ mensajes de marca**; ajustar solo con aprobación.
 ### Sección "Plataformas" (Fases 10–11)
 
 Contenido en [`lib/constants/platforms.ts`](../../src/lib/constants/platforms.ts). Responde a la
-pregunta que el cliente trae en la cabeza —"¿pueden hacer LO MÍO?"— para los cuatro destinos: **Web,
-Android, iOS y Escritorio (Windows · macOS · Linux)**.
+pregunta que el cliente trae en la cabeza —"¿pueden hacer LO MÍO?"— para los cinco destinos: **Web,
+E-commerce, Android, iOS y Escritorio (Windows · macOS · Linux)**.
 
 Reglas de redacción para esta sección, que es deliberadamente breve:
 
@@ -43,6 +43,11 @@ Los mock-ups del dispositivo llevan etiquetas en español ("Ruta de reparto 12",
    una reunión comercial, sobra.
 2. **Nada de _lorem ipsum_.** Es exactamente lo que hacía que la versión anterior se leyera como una
    maqueta sin terminar. Etiquetas plausibles y del dominio, siempre.
+3. **Cortas, porque la columna es estrecha.** Dentro de un teléfono compiten con el icono y con la
+   etiqueta de estado; cualquier rótulo largo acaba en puntos suspensivos, que se lee como un fallo.
+   Si hace falta, se acorta el texto antes que estrechar la etiqueta.
+4. **Los precios y los datos del escaparate son ambientación, igual que el resto.** Ningún importe,
+   descuento ni valoración de `EcommerceMockup` describe una oferta real.
 
 > Al generar diseño con herramientas de IA, revisa el copy línea por línea antes de portarlo: en
 > este proyecto una de ellas coló "seguridad de grado bancario", una afirmación que no podemos

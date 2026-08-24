@@ -98,6 +98,18 @@
   partida: teclado que descartaba pulsaciones, desbordamiento horizontal y solo un destino visible
   en móvil. **El bundle BAJA ~12 KB brotli.** Verificada con 66 unit + 26 E2E y Lighthouse
   99/100/96/100 con **CLS 0**. **Completada.**
+- ✅ **Fase 12 — Nitidez, bisel y E-commerce:**
+  ([ADR-015](./01-architecture/decisions/ADR-015-crisp-deck-and-ecommerce.md)). El dispositivo deja
+  de inclinarse en 3D: Chromium rasteriza una sola vez toda capa con transformación 3D y la
+  remuestrea, lo que **desenfocaba el texto del mock-up justo al acercarse a mirarlo**. Lo sustituyen
+  un paralaje del suelo y una **mira de inspección** que lee la posición en píxeles nominales del
+  destino, así que la interacción pasa a añadir información en vez de degradarla. Los teléfonos
+  reciben **bisel**, de modo que la curva del marco ya no se come la barra de estado ni la
+  navegación inferior. Entra un quinto destino, **E-commerce**, con escaparate en tablet y animación
+  propia de conversión. De paso se corrige un fallo latente: el observador del recorrido automático
+  usaba un umbral por fracción del elemento, inalcanzable en cuanto el deck creció más que la
+  ventana. **+1 KB brotli.** Verificada con 70 unit + 28 E2E y Lighthouse 99/100/96/100 con **CLS 0
+  en las tres pasadas**. **Completada.**
 
 ## Deuda técnica abierta
 

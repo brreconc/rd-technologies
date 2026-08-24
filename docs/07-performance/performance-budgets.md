@@ -23,16 +23,28 @@ Requisito §11.
   por lotes, DPR ≤ 2, nº de nodos por área, pausa fuera del viewport y degradación automática.
 - ✅ **Lighthouse CI** con presupuestos que fallan la build ([`lighthouserc.json`](../../lighthouserc.json), Fase 6).
 
-## Medición actual (Fase 10, ruta `/`)
+## Medición actual (Fase 12, ruta `/`)
 
-Medido sobre `pnpm start`, sumando los `<script src>` reales de la ruta (17 ficheros):
+Medido sobre `pnpm start`, sumando los recursos reales de la ruta (18 ficheros):
 
 | Compresión                       | First Load JS | Objetivo    |
 | -------------------------------- | ------------- | ----------- |
-| gzip -9                          | ~335 KB       | —           |
-| **Brotli** (lo que sirve un CDN) | **~290 KB**   | < 200 KB ❌ |
+| **Brotli** (lo que sirve un CDN) | **~258 KB**   | < 200 KB ❌ |
+
+CSS: ~13 KB brotli.
 
 > Next 16 + Turbopack no imprime la tabla de tamaños en el build; se mide sirviendo la ruta.
+
+> **Método (fijado en la Fase 12).** Las cifras anteriores no dejaron escrito cómo se obtuvieron. A
+> partir de aquí se mide así, y conviene repetirlo igual: se carga `/` con Playwright, se recogen las
+> URL de todos los `.js` y `.css` que la página pide **de verdad**, y se comprime cada fichero
+> correspondiente de `.next/` con `brotli -q 11`. Mide lo que descarga un visitante, no todo lo que
+> hay en `.next/static` (que incluye trozos que esa ruta nunca pide).
+>
+> **La serie histórica de abajo NO es comparable con este método.** Para poder dar un delta honesto
+> se reconstruyó el commit anterior (`d018fb1`) y se midió igual: **257 KB**. Es decir, la Fase 12
+> cuesta **+1 KB brotli** —un mock-up nuevo, cinco pictogramas y un icono de `lucide`, menos los
+> muelles de la inclinación retirada—, no los −20 KB que sugeriría comparar 278 con 258.
 
 ### ⚠️ Desvío abierto sobre el presupuesto de JS
 
@@ -45,6 +57,8 @@ El objetivo de **< 200 KB** (§11) está incumplido. Trazabilidad de la medició
 | Fase 9               | ~332 KB | ~288 KB |
 | Fase 10              | ~335 KB | ~290 KB |
 | Fase 11              | ~342 KB | ~278 KB |
+| Fase 11 (re-medida)  | —       | ~257 KB |
+| Fase 12              | —       | ~258 KB |
 
 El salto lo produjo la **Fase 8**, cuando las tarjetas de sección pasaron de Server Components
 (`Card`) a Client Components (`SpotlightCard`) y se añadieron formularios y menú interactivos. La
@@ -54,6 +68,10 @@ Fase 9 aportó ~4 KB.
 casi se paga solo porque en la misma fase se retiró `next-themes` con el tema claro
 ([ADR-012](../01-architecture/decisions/ADR-012-single-dark-theme.md)). El deck no trajo ninguna
 dependencia.
+
+**La Fase 12 cuesta +1 KB brotli** (medido contra `d018fb1` con el método de arriba), pese a añadir
+un destino entero con su mock-up. Lighthouse no se movió: **99 · 100 · 96 · 100**, LCP 0,9 s,
+**CLS 0 en las tres pasadas**, TBT 0 ms.
 
 **La Fase 11 RESTA ~12 KB brotli** pese a rehacer los cuatro mock-ups con mucho más detalle
 ([ADR-014](../01-architecture/decisions/ADR-014-instrument-deck.md)). Dos motivos: se retiraron los

@@ -4,12 +4,18 @@ import { Glyph, type GlyphName } from "./Glyph";
 /** Tres y no cuatro: con cuatro, el último se corta contra el borde del marco. */
 const CHIPS = ["Todas", "En curso", "Pendientes"];
 
+/**
+ * Seis filas, y con los rótulos cortos a propósito: la columna de la etiqueta de
+ * estado se lleva su parte del ancho, y en un teléfono cualquier título más
+ * largo que estos acaba en puntos suspensivos. Ver `content-guide.md`.
+ */
 const ITEMS: { icon: GlyphName; title: string; meta: string; tag: string }[] = [
-  { icon: "check", title: "Ruta de reparto 12", meta: "Completada · hoy 09:40", tag: "OK" },
+  { icon: "check", title: "Ruta de reparto 12", meta: "Completada · 09:40", tag: "OK" },
   { icon: "refresh", title: "Inventario nave 3", meta: "Sincronizando · 68%", tag: "SYNC" },
   { icon: "clock", title: "Orden #4471", meta: "Pendiente de firma", tag: "ESPERA" },
-  { icon: "wrench", title: "Mantenimiento línea B", meta: "Programado · mañana", tag: "PROG" },
-  { icon: "alert", title: "Sensor de temperatura", meta: "Fuera de rango · 42 °C", tag: "AVISO" },
+  { icon: "wrench", title: "Mantenimiento B", meta: "Programado · mañana", tag: "PROG" },
+  { icon: "alert", title: "Sensor térmico", meta: "Fuera de rango", tag: "AVISO" },
+  { icon: "truck", title: "Carga muelle 2", meta: "En tránsito · 14 min", tag: "RUTA" },
 ];
 
 const NAV: { icon: GlyphName; label: string }[] = [

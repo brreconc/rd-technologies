@@ -88,37 +88,50 @@ Contenido tipado en `src/lib/constants` (no hardcodeado). Helpers: `SectionHeadi
 > Todas las secciones usan HTML semántico (`section` + `aria-labelledby`, listas, headings
 > jerárquicos) y animaciones de entrada (ver abajo).
 
-### Deck multiplataforma (`sections/Platforms`) — Fases 10 y 11
+### Deck multiplataforma (`sections/Platforms`) — Fases 10 a 12
 
 La sección más interactiva del sitio. Responde de un vistazo a "¿pueden hacer LO MÍO?"
 compilando el destino elegido delante del cliente. Ver
-[ADR-013](../01-architecture/decisions/ADR-013-platform-deck.md) (concepto) y
-[ADR-014](../01-architecture/decisions/ADR-014-instrument-deck.md) (mock-ups y lenguaje visual).
+[ADR-013](../01-architecture/decisions/ADR-013-platform-deck.md) (concepto),
+[ADR-014](../01-architecture/decisions/ADR-014-instrument-deck.md) (mock-ups y lenguaje visual) y
+[ADR-015](../01-architecture/decisions/ADR-015-crisp-deck-and-ecommerce.md) (nitidez, bisel y
+E-commerce).
 
-| Fichero               | Qué es                                                                                                                                                    |
-| --------------------- | --------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| `index.tsx`           | Server Component: encabezado, marco y el párrafo de cierre. Solo el deck baja al cliente.                                                                 |
-| `PlatformDeck.tsx`    | Cliente. Patrón `tablist`/`tab`/`tabpanel`, morfismo del dispositivo, retinte por acento, inclinación 3D con el puntero y recorrido automático detenible. |
-| `mockups/index.tsx`   | Mapa `PlatformId → componente`. Solo hay **un** mock-up montado a la vez.                                                                                 |
-| `mockups/*Mockup.tsx` | Una interfaz creíble por destino: panel SaaS, app Material 3, app HIG y consola de escritorio. Decorativas (`aria-hidden`).                               |
-| `mockups/Glyph.tsx`   | Pictogramas de 1px dibujados a mano para el interior del mock-up. A 6–10 px no son identificables, así que no compensa arrastrar iconos reales al bundle. |
+| Fichero               | Qué es                                                                                                                                                       |
+| --------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------ |
+| `index.tsx`           | Server Component: encabezado, marco y el párrafo de cierre. Solo el deck baja al cliente.                                                                    |
+| `PlatformDeck.tsx`    | Cliente. Patrón `tablist`/`tab`/`tabpanel`, morfismo del dispositivo, retinte por acento, paralaje del suelo y mira de inspección, recorrido auto detenible. |
+| `mockups/index.tsx`   | Mapa `PlatformId → componente`. Solo hay **un** mock-up montado a la vez.                                                                                    |
+| `mockups/*Mockup.tsx` | Una interfaz creíble por destino: panel SaaS, escaparate, app Material 3, app HIG y consola de escritorio. Decorativas (`aria-hidden`).                      |
+| `mockups/Glyph.tsx`   | Pictogramas de 1px dibujados a mano para el interior del mock-up. A 6–10 px no son identificables, así que no compensa arrastrar iconos reales al bundle.    |
 
-**Tres invariantes que hay que respetar al tocar esto:**
+**Cuatro invariantes que hay que respetar al tocar esto:**
 
 1. **`container-type: size` en `.deck-device`** es lo que hace que el mock-up escale con el marco.
    Todo el interior dimensiona en `cqh` a partir de una única base (`font-size` de `.mk`) y de ahí
    en `em`. Si se quita, las unidades se resuelven contra el viewport y la interfaz revienta.
-2. **La cota manda sobre la geometría.** `deviceFrame()` deriva el marco de `readout`, no al revés.
-3. **El copy sale solo de `platforms.ts`.** Nada de texto de producto escrito dentro de un mock-up.
+2. **`.deck-device` no admite NINGUNA transformación** — ni `rotate`, ni `scale`, ni `translate`.
+   Chromium rasteriza una vez la capa transformada y la remuestrea, y el texto de 6–10 px del
+   mock-up se convierte en una mancha. Lo que responde al puntero es `.deck-floor-wrap` (paralaje) y
+   `.deck-cross` (mira). Hay un E2E que lee la matriz calculada con el puntero encima.
+3. **La cota manda sobre la geometría.** `deviceFrame()` deriva el marco de `readout`, no al revés.
+4. **El copy sale solo de `platforms.ts`.** Nada de texto de producto escrito dentro de un mock-up.
 
 **Cómo añadir una plataforma:**
 
 1. Añade la entrada en [`lib/constants/platforms.ts`](../../src/lib/constants/platforms.ts) con su
    acento (valida el contraste sobre `#0a0a0a`: se usa como texto), su `readout` (resolución
-   nominal) y su `fit` (eje dominante, porcentaje del escenario y radio).
+   nominal) y su `fit` (eje dominante, porcentaje del escenario y radio). **El radio no es
+   decorativo:** si es mayor que 0, el dispositivo recibe bisel y sus barras superior e inferior
+   necesitan margen lateral contra el arco de la esquina.
 2. Crea su componente en `mockups/` y regístralo en `mockups/index.tsx`.
 3. Ejecuta `pnpm test`: `platforms.test.ts` avisa si el marco no cuadra con la resolución que
    anuncia la cota o si el dispositivo no cabe en el escenario. No hay que tocar `PlatformDeck.tsx`.
+4. **Mira el rail en un teléfono.** El nombre del destino no se parte ni se recorta: si no cabe, el
+   rail baja a una sola columna antes que dejar "E-comme…" en pantalla.
+5. Comprueba que el deck sigue avanzando solo con la ventana **más baja que el deck**. El observador
+   usa `rootMargin`, no `threshold`, justamente porque un umbral por fracción se vuelve inalcanzable
+   en cuanto la sección es más alta que la ventana.
 
 ## Animaciones (`src/components/animations`)
 

@@ -20,3 +20,8 @@ overrides:
   # Docker. Se fuerza igualmente la línea parcheada para no arrastrar el aviso
   # en el árbol de dependencias. Ver docs/05-security.
   sharp@<0.35.0: ">=0.35.0"
+  # nanoid, transitiva de postcss, se cuelga en un bucle infinito cuando se le
+  # pide un identificador de tamaño cero con un generador propio
+  # (GHSA-2v37-7h3g-55p8). Aquí solo corre en build y nadie le pasa tamaño cero,
+  # pero el aviso es "high" y el salto es de parche. Ver docs/05-security.
+  nanoid@<3.3.18: ">=3.3.18"

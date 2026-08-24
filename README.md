@@ -3,7 +3,7 @@
 Landing page corporativa de **R&D Technologies** (desarrollo de software y ciberseguridad).
 Construida con Next.js 16 (App Router), React 19, TypeScript estricto y Tailwind CSS v4.
 
-> **Estado:** Fases 0–11 completadas. Landing completa, probada y **dockerizada**, lista para que
+> **Estado:** Fases 0–12 completadas. Landing completa, probada y **dockerizada**, lista para que
 > el equipo la despliegue a producción (ver la sección **Despliegue** más abajo).
 > El plan y las decisiones se rigen por [`../DOCS/PROMPT_MAESTRO.md`](../DOCS/PROMPT_MAESTRO.md).
 
@@ -75,8 +75,9 @@ Zod · React Hook Form · Radix · Lucide.
 
 Tema oscuro único, sin librería de theming ([ADR-012](./docs/01-architecture/decisions/ADR-012-single-dark-theme.md)).
 La sección `#plataformas` es un deck interactivo que compila el destino elegido delante del cliente
-([ADR-013](./docs/01-architecture/decisions/ADR-013-platform-deck.md) y
-[ADR-014](./docs/01-architecture/decisions/ADR-014-instrument-deck.md)).
+([ADR-013](./docs/01-architecture/decisions/ADR-013-platform-deck.md),
+[ADR-014](./docs/01-architecture/decisions/ADR-014-instrument-deck.md) y
+[ADR-015](./docs/01-architecture/decisions/ADR-015-crisp-deck-and-ecommerce.md)).
 
 ## 📄 Licencia
 

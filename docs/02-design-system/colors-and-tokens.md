@@ -100,10 +100,18 @@ diseño de partida lo hacía en una docena de sitios. Con un token medido (≥5:
 
 #### Radio 0 en el deck
 
-El deck es la única zona del sitio con esquinas rectas — salvo los teléfonos del escenario y los
-puntos de estado. Es deliberado: se lee como un instrumento dentro de una página de tarjetas
-redondeadas. Si se toca, hay que tocarlo entero o no tocarlo.
+El deck es la única zona del sitio con esquinas rectas — salvo los teléfonos y la tablet del
+escenario y los puntos de estado. Es deliberado: se lee como un instrumento dentro de una página de
+tarjetas redondeadas. Si se toca, hay que tocarlo entero o no tocarlo.
 Ver [ADR-014](../01-architecture/decisions/ADR-014-instrument-deck.md).
+
+En los destinos con radio > 0 ese radio **no es solo estético**: activa el bisel del dispositivo
+(`.deck-device[data-rounded]`), que es lo que impide que la curva del marco recorte la barra de
+estado y la navegación inferior del mock-up. Ver
+[ADR-015](../01-architecture/decisions/ADR-015-crisp-deck-and-ecommerce.md).
+
+Acentos por destino: web `#00f5ff` · e-commerce `#ff5f9e` · android `#4ade80` · ios `#a78bfa` ·
+escritorio `#ffd93d`. Los cinco superan AA sobre `#0a0a0a`, porque se usan como color de texto.
 
 Ver [ADR-004](../01-architecture/decisions/ADR-004-tailwind-v4-tokens.md) (tokens en CSS con
 Tailwind v4) y [ADR-006](../01-architecture/decisions/ADR-006-fase1-defaults.md) (decisión original

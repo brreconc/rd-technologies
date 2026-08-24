@@ -4,9 +4,9 @@ import { platforms, defaultPlatformId, deviceFrame, STAGE_RATIO } from "./platfo
 const pct = (value: string) => Number.parseFloat(value);
 
 describe("catálogo de plataformas", () => {
-  it("cubre los cuatro destinos, sin identificadores repetidos", () => {
-    expect(platforms).toHaveLength(4);
-    expect(new Set(platforms.map((p) => p.id)).size).toBe(4);
+  it("cubre los cinco destinos, sin identificadores repetidos", () => {
+    expect(platforms).toHaveLength(5);
+    expect(new Set(platforms.map((p) => p.id)).size).toBe(5);
   });
 
   it("arranca en un destino que existe", () => {
@@ -15,7 +15,7 @@ describe("catálogo de plataformas", () => {
 
   it("da a cada destino un acento propio y válido", () => {
     const accents = platforms.map((p) => p.accent);
-    expect(new Set(accents).size).toBe(4);
+    expect(new Set(accents).size).toBe(platforms.length);
     for (const accent of accents) expect(accent).toMatch(/^#[0-9a-f]{6}$/);
   });
 
@@ -60,15 +60,28 @@ describe("geometría del dispositivo", () => {
     };
     expect(orientation("web")).toBe("apaisado");
     expect(orientation("escritorio")).toBe("apaisado");
+    expect(orientation("ecommerce")).toBe("vertical");
     expect(orientation("android")).toBe("vertical");
     expect(orientation("ios")).toBe("vertical");
   });
 
-  it("solo redondea las esquinas de los teléfonos", () => {
+  /**
+   * El radio no es decorativo: `.deck-device[data-rounded]` lo usa para decidir
+   * si el dispositivo lleva bisel, y el bisel es lo que impide que la curva del
+   * marco se coma la barra de estado y la navegación inferior. Un destino de
+   * pantalla plana con radio, o un teléfono sin él, rompería esa cadena.
+   */
+  it("solo redondea las esquinas de los dispositivos con marco", () => {
     const radius = Object.fromEntries(platforms.map((p) => [p.id, p.fit.radius]));
     expect(radius.web).toBe(0);
     expect(radius.escritorio).toBe(0);
+    expect(radius.ecommerce).toBeGreaterThan(0);
     expect(radius.android).toBeGreaterThan(0);
     expect(radius.ios).toBeGreaterThan(0);
+  });
+
+  it("da a cada destino una resolución distinta de las demás", () => {
+    const shapes = platforms.map((p) => `${p.readout.w}x${p.readout.h}`);
+    expect(new Set(shapes).size).toBe(platforms.length);
   });
 });

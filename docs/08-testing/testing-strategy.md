@@ -77,8 +77,10 @@ instrumento estaría mintiendo. Se comprueba destino por destino:
 - El marco dibujado tiene **exactamente** la proporción que anuncia su `readout`, corrigiendo por la
   proporción del escenario (5/4), que no es cuadrado.
 - El dispositivo **cabe** dentro del escenario en ambos ejes.
-- Apaisados y verticales están donde toca, y solo los teléfonos llevan esquinas redondeadas.
-- El catálogo está completo: cuatro destinos, identificadores y acentos únicos, tres capacidades por
+- Apaisados y verticales están donde toca, y solo los dispositivos con marco llevan esquinas
+  redondeadas. El radio no es decorativo: es lo que decide si el dispositivo recibe bisel.
+- Cada destino anuncia una resolución distinta de las demás.
+- El catálogo está completo: cinco destinos, identificadores y acentos únicos, tres capacidades por
   panel (la rejilla está pensada para tres) y ningún campo de copy vacío.
 
 > Sustituye a `screens.test.ts`, que validaba los mock-ups SVG retirados en la Fase 11
@@ -87,22 +89,30 @@ instrumento estaría mintiendo. Se comprueba destino por destino:
 ### `platforms.spec.ts` — E2E
 
 1. **El recorrido automático avanza solo Y se puede detener.** Cubre WCAG 2.2.2: comprueba que
-   cambia de destino sin intervención y que, tras pulsar el botón, deja de cambiar.
+   cambia de destino sin intervención y que, tras pulsar el botón, deja de cambiar. Se ejecuta con
+   la **ventana más baja que el deck**, que es la regresión concreta que vigila: el observador
+   pedía ver el 30% del elemento, y esa fracción tiene como techo `alturaVentana/alturaDeck`, así
+   que al crecer la sección se volvió inalcanzable y el recorrido dejó de arrancar.
 2. **Teclado.** Flechas, `Inicio` y `Fin` recorren el rail moviendo foco y selección a la vez.
    Regresión concreta que vigila: el diseño de partida traía un candado temporal de 700 ms que se
-   tragaba las pulsaciones y hacía inalcanzables dos de los cuatro destinos.
+   tragaba las pulsaciones y hacía inalcanzables dos de los destinos.
 3. **La cota y el mock-up cambian con el destino**, y nunca hay dos mock-ups montados a la vez.
-4. **Los cuatro destinos se ven a la vez a 375px** — se mide la caja de cada pestaña contra el
-   viewport. Regresión que vigila: con el rail como tira deslizable, tres quedaban fuera de pantalla
-   sin ninguna pista de que existieran.
-5. **Ningún destino desborda a 320px** — se recorren los cuatro midiendo `scrollWidth`.
-6. **Movimiento reducido:** no hay recorrido automático, el botón no se ofrece, el contenido está
+4. **Los cinco destinos se ven a la vez a 375px** — se mide la caja de cada pestaña contra el
+   viewport. Regresión que vigila: con el rail como tira deslizable, casi todos quedaban fuera de
+   pantalla sin ninguna pista de que existieran.
+5. **El nombre de ningún destino se recorta** a 320, 375, 768 y 1024px — se compara `scrollWidth`
+   con `clientWidth` en cada rótulo. Regresión: a dos columnas salía "E-comme…" en un teléfono.
+6. **El dispositivo no se transforma con el puntero encima** — se lee la matriz calculada de
+   `.deck-device` y se exige identidad. Es la guardia de la nitidez del mock-up: cualquier
+   transformación 3D lo desenfoca ([ADR-015](../01-architecture/decisions/ADR-015-crisp-deck-and-ecommerce.md)).
+7. **Ningún destino desborda a 320px** — se recorren los cinco midiendo `scrollWidth`.
+8. **Movimiento reducido:** no hay recorrido automático, el botón no se ofrece, el contenido está
    completo y **no hay ni un error de consola** (guardia contra desajustes de hidratación).
 
 ## Resultados (última corrida local, Chromium)
 
-- **Unit (Vitest):** 66 tests en verde (incluye el motor de la malla neuronal y la geometría del deck).
-- **E2E + responsive + a11y (Playwright):** 26 tests en verde.
+- **Unit (Vitest):** 70 tests en verde (incluye el motor de la malla neuronal y la geometría del deck).
+- **E2E + responsive + a11y (Playwright):** 28 tests en verde.
 - **Lighthouse (build indexable):** Performance **99**, Accessibility **100**,
   Best Practices **96**, SEO **100**; LCP 0,9 s · CLS 0 · TBT 0 ms.
 - **`pnpm audit --prod`:** sin vulnerabilidades.
