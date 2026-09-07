@@ -120,6 +120,16 @@ unitario que lo calcula. Ver
 Acentos por destino: web `#00f5ff` · e-commerce `#ff5f9e` · android `#4ade80` · ios `#a78bfa` ·
 escritorio `#ffd93d`. Los cinco superan AA sobre `#0a0a0a`, porque se usan como color de texto.
 
+Acentos por estrato del manifiesto (`lib/constants/value-props.ts`): producto `#00f5ff` · seguridad
+`#a78bfa` · escala `#ffd93d`. Tres, no seis: aquí el color separa tres ideas, no dibuja un recorrido.
+
+> **Por qué la seguridad no usa el `--accent-purple` de la paleta.** El `#8b5cf6` del token se queda
+> en **4.68:1** sobre `--bg`: pasa AA por los pelos y no sobrevive a un fondo un punto más claro. El
+> ordinal del estrato se pinta con ese color, así que se usa el `#a78bfa` (**7.27:1**) que ya emplean
+> el recorrido del proceso y el destino iOS. El token de marca sigue siendo `#8b5cf6` para
+> **degradados**, donde nunca es color de texto. Ver
+> [ADR-017](../01-architecture/decisions/ADR-017-value-props-manifesto.md).
+
 Ver [ADR-004](../01-architecture/decisions/ADR-004-tailwind-v4-tokens.md) (tokens en CSS con
 Tailwind v4) y [ADR-006](../01-architecture/decisions/ADR-006-fase1-defaults.md) (decisión original
 de incluir tema claro, superada por ADR-012).

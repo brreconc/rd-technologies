@@ -71,22 +71,51 @@ Detalle en [09-content-seo/seo](../09-content-seo/seo.md).
 
 Contenido tipado en `src/lib/constants` (no hardcodeado). Helpers: `SectionHeading`, `IconBadge`.
 
-| Sección           | Ancla                 | Fuente de contenido                                   |
-| ----------------- | --------------------- | ----------------------------------------------------- |
-| `Hero`            | —                     | copy inline (oficial) + `HeroBackdrop`/`HeroStage`    |
-| `TechMarquee`     | —                     | `constants/tech`                                      |
-| `ValueProps`      | `#propuesta-de-valor` | `constants/value-props`                               |
-| `Services`        | `#servicios`          | `constants/services`                                  |
-| `Platforms`       | `#plataformas`        | `constants/platforms` (deck interactivo, Fases 10–11) |
-| `Differentiators` | `#por-que-elegirnos`  | `constants/differentiators`                           |
-| `Process`         | `#proceso`            | `constants/process` (recorrido horizontal, Fase 13)   |
-| `UseCases`        | `#casos-de-uso`       | `constants/use-cases`                                 |
-| `Testimonials`    | `#testimonios`        | `constants/testimonials` (ejemplos)                   |
-| `FAQ`             | `#faq`                | `constants/faq` (Accordion)                           |
-| `FinalCTA`        | `#contacto`           | copy inline (oficial)                                 |
+| Sección           | Ancla                 | Fuente de contenido                                     |
+| ----------------- | --------------------- | ------------------------------------------------------- |
+| `Hero`            | —                     | copy inline (oficial) + `HeroBackdrop`/`HeroStage`      |
+| `TechMarquee`     | —                     | `constants/tech`                                        |
+| `ValueProps`      | `#propuesta-de-valor` | `constants/value-props` (manifiesto editorial, Fase 14) |
+| `Services`        | `#servicios`          | `constants/services`                                    |
+| `Platforms`       | `#plataformas`        | `constants/platforms` (deck interactivo, Fases 10–11)   |
+| `Differentiators` | `#por-que-elegirnos`  | `constants/differentiators`                             |
+| `Process`         | `#proceso`            | `constants/process` (recorrido horizontal, Fase 13)     |
+| `UseCases`        | `#casos-de-uso`       | `constants/use-cases`                                   |
+| `Testimonials`    | `#testimonios`        | `constants/testimonials` (ejemplos)                     |
+| `FAQ`             | `#faq`                | `constants/faq` (Accordion)                             |
+| `FinalCTA`        | `#contacto`           | copy inline (oficial)                                   |
 
 > Todas las secciones usan HTML semántico (`section` + `aria-labelledby`, listas, headings
 > jerárquicos) y animaciones de entrada (ver abajo).
+
+### Manifiesto de la propuesta de valor (`sections/ValueProps`) — Fase 14
+
+Composición **editorial asimétrica**: a la izquierda el texto (antetítulo, titular corto con dos
+palabras teñidas con el degradado de marca, entradilla de dos frases y un enlace al proceso); a la
+derecha un **panel de estratos** de una sola pieza con tres afirmaciones engarzadas por una espina de
+luz. Ver [ADR-017](../01-architecture/decisions/ADR-017-value-props-manifesto.md).
+
+Es un **Server Component completo**: lo único de cliente son los envoltorios de animación de entrada
+que ya existían (`Reveal`, `TextReveal`, `Stagger`). Se retiró `SpotlightCard` de esta sección.
+
+| Pieza CSS      | Qué es                                                                               |
+| -------------- | ------------------------------------------------------------------------------------ |
+| `.vpx`         | La rejilla 5/7 a partir de `lg`; apilada por debajo.                                 |
+| `.vpx-strata`  | El panel: `<ol>` con borde, halo frío y un hilo de luz en el canto superior.         |
+| `.vpx-stratum` | Una fila. Conoce su color en `--own-accent` y su relleno vertical en `--vpx-pad-y`.  |
+| `.vpx-rail`    | La columna del nodo. Su `::after` es la **espina** que baja hasta el nodo siguiente. |
+| `.vpx-edge`    | El filo de acento que se dibuja bajo la fila al posarse encima o enfocar dentro.     |
+
+**Tres invariantes que hay que respetar al tocar esto:**
+
+1. **La espina llega al nodo siguiente gracias a un margen negativo**
+   (`margin-bottom: calc(-2 * var(--vpx-pad-y))`). El raíl solo mide la caja de contenido de su
+   fila; sin ese margen la línea se para en el aire y parece rota. Si cambias el relleno de la fila,
+   cámbialo **en la variable**, no en el `padding` a pelo.
+2. **El acento de cada estrato se usa como color de TEXTO** en su ordinal, así que tiene que pasar
+   AA sobre `--bg`. `value-props.test.ts` lo calcula y falla si no.
+3. **Los estratos no pueden llamarse como los servicios.** Aquí va el criterio, en "Servicios" el
+   catálogo; hay un test que compara los títulos de las dos secciones y falla si se solapan.
 
 ### Recorrido del proceso (`sections/Process`) — Fase 13
 
@@ -162,16 +191,16 @@ E-commerce).
 
 ## Animaciones (`src/components/animations`)
 
-| Componente                | Uso                                                                                                         |
-| ------------------------- | ----------------------------------------------------------------------------------------------------------- |
-| `Reveal`                  | Entrada fade+subida al hacer scroll (`mode="scroll"`) o al montar (`mode="mount"`); opción `blur`.          |
-| `Stagger` / `StaggerItem` | Lista con entrada escalonada 3D de sus ítems (variante `cardIn`).                                           |
-| `TextReveal`              | Título revelado **palabra a palabra** desde detrás de su máscara. Usado por todos los `SectionHeading`.     |
-| `NeuralNetwork`           | Malla neuronal del hero en `<canvas>`: arranque, tráfico de datos e intrusiones interceptadas. Ver ADR-011. |
-| `ScrollProgress`          | Barra de progreso de lectura fija arriba (`aria-hidden`).                                                   |
-| `MagneticButton`          | El CTA se desplaza hacia el cursor con muelle; sin listeners con movimiento reducido.                       |
-| `CountUp`                 | Cuenta de 0 al valor al entrar en pantalla; el HTML contiene siempre el valor final.                        |
-| `Marquee`                 | Cinta infinita en CSS puro con copia `aria-hidden` para no duplicar contenido.                              |
+| Componente                | Uso                                                                                                                                                                                                                        |
+| ------------------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `Reveal`                  | Entrada fade+subida al hacer scroll (`mode="scroll"`) o al montar (`mode="mount"`); opción `blur`.                                                                                                                         |
+| `Stagger` / `StaggerItem` | Lista con entrada escalonada de sus ítems. Por defecto `cardIn` (llegada 3D, para tarjetas sueltas); `StaggerItem` acepta otra variante — `rowIn` es la entrada lateral sin giro, para filas dentro de un panel con borde. |
+| `TextReveal`              | Título revelado **palabra a palabra** desde detrás de su máscara. Usado por todos los `SectionHeading`. Con `highlight` tiñe un fragmento contiguo con el degradado de marca sin dejar de recibir texto plano.             |
+| `NeuralNetwork`           | Malla neuronal del hero en `<canvas>`: arranque, tráfico de datos e intrusiones interceptadas. Ver ADR-011.                                                                                                                |
+| `ScrollProgress`          | Barra de progreso de lectura fija arriba (`aria-hidden`).                                                                                                                                                                  |
+| `MagneticButton`          | El CTA se desplaza hacia el cursor con muelle; sin listeners con movimiento reducido.                                                                                                                                      |
+| `CountUp`                 | Cuenta de 0 al valor al entrar en pantalla; el HTML contiene siempre el valor final.                                                                                                                                       |
+| `Marquee`                 | Cinta infinita en CSS puro con copia `aria-hidden` para no duplicar contenido.                                                                                                                                             |
 
 La lógica de la malla vive aparte, **sin DOM**, en `animations/NeuralNetwork/engine.ts` (probada con
 Vitest en `engine.test.ts`).

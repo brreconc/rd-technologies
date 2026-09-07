@@ -29,9 +29,9 @@ Medido sobre `pnpm start`, sumando los recursos reales de la ruta (18 ficheros):
 
 | Compresión                       | First Load JS | Objetivo    |
 | -------------------------------- | ------------- | ----------- |
-| **Brotli** (lo que sirve un CDN) | **~259 KB**   | < 200 KB ❌ |
+| **Brotli** (lo que sirve un CDN) | **~268 KB**   | < 200 KB ❌ |
 
-CSS: ~14 KB brotli.
+CSS: ~15 KB brotli.
 
 > Next 16 + Turbopack no imprime la tabla de tamaños en el build; se mide sirviendo la ruta.
 
@@ -60,6 +60,8 @@ El objetivo de **< 200 KB** (§11) está incumplido. Trazabilidad de la medició
 | Fase 11 (re-medida)  | —       | ~257 KB |
 | Fase 12              | —       | ~258 KB |
 | Fase 13              | —       | ~259 KB |
+| Fase 13 (re-medida)  | —       | ~268 KB |
+| Fase 14              | —       | ~268 KB |
 
 El salto lo produjo la **Fase 8**, cuando las tarjetas de sección pasaron de Server Components
 (`Card`) a Client Components (`SpotlightCard`) y se añadieron formularios y menú interactivos. La
@@ -69,6 +71,18 @@ Fase 9 aportó ~4 KB.
 casi se paga solo porque en la misma fase se retiró `next-themes` con el tema claro
 ([ADR-012](../01-architecture/decisions/ADR-012-single-dark-theme.md)). El deck no trajo ninguna
 dependencia.
+
+**La Fase 14 cuesta 0 KB de JS y +1 KB de CSS.** El manifiesto de la propuesta de valor
+([ADR-017](../01-architecture/decisions/ADR-017-value-props-manifesto.md)) retira `SpotlightCard`
+—Client Component con muelles— de esa sección y la deja en Server Components salvo los tres
+envoltorios de entrada. Lo que gana ahí se lo come el icono extra de `lucide`, de modo que el
+resultado neto es plano.
+
+> **Ojo con la serie:** la re-medida de la Fase 13 (268 KB) NO es una regresión. El script de la
+> Fase 12 cargaba `/` y medía; el de ahora **recorre además la página entera** antes de listar los
+> ficheros, así que recoge también los trozos que solo se piden al bajar. Es el número honesto, y es
+> el que hay que usar de aquí en adelante. Para poder dar un delta real se reconstruyó `f9deb87` y
+> se midió con el script nuevo: **268 KB**, exactamente igual.
 
 **La Fase 13 cuesta +1 KB de JS y +1 KB de CSS.** El recorrido del proceso
 ([ADR-016](../01-architecture/decisions/ADR-016-horizontal-process-timeline.md)) **retira Framer
@@ -103,14 +117,16 @@ Presupuestos en [`lighthouserc.json`](../../lighthouserc.json): las cuatro categ
 **≥ 0,95** o la build de auditoría falla. Corrida local (`pnpm lhci`, preset desktop, 3 pasadas,
 build indexable):
 
-| Categoría      | Fase 6 | Fase 9 | **Fase 10** |
-| -------------- | ------ | ------ | ----------- |
-| Performance    | 99     | 99     | **99**      |
-| Accessibility  | 100    | 100    | **100**     |
-| Best Practices | 96     | 96     | **96**      |
-| SEO            | 100    | 100    | **100**     |
+| Categoría      | Fase 6 | Fase 9 | Fase 10 | **Fase 14** |
+| -------------- | ------ | ------ | ------- | ----------- |
+| Performance    | 99     | 99     | 99      | **99**      |
+| Accessibility  | 100    | 100    | 100     | **100**     |
+| Best Practices | 96     | 96     | 96      | **96**      |
+| SEO            | 100    | 100    | 100     | **100**     |
 
 Métricas de la Fase 11: **LCP 0,8–0,9 s · CLS 0 · TBT 0 ms**.
+Métricas de la Fase 14: **LCP 0,8–0,9 s · TBT 0 ms**, y CLS 0 en dos de las tres pasadas — la
+tercera vuelve a marcar el 0,372 del footer que se describe justo debajo.
 
 > Ni la escenografía de la Fase 9 (canvas del hero, revelados por scroll, línea de tiempo) ni el
 > deck de las Fases 10–11 movieron ninguna métrica. El canvas se pinta después del texto y se pausa
@@ -129,6 +145,13 @@ quitando la sección `Platforms` del árbol y reconstruyendo: el valor sale **id
 
 Queda como deuda anotada, con el sospechoso ya identificado: `body` es un flex vertical con
 `min-h-dvh`, y el footer no tiene reserva de espacio mientras `main` está vacío.
+
+**Estado en la Fase 14 (sigue abierto, y conviene cerrarlo).** Se vuelve a medir y sale **el mismo
+valor exacto**, 0,372, en una de cada tres pasadas — ni la Fase 13 ni la 14 lo han movido, lo que
+confirma que no depende del contenido de las secciones. La corrección propuesta es de una línea
+(reservar altura para `<main>`), pero toca el layout raíz y afecta a páginas cortas como el 404, así
+que no se ha aplicado dentro del alcance de estas fases. Mientras tanto **la mediana de Lighthouse
+sigue en CLS 0**, que es lo que evalúan las aserciones de `lighthouserc.json`.
 
 ### Nota sobre las animaciones ligadas al scroll
 

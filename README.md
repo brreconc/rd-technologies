@@ -3,7 +3,7 @@
 Landing page corporativa de **R&D Technologies** (desarrollo de software y ciberseguridad).
 Construida con Next.js 16 (App Router), React 19, TypeScript estricto y Tailwind CSS v4.
 
-> **Estado:** Fases 0–13 completadas. Landing completa, probada y **dockerizada**, lista para que
+> **Estado:** Fases 0–14 completadas. Landing completa, probada y **dockerizada**, lista para que
 > el equipo la despliegue a producción (ver la sección **Despliegue** más abajo).
 > El plan y las decisiones se rigen por [`../DOCS/PROMPT_MAESTRO.md`](../DOCS/PROMPT_MAESTRO.md).
 

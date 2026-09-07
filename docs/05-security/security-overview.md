@@ -67,13 +67,14 @@ Comprobado en `pnpm start`:
 El criterio de entrega es `pnpm audit --prod` limpio, y el CI lo hace fallar si no lo está
 (`.github/workflows/ci.yml`, job `quality`). Historial de actuaciones:
 
-| Fecha      | Aviso                                                                                             | Actuación                                                               |
-| ---------- | ------------------------------------------------------------------------------------------------- | ----------------------------------------------------------------------- |
-| Fase 6     | `postcss` — XSS en el stringify de CSS (GHSA-qx2v-qp2m-jg93)                                      | Override a `>=8.5.10` en `pnpm-workspace.yaml` (solo se usa en build).  |
-| 2026-07-23 | **`next` 16.2.10** — 4 avisos, entre ellos **bypass de middleware/proxy** (GHSA-6gpp-xcg3-4w24)   | **Actualización a `next@16.2.11`** + `eslint-config-next@16.2.11`.      |
-| 2026-07-23 | `sharp <0.35.0` — CVE de libvips heredados (GHSA-f88m-g3jw-g9cj)                                  | Override a `>=0.35.0`.                                                  |
-| 2026-07-30 | `postcss <=8.5.17` — path traversal al auto-cargar el source map previo (GHSA-r28c-9q8g-f849)     | Override elevado a `>=8.5.18`.                                          |
-| 2026-08-24 | `nanoid <3.3.18` (transitiva de `postcss`) — bucle infinito con tamaño cero (GHSA-2v37-7h3g-55p8) | Override a `>=3.3.18`. Solo corre en build y nadie le pasa tamaño cero. |
+| Fecha      | Aviso                                                                                                                                                                                             | Actuación                                                                          |
+| ---------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | ---------------------------------------------------------------------------------- |
+| Fase 6     | `postcss` — XSS en el stringify de CSS (GHSA-qx2v-qp2m-jg93)                                                                                                                                      | Override a `>=8.5.10` en `pnpm-workspace.yaml` (solo se usa en build).             |
+| 2026-07-23 | **`next` 16.2.10** — 4 avisos, entre ellos **bypass de middleware/proxy** (GHSA-6gpp-xcg3-4w24)                                                                                                   | **Actualización a `next@16.2.11`** + `eslint-config-next@16.2.11`.                 |
+| 2026-07-23 | `sharp <0.35.0` — CVE de libvips heredados (GHSA-f88m-g3jw-g9cj)                                                                                                                                  | Override a `>=0.35.0`.                                                             |
+| 2026-07-30 | `postcss <=8.5.17` — path traversal al auto-cargar el source map previo (GHSA-r28c-9q8g-f849)                                                                                                     | Override elevado a `>=8.5.18`.                                                     |
+| 2026-08-24 | `nanoid <3.3.18` (transitiva de `postcss`) — bucle infinito con tamaño cero (GHSA-2v37-7h3g-55p8)                                                                                                 | Override a `>=3.3.18`. Solo corre en build y nadie le pasa tamaño cero.            |
+| 2026-09-06 | `browserslist <=4.28.6` (vía `styled-jsx` → `@babel/core`) — memoria sin desalojo de caché (GHSA-c83g-rgw3-j3cx) y escritura de prototipo al normalizar stats no confiables (GHSA-73wf-gq98-2v4g) | Override a `>=4.28.7`. Solo corre en build y no se le pasan estadísticas externas. |
 
 > ⚠️ **Por qué el aviso de `next` era serio aquí.** El bypass afectaba a aplicaciones del App Router
 > con Turbopack, y en este proyecto **la CSP con nonce y las cabeceras de seguridad se aplican en el

@@ -121,11 +121,24 @@
   rejilla → **CLS 0** al cambiar de paso, con E2E que lo mide. Los seis pasos siguen completos en el
   DOM en una `<ol>`: la animación nunca es la única forma de llegar al texto. **+1 KB de JS y +1 KB
   de CSS.** Verificada con 86 unit + 36 E2E y Lighthouse 99/100/96/100. **Completada.**
+- ✅ **Fase 14 — La propuesta de valor pasa a ser un manifiesto:**
+  ([ADR-017](./01-architecture/decisions/ADR-017-value-props-manifesto.md)). `#propuesta-de-valor`
+  era el bloque más flojo de la página: **73 palabras en un párrafo centrado** de nueve líneas y tres
+  tarjetas tituladas _Desarrollo_, _Seguridad_ y _Soporte_ — exactamente los tres pilares que la
+  sección siguiente vuelve a desplegar con todo detalle. Ahora es una composición **editorial
+  asimétrica (5/7)**: a la izquierda un titular corto con dos palabras teñidas con el degradado de
+  marca y **29 palabras** de entradilla; a la derecha un **panel de estratos** de una sola pieza,
+  con tres afirmaciones engarzadas por una espina de luz que se dibuja con el scroll y color propio
+  por estrato. El reparto de contenido con "Servicios" queda fijado por escrito —aquí el CRITERIO,
+  allí el CATÁLOGO— y hay un test que falla si vuelven a solaparse. `TextReveal` aprende a resaltar
+  un fragmento del titular sin dejar de ser texto plano, y `StaggerItem` admite una entrada lateral
+  (`rowIn`) para filas dentro de un panel. **0 KB de JS** (se retira `SpotlightCard` de la sección) y
+  +1 KB de CSS. Verificada con 101 unit + 48 E2E y Lighthouse 99/100/96/100. **Completada.**
 
 ## Deuda técnica abierta
 
 | Tema                               | Detalle                                                                                                                       |
 | ---------------------------------- | ----------------------------------------------------------------------------------------------------------------------------- |
-| **Presupuesto de JS (§11)**        | ~278 KB brotli frente al objetivo < 200 KB. Origen y plan en [07-performance](./07-performance/performance-budgets.md).       |
+| **Presupuesto de JS (§11)**        | ~268 KB brotli frente al objetivo < 200 KB. Origen y plan en [07-performance](./07-performance/performance-budgets.md).       |
 | **La página no se muestra sin JS** | Consecuencia de la ruta dinámica que exige el nonce de la CSP. Ver [06-accessibility](./06-accessibility/a11y-guidelines.md). |
 | **Contenido pendiente (§19)**      | Datos reales de contacto, testimonios y las métricas del hero (hoy ilustrativas).                                             |

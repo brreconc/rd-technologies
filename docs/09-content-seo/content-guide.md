@@ -11,6 +11,40 @@
 El copy oficial de las secciones proviene de `Prompt.md` (brief del cliente). **No inventar
 mensajes de marca**; ajustar solo con aprobación.
 
+> **Excepción registrada (Fase 14).** El copy de "Propuesta de valor" **se reescribió a petición
+> expresa del cliente**. Queda anotado aquí para que quien recoja el proyecto sepa que ese texto ya
+> no es el de `Prompt.md`. Ver [ADR-017](../01-architecture/decisions/ADR-017-value-props-manifesto.md).
+
+### Sección "Propuesta de valor" (Fase 14)
+
+Contenido en [`lib/constants/value-props.ts`](../../src/lib/constants/value-props.ts). Es el
+**manifiesto**: lo primero que se lee después del hero, y lo único que hay que leer para entender
+quién es la empresa.
+
+La regla que fija el reparto con la sección siguiente, y que es la razón de ser de esta:
+
+> **"Propuesta de valor" cuenta el CRITERIO. "Servicios" cuenta el CATÁLOGO.**
+
+Antes no era así: los tres pilares de aquí se llamaban _Desarrollo_, _Seguridad_ y _Soporte_, que es
+literalmente lo que "Servicios" despliega diez centímetros más abajo. Ahora los tres estratos hablan
+de **cómo se trabaja** (_a medida, no de plantilla_; _seguro desde el diseño_; _preparado para
+crecer_), no de qué se vende. Hay un test que falla si los títulos vuelven a solaparse.
+
+Reglas de redacción:
+
+- **El titular, 10 palabras como mucho**, y con las tres ideas dentro (a medida · seguro · escala).
+  `value-props.test.ts` lo comprueba.
+- **La entradilla, dos frases y 40 palabras como mucho.** El copy anterior tenía 73 en un solo
+  párrafo y era el motivo de rehacer la sección; el tope existe para que no vuelva a crecer.
+- **Una línea por estrato, 16 palabras como mucho.** Si una descripción necesita dos líneas, la idea
+  es demasiado grande para esta sección y pertenece a "Servicios".
+- **El fragmento resaltado del titular** (`highlight`) tiene que aparecer _tal cual_ en `title`. Si
+  no, no se resalta nada y el fallo es silencioso — por eso hay un test.
+- **Los tres acentos se usan como color de texto** en los ordinales, así que cualquier color nuevo
+  tiene que superar 4.5:1 sobre `--bg`. El test lo calcula.
+- **Son afirmaciones sin prueba, y hay que tratarlas como tales.** Nada de cifras ni de nombres de
+  cliente aquí mientras no haya casos reales (§19).
+
 ### Sección "Plataformas" (Fases 10–11)
 
 Contenido en [`lib/constants/platforms.ts`](../../src/lib/constants/platforms.ts). Responde a la

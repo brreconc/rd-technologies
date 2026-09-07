@@ -25,3 +25,10 @@ overrides:
   # (GHSA-2v37-7h3g-55p8). Aquí solo corre en build y nadie le pasa tamaño cero,
   # pero el aviso es "high" y el salto es de parche. Ver docs/05-security.
   nanoid@<3.3.18: ">=3.3.18"
+  # browserslist, transitiva de styled-jsx → @babel/core, tiene dos avisos
+  # "high" publicados en septiembre de 2026: crecimiento de memoria sin desalojo
+  # de caché (GHSA-c83g-rgw3-j3cx) y escritura de prototipo al normalizar un
+  # `browserslist-stats.json` no confiable (GHSA-73wf-gq98-2v4g). Solo corre en
+  # build y aquí no se le pasan estadísticas externas, pero el salto es de
+  # parche. Ver docs/05-security.
+  browserslist@<4.28.7: ">=4.28.7"

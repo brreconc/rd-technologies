@@ -33,6 +33,19 @@
   exentos del contraste (WCAG 1.4.3). El escaneo axe los excluye a propósito; el contenido que sí
   leen las ayudas técnicas se audita al completo. Ver [08-testing](../08-testing/testing-strategy.md).
 
+## Listas que son listas — el manifiesto (Fase 14)
+
+Los tres estratos de "Propuesta de valor" son una **`<ol>` de verdad**, no tres `div`. Son tres, van
+en orden y ese orden significa algo: primero qué se construye, luego cómo se protege, luego cómo
+dura. Los ordinales visibles `01…03` están `aria-hidden` — la lista ya numera y leerlos dos veces
+estorba—, igual que la espina de luz y los nodos, que son dibujo.
+
+**No es un carrusel.** No hay pestañas, ni acordeón, ni recorrido automático: los tres estratos están
+visibles a la vez y no hay nada que pausar. El único elemento enfocable de la sección es el enlace
+"Así trabajamos". Si alguien convierte esto en algo interactivo, hereda de golpe todo lo de la
+sección siguiente (nombres de control únicos, WCAG 2.2.2, `aria-current`). Ver
+[ADR-017](../01-architecture/decisions/ADR-017-value-props-manifesto.md).
+
 ## Contenido que se mueve solo — WCAG 2.2.2 (Fases 10 y 13)
 
 Hay **dos** piezas que se mueven solas: el **deck multiplataforma** (ADR-013) recorre sus cinco

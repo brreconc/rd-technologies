@@ -4,17 +4,18 @@ Requisito §13. Suite instalada y en verde.
 
 ## Niveles
 
-| Nivel                | Herramienta                          | Dónde                    | Cubre                                                                                                                               |
-| -------------------- | ------------------------------------ | ------------------------ | ----------------------------------------------------------------------------------------------------------------------------------- |
-| Unit / componentes   | Vitest + Testing Library (jsdom)     | `src/**/*.test.ts(x)`    | Validadores Zod, sanitize, rate-limit, anti-bot, respuestas, JSON-LD, render de primitivos.                                         |
-| E2E funcional        | Playwright                           | `e2e/home.spec.ts`       | Navegación por anclas, paleta oscura única, errores accesibles del formulario.                                                      |
-| Experiencia (Fase 9) | Playwright                           | `e2e/experience.spec.ts` | Canvas del hero, texto íntegro de los títulos revelados, scroll-spy, sin JS y con movimiento reducido (sin errores de hidratación). |
-| Deck (Fases 10–11)   | Playwright                           | `e2e/platforms.spec.ts`  | Patrón de pestañas, teclado, cota y mock-up por destino, recorrido detenible (WCAG 2.2.2), 375px, 320px y movimiento reducido.      |
-| Seguridad (CSP)      | Playwright                           | `e2e/home.spec.ts`       | La CSP con nonce NO bloquea scripts: 0 violaciones ni errores de consola.                                                           |
-| Cross-browser        | Playwright (Chromium/Firefox/WebKit) | `ALL_BROWSERS=1`         | Paridad entre motores.                                                                                                              |
-| Responsive           | Playwright (320→2560)                | `e2e/responsive.spec.ts` | **Cero scroll horizontal** por breakpoint.                                                                                          |
-| Accesibilidad        | @axe-core/playwright                 | `e2e/a11y.spec.ts`       | Sin violaciones críticas/serias (WCAG 2.0/2.1 A y AA), también con el deck en otro acento.                                          |
-| Performance          | Lighthouse CI                        | `lighthouserc.json`      | Presupuestos CWV y categorías ≥ 95.                                                                                                 |
+| Nivel                | Herramienta                          | Dónde                     | Cubre                                                                                                                                                                          |
+| -------------------- | ------------------------------------ | ------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
+| Unit / componentes   | Vitest + Testing Library (jsdom)     | `src/**/*.test.ts(x)`     | Validadores Zod, sanitize, rate-limit, anti-bot, respuestas, JSON-LD, render de primitivos.                                                                                    |
+| E2E funcional        | Playwright                           | `e2e/home.spec.ts`        | Navegación por anclas, paleta oscura única, errores accesibles del formulario.                                                                                                 |
+| Experiencia (Fase 9) | Playwright                           | `e2e/experience.spec.ts`  | Canvas del hero, texto íntegro de los títulos revelados, scroll-spy, sin JS y con movimiento reducido (sin errores de hidratación).                                            |
+| Deck (Fases 10–11)   | Playwright                           | `e2e/platforms.spec.ts`   | Patrón de pestañas, teclado, cota y mock-up por destino, recorrido detenible (WCAG 2.2.2), 375px, 320px y movimiento reducido.                                                 |
+| Manifiesto (Fase 14) | Playwright                           | `e2e/value-props.spec.ts` | Titular íntegro pese al troceado por palabras, `<ol>` completa desde el primer render, ordinales fuera del árbol de accesibilidad, copy corto, 320→2560 y movimiento reducido. |
+| Seguridad (CSP)      | Playwright                           | `e2e/home.spec.ts`        | La CSP con nonce NO bloquea scripts: 0 violaciones ni errores de consola.                                                                                                      |
+| Cross-browser        | Playwright (Chromium/Firefox/WebKit) | `ALL_BROWSERS=1`          | Paridad entre motores.                                                                                                                                                         |
+| Responsive           | Playwright (320→2560)                | `e2e/responsive.spec.ts`  | **Cero scroll horizontal** por breakpoint.                                                                                                                                     |
+| Accesibilidad        | @axe-core/playwright                 | `e2e/a11y.spec.ts`        | Sin violaciones críticas/serias (WCAG 2.0/2.1 A y AA), también con el deck en otro acento.                                                                                     |
+| Performance          | Lighthouse CI                        | `lighthouserc.json`       | Presupuestos CWV y categorías ≥ 95.                                                                                                                                            |
 
 ## Comandos
 
@@ -134,12 +135,38 @@ En E2E ([`process.spec.ts`](../../e2e/process.spec.ts)):
 7. **Movimiento reducido:** no hay recorrido, el control no se ofrece, el contenido está completo y no
    hay ni un error de consola.
 
+### `value-props.test.ts`, `TextReveal.test.tsx` y `value-props.spec.ts` — el manifiesto (Fase 14)
+
+Tres cosas que solo un test detecta a tiempo:
+
+1. **El copy no puede volver a engordar.** La sección se rehízo porque tenía 73 palabras en un
+   párrafo; ahora hay tope al titular (≤10 palabras), a la entradilla (≤40) y a cada estrato (≤16).
+2. **`highlight` falla en silencio.** `TextReveal` solo tiñe el fragmento si lo encuentra tal cual;
+   una errata no rompe nada, simplemente deja el titular sin resaltar y nadie se entera. Hay un test
+   unitario que comprueba que `title` contiene `highlight`, y otro de componente que verifica qué
+   palabras acaban pintadas —incluido el caso de la palabra con puntuación al final.
+3. **La sección no puede volver a duplicar a "Servicios".** Un test compara los títulos de las dos y
+   falla si se solapan. Ese solape era el problema de fondo, y es exactamente la clase de cosa que
+   vuelve sola cuando alguien edita el copy meses después.
+
+Y el contraste de los tres acentos contra `#0a0a0a`, igual que en el proceso: se usan como color de
+texto en los ordinales.
+
+En E2E ([`value-props.spec.ts`](../../e2e/value-props.spec.ts)) se protege lo que el troceado por
+palabras podría romper —que el titular siga siendo **una frase** para lectores y para la búsqueda del
+navegador—, que los tres estratos estén completos en la `<ol>` desde el primer render, que los
+ordinales no se anuncien dos veces, que no haya desbordamiento a 320, 375, 768, 1024, 1440 y 2560px
+(también del panel, no solo del documento) y que con `prefers-reduced-motion` las tres filas queden a
+opacidad 1 y sin transformación, sin un solo error de consola.
+
 ## Resultados (última corrida local, Chromium)
 
-- **Unit (Vitest):** 86 tests en verde (incluye el motor de la malla neuronal y la geometría del deck).
-- **E2E + responsive + a11y (Playwright):** 36 tests en verde.
+- **Unit (Vitest):** 101 tests en verde (incluye el motor de la malla neuronal y la geometría del deck).
+- **E2E + responsive + a11y (Playwright):** 48 tests en verde.
 - **Lighthouse (build indexable):** Performance **99**, Accessibility **100**,
-  Best Practices **96**, SEO **100**; LCP 0,9 s · CLS 0 · TBT 0 ms.
+  Best Practices **96**, SEO **100**; LCP 0,9 s · TBT 0 ms. CLS 0 en dos de las tres pasadas; la
+  tercera marca el 0,372 del footer que sigue abierto desde la Fase 11 (ver
+  [07-performance](../07-performance/performance-budgets.md)).
 - **`pnpm audit --prod`:** sin vulnerabilidades.
 
 ## Pendiente

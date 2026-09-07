@@ -81,6 +81,24 @@ El **bisel** de los destinos de esquina redonda también va en unidades de conte
 la esquina se comía la barra de estado y la navegación inferior. Ver
 [ADR-015](../01-architecture/decisions/ADR-015-crisp-deck-and-ecommerce.md).
 
+## El manifiesto de la propuesta de valor en cada tamaño
+
+| Tamaño | Disposición                                                                           |
+| ------ | ------------------------------------------------------------------------------------- |
+| < `lg` | Apilado: primero el texto, después el panel de estratos a ancho completo.             |
+| ≥ `lg` | Dos columnas **desiguales**, 5 (texto) / 7 (panel), centradas verticalmente entre sí. |
+
+La asimetría no es capricho: dos mitades iguales devolverían la sección al bloque centrado que era
+antes de la Fase 14 ([ADR-017](../01-architecture/decisions/ADR-017-value-props-manifesto.md)).
+
+Dentro del panel no hay un solo breakpoint. Cada fila es una rejilla de dos columnas —nodo y texto—
+donde el nodo mide `clamp(2.5rem, 6vw, 2.875rem)` y el relleno vive en `--vpx-pad-y`, así que todo
+escala con el viewport de forma continua. El texto se envuelve solo; a 320px las descripciones pasan
+de una a tres líneas y la fila crece, que es justo lo que debe hacer.
+
+`e2e/value-props.spec.ts` comprueba a **320, 375, 768, 1024, 1440 y 2560px** que no desborda ni el
+documento ni el panel.
+
 ## El recorrido del proceso en cada tamaño
 
 El raíl es una rejilla de **seis columnas iguales desde 320px**, y cabe porque los hitos son números

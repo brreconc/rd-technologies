@@ -35,6 +35,19 @@ export const cardIn: Variants = {
   },
 };
 
+/**
+ * Entrada de una FILA que vive DENTRO de un panel compartido. Deliberadamente
+ * más sobria que `cardIn`: una tarjeta suelta puede llegar inclinada en 3D
+ * porque no tiene vecinos con los que alinearse, pero una fila dentro de un
+ * panel con borde sí los tiene — girarla despega su texto de la caja que la
+ * contiene y, de paso, el rasterizado en 3D de Chromium la desenfoca
+ * (la misma trampa documentada en ADR-015). Aquí solo entra desde la izquierda.
+ */
+export const rowIn: Variants = {
+  hidden: { opacity: 0, x: -18 },
+  show: { opacity: 1, x: 0, transition: { duration: 0.55, ease: EASE_OUT } },
+};
+
 /** Contenedor de un título que se revela palabra a palabra. */
 export const staggerWords: Variants = {
   hidden: {},
