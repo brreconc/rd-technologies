@@ -3,7 +3,7 @@
 Landing page corporativa de **R&D Technologies** (desarrollo de software y ciberseguridad).
 Construida con Next.js 16 (App Router), React 19, TypeScript estricto y Tailwind CSS v4.
 
-> **Estado:** Fases 0–7 completadas. Landing completa, probada y **dockerizada**, lista para que
+> **Estado:** Fases 0–16 completadas. Landing completa, probada y **dockerizada**, lista para que
 > el equipo la despliegue a producción (ver la sección **Despliegue** más abajo).
 > El plan y las decisiones se rigen por [`../DOCS/PROMPT_MAESTRO.md`](../DOCS/PROMPT_MAESTRO.md).
 
@@ -70,8 +70,19 @@ Toda la documentación vive en [`docs/`](./docs). Empieza por [`docs/README.md`]
 
 ## 🧱 Stack principal
 
-Next.js 16 · React 19 · TypeScript (strict) · Tailwind CSS v4 · Framer Motion · next-themes ·
-Zod · React Hook Form · Radix/shadcn (próxima fase) · Lucide.
+Next.js 16 · React 19 · TypeScript (strict) · Tailwind CSS v4 · Framer Motion ·
+Zod · React Hook Form · Radix · Lucide.
+
+Tema oscuro único, sin librería de theming ([ADR-012](./docs/01-architecture/decisions/ADR-012-single-dark-theme.md)).
+El hero es una **consola de compilación** que se ejecuta sola (teclea código, compila y aplica
+ciberseguridad), con un ejemplo aleatorio por recarga —Web, Android, iOS o Windows—
+([ADR-019](./docs/01-architecture/decisions/ADR-019-hero-code-console.md)).
+La sección `#plataformas` es un deck interactivo que compila el destino elegido delante del cliente
+([ADR-013](./docs/01-architecture/decisions/ADR-013-platform-deck.md),
+[ADR-014](./docs/01-architecture/decisions/ADR-014-instrument-deck.md) y
+[ADR-015](./docs/01-architecture/decisions/ADR-015-crisp-deck-and-ecommerce.md)).
+La sección `#proceso` es un recorrido horizontal que se ejecuta solo, con una detonación de color en
+cada hito ([ADR-016](./docs/01-architecture/decisions/ADR-016-horizontal-process-timeline.md)).
 
 ## 📄 Licencia
 

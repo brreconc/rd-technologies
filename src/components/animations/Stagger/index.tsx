@@ -1,6 +1,6 @@
 "use client";
 
-import { m } from "framer-motion";
+import { m, type Variants } from "framer-motion";
 import { cn } from "@/lib/utils/cn";
 import { cardIn, staggerContainer } from "@/lib/animations/framer-variants";
 
@@ -36,16 +36,28 @@ export function Stagger({
   );
 }
 
-/** Ítem (`li`) de una lista `Stagger`. */
+/**
+ * Ítem (`li`) de una lista `Stagger`.
+ *
+ * Entra con `cardIn` salvo que se le pase otra variante. El motivo de que se
+ * pueda cambiar es que no toda lista es una rejilla de tarjetas sueltas: una
+ * fila dentro de un panel compartido pide una entrada más contenida
+ * (`rowIn`). La clase `reveal` se mantiene pase lo que pase, porque es el
+ * contrato con `prefers-reduced-motion` (ADR-011).
+ */
 export function StaggerItem({
   className,
   children,
+  variants = cardIn,
+  style,
 }: {
   className?: string;
   children: React.ReactNode;
+  variants?: Variants;
+  style?: React.CSSProperties;
 }) {
   return (
-    <m.li className={cn("reveal", className)} variants={cardIn}>
+    <m.li className={cn("reveal", className)} variants={variants} style={style}>
       {children}
     </m.li>
   );

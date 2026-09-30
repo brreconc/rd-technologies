@@ -6,14 +6,17 @@ import { Button } from "@/components/ui/button";
 import { siteConfig } from "@/config/site";
 
 /**
- * Menú de navegación móvil (< lg). Usa Radix Dialog: trampa de foco, cierre con
- * Escape y roles ARIA correctos por defecto (§10).
+ * Menú de navegación en pantallas por debajo de `xl`. Usa Radix Dialog: trampa
+ * de foco, cierre con Escape y roles ARIA correctos por defecto (§10).
+ *
+ * El corte está en `xl` (no en `lg`) porque la navegación de escritorio con seis
+ * destinos necesita 1280px para mostrar los rótulos completos sin partirlos.
  */
 export function MobileNav() {
   return (
     <Dialog.Root>
       <Dialog.Trigger asChild>
-        <Button variant="ghost" size="icon" className="lg:hidden" aria-label="Abrir menú">
+        <Button variant="ghost" size="icon" className="xl:hidden" aria-label="Abrir menú">
           <Menu className="size-5" aria-hidden="true" />
         </Button>
       </Dialog.Trigger>

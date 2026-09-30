@@ -1,0 +1,200 @@
+/* ==========================================================================
+   SECCIÓN · Preguntas frecuentes — EXPLORADOR de dos paneles (.faqx-*)
+   Driver: FAQ/FaqExplorer.tsx
+
+   Izquierda: lista de preguntas numeradas (pestañas). Derecha: panel de
+   respuesta que revela la pregunta activa con una entrada cinematográfica y un
+   gran "?" de fondo. Cada pregunta tiene su acento (`--faq-accent`). En móvil la
+   rejilla se apila (lista arriba, respuesta debajo).
+   ========================================================================== */
+
+.faqx {
+  --faq-ease: cubic-bezier(0.16, 1, 0.3, 1);
+  display: grid;
+  gap: clamp(1rem, 2.5vw, 1.75rem);
+}
+@media (width >= 64rem) {
+  .faqx {
+    grid-template-columns: minmax(0, 0.92fr) minmax(0, 1.08fr);
+    align-items: start;
+  }
+}
+
+/* --- Lista de preguntas (pestañas) ---------------------------------------- */
+.faqx-list {
+  display: flex;
+  flex-direction: column;
+  gap: 0.55rem;
+}
+
+.faqx-q {
+  position: relative;
+  display: flex;
+  align-items: center;
+  gap: 0.85rem;
+  width: 100%;
+  text-align: left;
+  padding: 0.85rem 1rem;
+  border-radius: 0.8rem;
+  border: 1px solid transparent;
+  background: color-mix(in srgb, var(--surface) 45%, transparent);
+  color: var(--muted);
+  cursor: pointer;
+  overflow: hidden;
+  transition:
+    color 0.3s ease,
+    background-color 0.3s ease,
+    border-color 0.3s ease,
+    box-shadow 0.3s ease,
+    transform 0.3s var(--faq-ease);
+}
+/* Barra de acento a la izquierda que crece en la pregunta activa. */
+.faqx-q::before {
+  content: "";
+  position: absolute;
+  inset: 0.55rem auto 0.55rem 0;
+  width: 3px;
+  border-radius: 999px;
+  background: var(--faq-accent);
+  transform: scaleY(0);
+  transform-origin: center;
+  transition: transform 0.35s var(--faq-ease);
+}
+.faqx-q:hover {
+  color: var(--fg);
+  background: color-mix(in srgb, var(--surface) 70%, transparent);
+}
+.faqx-q:focus-visible {
+  outline: 2px solid var(--faq-accent);
+  outline-offset: 2px;
+}
+.faqx-q[data-active] {
+  color: var(--fg);
+  border-color: color-mix(in srgb, var(--faq-accent) 45%, var(--border));
+  background: color-mix(in srgb, var(--faq-accent) 12%, var(--surface));
+  box-shadow: 0 10px 30px -18px color-mix(in srgb, var(--faq-accent) 85%, transparent);
+}
+.faqx-q[data-active]::before {
+  transform: scaleY(1);
+}
+
+.faqx-q-n {
+  flex: none;
+  font-family: var(--font-jetbrains-mono), ui-monospace, monospace;
+  font-size: 0.72rem;
+  font-weight: 600;
+  letter-spacing: 0.04em;
+  color: color-mix(in srgb, var(--muted) 80%, transparent);
+  transition: color 0.3s ease;
+}
+.faqx-q[data-active] .faqx-q-n {
+  color: var(--faq-accent);
+}
+.faqx-q-t {
+  flex: 1;
+  min-width: 0;
+  font-size: 0.92rem;
+  font-weight: 500;
+  line-height: 1.35;
+}
+.faqx-q-caret {
+  flex: none;
+  color: color-mix(in srgb, var(--muted) 60%, transparent);
+  transition:
+    transform 0.35s var(--faq-ease),
+    color 0.3s ease;
+}
+.faqx-q[data-active] .faqx-q-caret {
+  color: var(--faq-accent);
+  transform: translateX(2px);
+}
+
+/* --- Panel de respuesta --------------------------------------------------- */
+.faqx-stage {
+  position: relative;
+}
+.faqx-panel {
+  position: relative;
+  overflow: hidden;
+  padding: clamp(1.5rem, 3vw, 2.35rem);
+  border-radius: 1.1rem;
+  border: 1px solid color-mix(in srgb, var(--faq-accent) 38%, var(--border));
+  background:
+    radial-gradient(
+      120% 90% at 100% 0%,
+      color-mix(in srgb, var(--faq-accent) 14%, transparent),
+      transparent 55%
+    ),
+    linear-gradient(
+      160deg,
+      color-mix(in srgb, var(--faq-accent) 9%, var(--surface)),
+      var(--surface)
+    );
+  box-shadow:
+    0 34px 70px -44px color-mix(in srgb, var(--faq-accent) 85%, transparent),
+    inset 0 1px 0 color-mix(in srgb, #fff 6%, transparent);
+  animation: faqx-in 0.55s var(--faq-ease) both;
+}
+@keyframes faqx-in {
+  from {
+    opacity: 0;
+    transform: translateY(14px) scale(0.985);
+    filter: blur(6px);
+  }
+  to {
+    opacity: 1;
+    transform: none;
+    filter: none;
+  }
+}
+
+/* Gran signo de interrogación de fondo (decorativo, atractivo). */
+.faqx-panel-mark {
+  position: absolute;
+  top: -1.5rem;
+  right: -0.5rem;
+  font-family: var(--font-space-grotesk), sans-serif;
+  font-weight: 800;
+  font-size: clamp(7rem, 20cqw, 12rem);
+  line-height: 1;
+  color: transparent;
+  -webkit-text-stroke: 1.5px color-mix(in srgb, var(--faq-accent) 26%, transparent);
+  pointer-events: none;
+  user-select: none;
+}
+
+.faqx-panel-k {
+  position: relative;
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5rem;
+  font-family: var(--font-jetbrains-mono), ui-monospace, monospace;
+  font-size: 0.68rem;
+  letter-spacing: 0.2em;
+  text-transform: uppercase;
+  color: var(--faq-accent);
+}
+.faqx-panel-k::before {
+  content: "";
+  width: 1.4rem;
+  height: 1px;
+  background: color-mix(in srgb, var(--faq-accent) 65%, transparent);
+}
+.faqx-panel-q {
+  position: relative;
+  margin-top: 0.7rem;
+  font-size: clamp(1.25rem, 1rem + 1.2vw, 1.7rem);
+  font-weight: 700;
+  line-height: 1.2;
+  color: var(--fg);
+  text-wrap: balance;
+}
+.faqx-panel-a {
+  position: relative;
+  margin-top: 0.9rem;
+  max-width: 42rem;
+  font-size: clamp(0.98rem, 0.92rem + 0.3vw, 1.12rem);
+  line-height: 1.65;
+  color: var(--muted);
+  text-wrap: pretty;
+}

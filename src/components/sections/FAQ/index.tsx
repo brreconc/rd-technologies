@@ -1,38 +1,30 @@
 import { Container, Section } from "@/components/ui/container";
 import { SectionHeading } from "@/components/sections/SectionHeading";
 import { Reveal } from "@/components/animations/Reveal";
-import {
-  Accordion,
-  AccordionItem,
-  AccordionTrigger,
-  AccordionContent,
-} from "@/components/ui/accordion";
-import { faq } from "@/lib/constants/faq";
+import { FaqExplorer } from "./FaqExplorer";
 
 /**
  * Sección "Preguntas frecuentes" (§8.8).
- * Server Component que renderiza el Accordion (cliente) con datos serializables.
+ *
+ * El acordeón se sustituye por un EXPLORADOR de dos paneles (`FaqExplorer`):
+ * lista de preguntas a un lado y panel de respuesta al otro, más atractivo para
+ * explorar. El contenido sigue disponible como datos estructurados (FAQPage
+ * JSON-LD), así que el SEO no depende de esta capa.
  */
 export function FAQ() {
   return (
     <Section id="faq" aria-labelledby="faq-title" className="section-edge">
-      <Container className="max-w-3xl">
+      <Container className="max-w-5xl">
         <SectionHeading
           id="faq-title"
           centered
           eyebrow="Preguntas frecuentes"
           title="Resolvemos tus dudas"
+          highlight="tus dudas"
         />
 
-        <Reveal delay={0.1}>
-          <Accordion type="single" collapsible className="mt-10">
-            {faq.map((item, index) => (
-              <AccordionItem key={item.question} value={`faq-${index}`}>
-                <AccordionTrigger>{item.question}</AccordionTrigger>
-                <AccordionContent>{item.answer}</AccordionContent>
-              </AccordionItem>
-            ))}
-          </Accordion>
+        <Reveal delay={0.1} className="mt-10">
+          <FaqExplorer />
         </Reveal>
       </Container>
     </Section>

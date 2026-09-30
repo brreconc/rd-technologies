@@ -3,6 +3,7 @@
 import { useId, useState, type BaseSyntheticEvent } from "react";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
+import { User, Mail, Building2, MessageSquare } from "lucide-react";
 import { Input, Label } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { Button } from "@/components/ui/button";
@@ -102,78 +103,96 @@ export function ContactForm() {
   }
 
   return (
-    <form onSubmit={handleSubmit(onSubmit)} noValidate className="flex flex-col gap-5 text-left">
+    <form onSubmit={handleSubmit(onSubmit)} noValidate className="cf-form">
       <AntiBotFields timingRef={timingRef} />
 
-      <div className="grid gap-5 sm:grid-cols-2">
-        <div>
-          <Label htmlFor={`${fieldId}-name`}>Nombre</Label>
+      <div className="cf-row">
+        <div className="cf-field">
+          <User className="cf-ico" aria-hidden="true" />
           <Input
             id={`${fieldId}-name`}
+            placeholder=" "
             autoComplete="name"
             maxLength={CONTACT_LIMITS.name.max}
             aria-invalid={!!errors.name}
             aria-describedby={errors.name ? errId("name") : undefined}
+            className="cf-input"
             {...register("name")}
           />
+          <Label htmlFor={`${fieldId}-name`} className="cf-label">
+            Nombre
+          </Label>
           {errors.name && (
-            <p id={errId("name")} role="alert" className="text-danger mt-1.5 text-sm">
+            <p id={errId("name")} role="alert" className="cf-err">
               {errors.name.message}
             </p>
           )}
         </div>
 
-        <div>
-          <Label htmlFor={`${fieldId}-email`}>Correo electrónico</Label>
+        <div className="cf-field">
+          <Mail className="cf-ico" aria-hidden="true" />
           <Input
             id={`${fieldId}-email`}
             type="email"
             inputMode="email"
+            placeholder=" "
             autoComplete="email"
             maxLength={CONTACT_LIMITS.email.max}
             aria-invalid={!!errors.email}
             aria-describedby={errors.email ? errId("email") : undefined}
+            className="cf-input"
             {...register("email")}
           />
+          <Label htmlFor={`${fieldId}-email`} className="cf-label">
+            Correo electrónico
+          </Label>
           {errors.email && (
-            <p id={errId("email")} role="alert" className="text-danger mt-1.5 text-sm">
+            <p id={errId("email")} role="alert" className="cf-err">
               {errors.email.message}
             </p>
           )}
         </div>
       </div>
 
-      <div>
-        <Label htmlFor={`${fieldId}-company`}>
-          Empresa <span className="text-muted font-normal">(opcional)</span>
-        </Label>
+      <div className="cf-field">
+        <Building2 className="cf-ico" aria-hidden="true" />
         <Input
           id={`${fieldId}-company`}
+          placeholder=" "
           autoComplete="organization"
           maxLength={CONTACT_LIMITS.company.max}
           aria-invalid={!!errors.company}
           aria-describedby={errors.company ? errId("company") : undefined}
+          className="cf-input"
           {...register("company")}
         />
+        <Label htmlFor={`${fieldId}-company`} className="cf-label">
+          Empresa (opcional)
+        </Label>
         {errors.company && (
-          <p id={errId("company")} role="alert" className="text-danger mt-1.5 text-sm">
+          <p id={errId("company")} role="alert" className="cf-err">
             {errors.company.message}
           </p>
         )}
       </div>
 
-      <div>
-        <Label htmlFor={`${fieldId}-message`}>Mensaje</Label>
+      <div className="cf-field">
+        <MessageSquare className="cf-ico" aria-hidden="true" />
         <Textarea
           id={`${fieldId}-message`}
+          rows={3}
+          placeholder=" "
           maxLength={CONTACT_LIMITS.message.max}
           aria-invalid={!!errors.message}
           aria-describedby={errors.message ? errId("message") : undefined}
-          placeholder="Cuéntanos qué necesitas construir o proteger."
+          className="cf-input"
           {...register("message")}
         />
+        <Label htmlFor={`${fieldId}-message`} className="cf-label">
+          Mensaje
+        </Label>
         {errors.message && (
-          <p id={errId("message")} role="alert" className="text-danger mt-1.5 text-sm">
+          <p id={errId("message")} role="alert" className="cf-err">
             {errors.message.message}
           </p>
         )}
@@ -187,12 +206,14 @@ export function ContactForm() {
         </p>
       )}
 
-      <div className="flex flex-col items-start gap-3 sm:flex-row sm:items-center">
-        <Button type="submit" size="lg" disabled={isSubmitting}>
-          {isSubmitting ? "Enviando…" : "Solicita una asesoría gratuita"}
-        </Button>
-        <p className="text-muted text-xs">Te responderemos por correo. No compartimos tus datos.</p>
-      </div>
+      <Button
+        type="submit"
+        size="lg"
+        disabled={isSubmitting}
+        className="btn-shine mt-1 w-full justify-center"
+      >
+        {isSubmitting ? "Enviando…" : "Solicita una asesoría gratuita"}
+      </Button>
     </form>
   );
 }

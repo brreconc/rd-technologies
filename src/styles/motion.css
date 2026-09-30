@@ -1,0 +1,517 @@
+/* ==========================================================================
+   SISTEMA DE MOVIMIENTO — efectos de PÁGINA y transversales (no de una sola
+   sección): aurora, costura entre secciones, llegada de sección, rejilla de
+   puntos, radar, spotlight, HUD, marquee, view-transitions… Ver ADR-010/011.
+   Los efectos propios de UNA sección viven en src/styles/sections/<sección>.
+   ========================================================================== */
+/* ==========================================================================
+   SISTEMA DE MOVIMIENTO v3 — "escenografía de sistema seguro" (Fase 9)
+   Todo lo de aquí es GPU-friendly (transform/opacity/filter) y decorativo.
+   La regla global de @layer base (prefers-reduced-motion) ya fuerza
+   `animation-duration: 0.001ms`, así que TODAS estas animaciones se detienen
+   solas cuando el usuario pide menos movimiento.
+   Ver docs/02-design-system/motion.md, ADR-010 y ADR-011.
+   ========================================================================== */
+
+@keyframes gradient-pan {
+  to {
+    background-position: 200% center;
+  }
+}
+
+@keyframes gradient-boot {
+  from {
+    background-position: -120% center;
+  }
+  to {
+    background-position: 0% center;
+  }
+}
+
+@keyframes marquee-x {
+  to {
+    transform: translateX(-50%);
+  }
+}
+
+@keyframes shine-sweep {
+  to {
+    transform: translateX(240%) skewX(-18deg);
+  }
+}
+
+@keyframes radar-spin {
+  to {
+    transform: rotate(1turn);
+  }
+}
+
+@keyframes cue-fall {
+  0% {
+    transform: translateY(0);
+    opacity: 0;
+  }
+  25% {
+    opacity: 1;
+  }
+  100% {
+    transform: translateY(340%);
+    opacity: 0;
+  }
+}
+
+/* El hilo nace del nodo central y se despliega hacia los dos lados. */
+@keyframes edge-draw {
+  from {
+    transform: scaleX(0);
+    opacity: 0;
+  }
+  30% {
+    opacity: 1;
+  }
+  to {
+    transform: scaleX(1);
+    opacity: 1;
+  }
+}
+
+/* --- Costura entre secciones: hilo de luz en lugar de un borde plano --------
+   Donde el navegador soporta animaciones ligadas al scroll, el hilo se DIBUJA
+   desde el centro al entrar la sección — coste cero de JavaScript. Donde no
+   (Safari, navegadores antiguos), queda pintado en su estado final. */
+.section-edge {
+  position: relative;
+}
+/* La costura no es un borde: es un HILO DE LUZ con un nodo encendido en el
+   centro, el mismo vocabulario visual de la malla del hero. Tres capas de
+   fondo en un solo elemento (halo, nodo y línea de 1px centrada en la caja),
+   para no añadir nodos al DOM. */
+.section-edge::before {
+  content: "";
+  position: absolute;
+  inset-inline: 0;
+  top: -4px;
+  height: 9px;
+  pointer-events: none;
+  transform-origin: 50% 50%;
+  background:
+    radial-gradient(
+        circle at 50% 50%,
+        color-mix(in srgb, var(--accent-cyan) 45%, transparent) 0,
+        transparent 9px
+      )
+      center / 100% 100% no-repeat,
+    radial-gradient(
+        circle at 50% 50%,
+        color-mix(in srgb, var(--accent-cyan) 95%, transparent) 0 2px,
+        transparent 2.5px
+      )
+      center / 100% 100% no-repeat,
+    linear-gradient(
+        90deg,
+        transparent,
+        var(--border) 14%,
+        color-mix(in srgb, var(--accent-cyan) 60%, transparent) 50%,
+        var(--border) 86%,
+        transparent
+      )
+      center / 100% 1px no-repeat;
+}
+
+/* Resplandor de la costura: la luz que "enciende" el capítulo nuevo. Se hincha
+   al cruzar el límite entre secciones y se queda en un rescoldo tenue. */
+.section-edge::after {
+  content: "";
+  position: absolute;
+  inset-inline: 0;
+  top: 0;
+  height: 260px;
+  z-index: -1;
+  pointer-events: none;
+  opacity: 0;
+  background: radial-gradient(
+    55% 100% at 50% 0%,
+    color-mix(in srgb, var(--accent-cyan) 17%, transparent),
+    color-mix(in srgb, var(--accent-purple) 9%, transparent) 40%,
+    transparent 72%
+  );
+}
+
+@keyframes seam-bloom {
+  0% {
+    opacity: 0;
+  }
+  45% {
+    opacity: 1;
+  }
+  100% {
+    opacity: 0.22;
+  }
+}
+
+@supports (animation-timeline: view()) {
+  @media (prefers-reduced-motion: no-preference) {
+    .section-edge::before {
+      animation: edge-draw linear both;
+      animation-timeline: view();
+      animation-range: entry 0% entry 65%;
+    }
+    .section-edge::after {
+      animation: seam-bloom linear both;
+      animation-timeline: view();
+      animation-range: entry 0% entry 90%;
+    }
+  }
+}
+
+/* --- Llegada de sección: cada capítulo emerge de la penumbra ---------------
+   Ligado al scroll (sin JavaScript, sin observadores): la sección entra atenuada
+   y alcanza su brillo pleno según sube. Es lo que convierte el paso de una
+   sección a otra en un cambio de plano y no en un simple desplazamiento.
+   Lo aplica la primitiva `Section`, así que TODAS las secciones lo heredan. */
+@keyframes section-flow {
+  from {
+    opacity: 0.5;
+    transform: translate3d(0, 30px, 0);
+  }
+  to {
+    opacity: 1;
+    transform: none;
+  }
+}
+
+@supports (animation-timeline: view()) {
+  @media (prefers-reduced-motion: no-preference) {
+    .section-flow {
+      animation: section-flow linear both;
+      animation-timeline: view();
+      animation-range: entry 0% entry 60%;
+    }
+  }
+}
+
+/* --- Aurora: luz ambiental que recorre la página al hacer scroll -----------
+   Una única capa fija detrás de todo, cuyos focos se desplazan con el avance
+   del documento (`animation-timeline: scroll()`). Da continuidad cinematográfica
+   —la página se percibe como un solo espacio con iluminación propia— sin costar
+   un solo evento de scroll en JavaScript. */
+.aurora {
+  position: fixed;
+  inset: -15%;
+  z-index: -30;
+  pointer-events: none;
+  opacity: 0.6;
+  background:
+    radial-gradient(
+      40% 32% at 20% 14%,
+      color-mix(in srgb, var(--accent-cyan) 12%, transparent),
+      transparent 70%
+    ),
+    radial-gradient(
+      36% 30% at 82% 46%,
+      color-mix(in srgb, var(--accent-purple) 14%, transparent),
+      transparent 72%
+    );
+}
+
+@keyframes aurora-drift {
+  0% {
+    transform: translate3d(-3%, -2%, 0) scale(1.04);
+  }
+  50% {
+    transform: translate3d(4%, 3%, 0) scale(1.14);
+  }
+  100% {
+    transform: translate3d(-2%, 7%, 0) scale(1.06);
+  }
+}
+
+@supports (animation-timeline: scroll()) {
+  @media (prefers-reduced-motion: no-preference) {
+    .aurora {
+      animation: aurora-drift linear both;
+      animation-timeline: scroll(root);
+      will-change: transform;
+    }
+  }
+}
+
+/* --- Rejilla de puntos difuminada (fondo técnico) --- */
+.grid-dots {
+  position: absolute;
+  inset: 0;
+  z-index: -10;
+  pointer-events: none;
+  background-image: radial-gradient(
+    color-mix(in srgb, var(--fg) 14%, transparent) 1px,
+    transparent 1px
+  );
+  background-size: 32px 32px;
+  -webkit-mask-image: radial-gradient(ellipse 70% 60% at 50% 0%, #000 20%, transparent 75%);
+  mask-image: radial-gradient(ellipse 70% 60% at 50% 0%, #000 20%, transparent 75%);
+  opacity: 0.5;
+}
+
+/* --- Barrido de radar (CTA final): cierra el relato de vigilancia del hero --- */
+.radar-sweep {
+  position: absolute;
+  inset: 0;
+  z-index: -10;
+  pointer-events: none;
+  transform-origin: 50% 100%;
+  background: conic-gradient(
+    from 0deg at 50% 100%,
+    transparent 0deg,
+    color-mix(in srgb, var(--accent-cyan) 18%, transparent) 14deg,
+    transparent 40deg
+  );
+  -webkit-mask-image: radial-gradient(circle at 50% 100%, #000 8%, transparent 70%);
+  mask-image: radial-gradient(circle at 50% 100%, #000 8%, transparent 70%);
+  animation: radar-spin 12s linear infinite;
+  will-change: transform;
+}
+
+/* --- Indicador de scroll: gota de luz que cae por un hilo --- */
+.scroll-cue {
+  position: relative;
+  display: block;
+  width: 1px;
+  height: 40px;
+  overflow: hidden;
+  background: linear-gradient(180deg, transparent, color-mix(in srgb, var(--fg) 20%, transparent));
+}
+.scroll-cue::after {
+  content: "";
+  position: absolute;
+  inset-inline: 0;
+  top: -40%;
+  height: 40%;
+  background: linear-gradient(180deg, transparent, var(--accent-cyan));
+  animation: cue-fall 2.4s cubic-bezier(0.65, 0, 0.35, 1) infinite;
+}
+
+/* --- Barra de progreso de scroll (arriba, fija) --- */
+.scroll-progress {
+  transform-origin: 0 50%;
+  background-image: linear-gradient(90deg, var(--accent-cyan), var(--accent-purple));
+}
+
+/* --- Foco/spotlight que sigue al cursor dentro de una tarjeta --- */
+.spotlight {
+  position: relative;
+  isolation: isolate;
+}
+.spotlight::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  border-radius: inherit;
+  z-index: -1;
+  background: radial-gradient(
+    240px circle at var(--mx, 50%) var(--my, 0%),
+    color-mix(in srgb, var(--accent-cyan) 16%, transparent),
+    transparent 65%
+  );
+  opacity: 0;
+  transition: opacity 0.35s ease;
+  pointer-events: none;
+}
+.spotlight:hover::before,
+.spotlight:focus-within::before {
+  opacity: 1;
+}
+
+/* --- Brillo superior sutil: da volumen a las superficies --- */
+.card-sheen {
+  background-image: linear-gradient(
+    180deg,
+    color-mix(in srgb, var(--fg) 4%, transparent),
+    transparent 45%
+  );
+}
+
+/* --- Esquinas de HUD: se despliegan al enfocar/pasar el cursor por la tarjeta.
+   Ocho franjas de 1px dibujadas con gradientes (sin nodos extra ni bordes). --- */
+.hud-corners {
+  position: absolute;
+  inset: 0.55rem;
+  pointer-events: none;
+  opacity: 0;
+  transform: scale(0.98);
+  transition:
+    opacity 0.35s ease,
+    transform 0.35s ease;
+  --hud: color-mix(in srgb, var(--accent-cyan) 70%, transparent);
+  background:
+    linear-gradient(var(--hud), var(--hud)) left top / 14px 1px no-repeat,
+    linear-gradient(var(--hud), var(--hud)) left top / 1px 14px no-repeat,
+    linear-gradient(var(--hud), var(--hud)) right top / 14px 1px no-repeat,
+    linear-gradient(var(--hud), var(--hud)) right top / 1px 14px no-repeat,
+    linear-gradient(var(--hud), var(--hud)) left bottom / 14px 1px no-repeat,
+    linear-gradient(var(--hud), var(--hud)) left bottom / 1px 14px no-repeat,
+    linear-gradient(var(--hud), var(--hud)) right bottom / 14px 1px no-repeat,
+    linear-gradient(var(--hud), var(--hud)) right bottom / 1px 14px no-repeat;
+}
+.group:hover > .hud-corners,
+.group:focus-within > .hud-corners {
+  opacity: 1;
+  transform: scale(1);
+}
+
+/* --- Borde con gradiente que aparece al pasar el cursor --- */
+.gradient-border::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  border-radius: inherit;
+  padding: 1px;
+  background: linear-gradient(
+    130deg,
+    color-mix(in srgb, var(--accent-cyan) 70%, transparent),
+    transparent 45%,
+    color-mix(in srgb, var(--accent-purple) 70%, transparent)
+  );
+  -webkit-mask:
+    linear-gradient(#000 0 0) content-box,
+    linear-gradient(#000 0 0);
+  -webkit-mask-composite: xor;
+  mask-composite: exclude;
+  opacity: 0;
+  transition: opacity 0.35s ease;
+  pointer-events: none;
+}
+.gradient-border:hover::after,
+.gradient-border:focus-within::after {
+  opacity: 1;
+}
+
+/* --- Brillo diagonal que barre un botón al hacer hover --- */
+.btn-shine {
+  position: relative;
+  overflow: hidden;
+}
+.btn-shine::after {
+  content: "";
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 45%;
+  height: 100%;
+  background: linear-gradient(
+    90deg,
+    transparent,
+    color-mix(in srgb, #fff 55%, transparent),
+    transparent
+  );
+  transform: translateX(-180%) skewX(-18deg);
+  pointer-events: none;
+}
+.btn-shine:hover::after {
+  animation: shine-sweep 0.9s ease;
+}
+
+/* --- CTA premium: elevación + glow + anillo de energía -----------------------
+   El botón primario del hero recibe su color por plataforma en `--cta` (lo fija
+   el componente). El realce vive aquí: se eleva, intensifica el glow y emite un
+   anillo que se expande una vez al entrar el puntero. Nada de barrido diagonal. */
+.cta-primary {
+  position: relative;
+  box-shadow: 0 10px 30px -12px var(--cta, var(--accent-cyan));
+  transition:
+    transform 0.35s cubic-bezier(0.16, 1, 0.3, 1),
+    box-shadow 0.35s ease,
+    filter 0.35s ease;
+}
+.cta-primary:hover {
+  transform: translateY(-2px);
+  filter: brightness(1.08) saturate(1.08);
+  box-shadow:
+    0 18px 46px -14px var(--cta, var(--accent-cyan)),
+    inset 0 0 0 1px color-mix(in srgb, #fff 30%, transparent);
+}
+.cta-primary:active {
+  transform: translateY(0);
+}
+.cta-primary::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  border-radius: inherit;
+  pointer-events: none;
+  opacity: 0;
+}
+.cta-primary:hover::after {
+  animation: cta-ring 0.7s ease-out;
+}
+@keyframes cta-ring {
+  0% {
+    opacity: 0.7;
+    box-shadow: 0 0 0 0 color-mix(in srgb, var(--cta, var(--accent-cyan)) 55%, transparent);
+  }
+  100% {
+    opacity: 0;
+    box-shadow: 0 0 0 12px color-mix(in srgb, var(--cta, var(--accent-cyan)) 0%, transparent);
+  }
+}
+
+/* CTA "fantasma" (contorno): se rellena con un degradado de marca y se eleva. */
+.cta-ghost {
+  position: relative;
+  overflow: hidden;
+  isolation: isolate;
+  transition:
+    transform 0.35s cubic-bezier(0.16, 1, 0.3, 1),
+    border-color 0.3s ease,
+    color 0.3s ease,
+    box-shadow 0.35s ease;
+}
+.cta-ghost::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  z-index: -1;
+  border-radius: inherit;
+  background: linear-gradient(
+    120deg,
+    color-mix(in srgb, var(--accent-cyan) 22%, transparent),
+    color-mix(in srgb, var(--accent-purple) 22%, transparent)
+  );
+  opacity: 0;
+  transition: opacity 0.35s ease;
+}
+.cta-ghost:hover {
+  transform: translateY(-2px);
+  border-color: color-mix(in srgb, var(--accent-cyan) 55%, var(--border));
+  box-shadow: 0 14px 34px -16px color-mix(in srgb, var(--accent-cyan) 60%, transparent);
+}
+.cta-ghost:hover::before {
+  opacity: 1;
+}
+
+/* --- Marquee infinito (tiras de tecnología / confianza) --- */
+.marquee {
+  display: flex;
+  overflow: hidden;
+  -webkit-mask-image: linear-gradient(90deg, transparent, #000 10%, #000 90%, transparent);
+  mask-image: linear-gradient(90deg, transparent, #000 10%, #000 90%, transparent);
+}
+.marquee-track {
+  display: flex;
+  flex: 0 0 auto;
+  align-items: center;
+  gap: var(--gap, 3rem);
+  padding-right: var(--gap, 3rem);
+  min-width: 100%;
+  animation: marquee-x var(--speed, 34s) linear infinite;
+  will-change: transform;
+}
+.marquee:hover .marquee-track {
+  animation-play-state: paused;
+}
+
+/* Transiciones de vista suaves (progresivo; solo navegadores que lo soporten). */
+@media (prefers-reduced-motion: no-preference) {
+  @view-transition {
+    navigation: auto;
+  }
+}

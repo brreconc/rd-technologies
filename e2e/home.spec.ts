@@ -33,17 +33,20 @@ test.describe("Home", () => {
     await expect(page.locator("#contacto")).toBeInViewport();
   });
 
-  test("el toggle de tema alterna claro/oscuro", async ({ page }) => {
+  test("el sitio se sirve con la paleta oscura única", async ({ page }) => {
+    // ADR-012: no hay alternador de tema ni clase de tema en <html>; la paleta
+    // vive entera en CSS. Se verifica el contrato observable: fondo oscuro y
+    // `color-scheme: dark` (lo que hace que el navegador pinte en oscuro los
+    // controles nativos, scrollbars y el formulario).
     await page.goto("/");
-    const html = page.locator("html");
-    await expect(html).toHaveClass(/dark/);
-
-    // El toggle de tema es un role="switch" (aria-checked = tema claro).
-    const toggle = page.getByRole("switch", { name: /tema|theme|claro|oscuro/i }).first();
-    await expect(toggle).toHaveAttribute("aria-checked", "false");
-    await toggle.click();
-    await expect(html).toHaveClass(/light/);
-    await expect(toggle).toHaveAttribute("aria-checked", "true");
+    const scheme = await page.evaluate(
+      () => getComputedStyle(document.documentElement).colorScheme,
+    );
+    expect(scheme).toBe("dark");
+    expect(await page.evaluate(() => getComputedStyle(document.body).backgroundColor)).toBe(
+      "rgb(10, 10, 10)",
+    );
+    await expect(page.getByRole("switch", { name: /tema|theme/i })).toHaveCount(0);
   });
 
   test("el formulario de contacto muestra errores accesibles al enviar vacío", async ({ page }) => {

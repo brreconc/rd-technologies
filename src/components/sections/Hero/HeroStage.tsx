@@ -5,9 +5,9 @@ import { m, useReducedMotion, useScroll, useTransform } from "framer-motion";
 
 /**
  * "Movimiento de cámara" al abandonar el hero (Fase 9): al bajar, el contenido
- * se aleja ligeramente y se funde, dejando ver la malla del fondo antes de
- * entregar el foco a la siguiente sección. Es una animación ligada al scroll
- * (solo `transform`/`opacity`, compuestas por la GPU).
+ * se aleja ligeramente y se funde antes de entregar el foco a la siguiente
+ * sección. Es una animación ligada al scroll (solo `transform`/`opacity`,
+ * compuestas por la GPU).
  *
  * El `<h1>` vive dentro pero NO se anima al entrar: en reposo el envoltorio está
  * en su estado neutro (opacidad 1, sin desplazamiento), así que el LCP se pinta

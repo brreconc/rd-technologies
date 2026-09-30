@@ -1,0 +1,278 @@
+/* ==========================================================================
+   SECCIÓN · Alianzas (R&D Technologies × Z-Tech Innovaciones). Prefijo: .alx-*
+
+   Compacta (cabe en un pantallazo) y premium: dos placas de marca con borde en
+   degradado y glow, unidas por un PUENTE DE ENERGÍA animado (cables con flujo +
+   nodo central con apretón de manos y pulso). En escritorio van lado a lado; en
+   móvil se apilan y el puente se vuelve vertical.
+   ========================================================================== */
+
+.alx {
+  --alx-ease: cubic-bezier(0.16, 1, 0.3, 1);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: clamp(1.1rem, 2.4vw, 1.6rem);
+}
+
+/* --- Puente: placa — enlace — placa ---------------------------------------- */
+.alx-bridge {
+  display: flex;
+  flex-direction: column;
+  align-items: stretch;
+  gap: 0;
+  width: 100%;
+  max-width: 54rem;
+}
+@media (width >= 56rem) {
+  .alx-bridge {
+    flex-direction: row;
+    align-items: stretch;
+  }
+}
+
+/* --- Placa de marca (premium: borde en degradado + glow) ------------------- */
+.alx-plate {
+  position: relative;
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 0.85rem;
+  padding: clamp(1.15rem, 2.4vw, 1.65rem);
+  border: 1px solid transparent;
+  border-radius: 1.1rem;
+  background:
+    linear-gradient(
+        165deg,
+        color-mix(in srgb, var(--accent-cyan) 7%, var(--surface)),
+        var(--surface)
+      )
+      padding-box,
+    linear-gradient(
+        140deg,
+        color-mix(in srgb, var(--accent-cyan) 45%, transparent),
+        transparent 55%
+      )
+      border-box;
+  box-shadow:
+    0 20px 45px -30px color-mix(in srgb, var(--accent-cyan) 60%, transparent),
+    inset 0 1px 0 color-mix(in srgb, #fff 5%, transparent);
+  transition:
+    transform 0.4s var(--alx-ease),
+    box-shadow 0.4s ease;
+}
+.alx-plate:hover {
+  transform: translateY(-4px);
+  box-shadow: 0 28px 55px -28px color-mix(in srgb, var(--accent-cyan) 75%, transparent);
+}
+
+/* Contenedor del logo (altura fija para igualar ambas placas). */
+.alx-logo {
+  position: relative;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  height: clamp(4.5rem, 11vw, 6.25rem);
+}
+/* Glow de acento detrás del logo transparente (R&D). */
+.alx-logo:not(.alx-logo-light)::before {
+  content: "";
+  position: absolute;
+  inset: -18%;
+  z-index: 0;
+  border-radius: 50%;
+  background: radial-gradient(
+    circle,
+    color-mix(in srgb, var(--accent-cyan) 22%, transparent),
+    transparent 68%
+  );
+  filter: blur(8px);
+}
+.alx-logo-img {
+  position: relative;
+  z-index: 1;
+  max-height: 100%;
+  width: auto;
+  object-fit: contain;
+}
+/* Placa CLARA premium para el logo del aliado (logo navy → necesita fondo claro
+   para ser legible; no es una caja blanca dura sino una placa suave con glow). */
+.alx-logo-light {
+  padding: 0.75rem 1rem;
+  border-radius: 0.95rem;
+  background: linear-gradient(180deg, #f6f8fc, #e9edf4);
+  box-shadow:
+    inset 0 0 0 1px rgba(255, 255, 255, 0.7),
+    inset 0 -3px 8px rgba(20, 30, 60, 0.08),
+    0 14px 34px -16px color-mix(in srgb, var(--accent-cyan) 55%, rgba(0, 0, 0, 0.5));
+}
+.alx-logo-light .alx-logo-img {
+  border-radius: 0.4rem;
+}
+
+.alx-role {
+  position: relative;
+  z-index: 1;
+  font-family: var(--font-jetbrains-mono), ui-monospace, monospace;
+  font-size: 0.72rem;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  color: color-mix(in srgb, var(--accent-cyan) 55%, var(--muted));
+}
+
+/* --- Puente de energía ----------------------------------------------------- */
+.alx-link {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  flex: none;
+  padding: 0.5rem 0;
+}
+@media (width >= 56rem) {
+  .alx-link {
+    flex-direction: row;
+    padding: 0 0.4rem;
+  }
+}
+
+/* Cable con flujo luminoso. Vertical en móvil, horizontal en lg. */
+.alx-wire {
+  position: relative;
+  overflow: hidden;
+  width: 2px;
+  height: clamp(1.1rem, 3vw, 1.75rem);
+  border-radius: 999px;
+  background: linear-gradient(
+    180deg,
+    color-mix(in srgb, var(--accent-cyan) 65%, transparent),
+    color-mix(in srgb, var(--accent-purple) 65%, transparent)
+  );
+}
+.alx-wire::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(
+    180deg,
+    transparent,
+    color-mix(in srgb, #fff 70%, transparent),
+    transparent
+  );
+  background-size: 100% 45%;
+  background-repeat: no-repeat;
+  animation: alx-flow-y 1.6s linear infinite;
+}
+@keyframes alx-flow-y {
+  from {
+    background-position: 0 -45%;
+  }
+  to {
+    background-position: 0 145%;
+  }
+}
+@media (width >= 56rem) {
+  .alx-wire {
+    width: clamp(2rem, 5vw, 4.5rem);
+    height: 2px;
+    background: linear-gradient(
+      90deg,
+      color-mix(in srgb, var(--accent-cyan) 65%, transparent),
+      color-mix(in srgb, var(--accent-purple) 65%, transparent)
+    );
+  }
+  .alx-wire::after {
+    background: linear-gradient(
+      90deg,
+      transparent,
+      color-mix(in srgb, #fff 70%, transparent),
+      transparent
+    );
+    background-size: 45% 100%;
+    background-repeat: no-repeat;
+    animation: alx-flow-x 1.6s linear infinite;
+  }
+}
+@keyframes alx-flow-x {
+  from {
+    background-position: -45% 0;
+  }
+  to {
+    background-position: 145% 0;
+  }
+}
+
+/* Nodo central: apretón de manos + pulso. */
+.alx-node {
+  position: relative;
+  display: grid;
+  place-items: center;
+  width: 3.1rem;
+  height: 3.1rem;
+  flex: none;
+  border-radius: 50%;
+  color: #fff;
+  background: linear-gradient(135deg, var(--accent-cyan), var(--accent-purple));
+  box-shadow:
+    0 0 28px -6px color-mix(in srgb, var(--accent-cyan) 75%, transparent),
+    inset 0 1px 0 color-mix(in srgb, #fff 40%, transparent);
+}
+.alx-node::before {
+  content: "";
+  position: absolute;
+  inset: -6px;
+  border-radius: 50%;
+  border: 1px solid color-mix(in srgb, var(--accent-cyan) 55%, transparent);
+  animation: alx-pulse 2.1s ease-out infinite;
+}
+@keyframes alx-pulse {
+  0% {
+    opacity: 0.8;
+    transform: scale(1);
+  }
+  100% {
+    opacity: 0;
+    transform: scale(1.6);
+  }
+}
+
+/* --- Descripción + CTA (juntos, compactos) --------------------------------- */
+.alx-desc {
+  max-width: 42rem;
+  text-align: center;
+  color: var(--muted);
+  font-size: clamp(0.95rem, 0.9rem + 0.25vw, 1.08rem);
+  line-height: 1.6;
+  text-wrap: pretty;
+}
+.alx-cta {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5rem;
+  padding: 0.65rem 1.25rem;
+  border-radius: 999px;
+  border: 1px solid color-mix(in srgb, var(--accent-cyan) 40%, var(--border));
+  color: var(--fg);
+  font-size: 0.9rem;
+  font-weight: 500;
+  background: color-mix(in srgb, var(--accent-cyan) 8%, transparent);
+  transition:
+    transform 0.3s var(--alx-ease),
+    border-color 0.3s ease,
+    box-shadow 0.3s ease,
+    background-color 0.3s ease;
+}
+.alx-cta:hover {
+  transform: translateY(-2px);
+  border-color: color-mix(in srgb, var(--accent-cyan) 65%, transparent);
+  background: color-mix(in srgb, var(--accent-cyan) 14%, transparent);
+  box-shadow: 0 14px 34px -16px color-mix(in srgb, var(--accent-cyan) 65%, transparent);
+}
+.alx-cta svg {
+  transition: transform 0.3s var(--alx-ease);
+}
+.alx-cta:hover svg {
+  transform: translate(2px, -2px);
+}

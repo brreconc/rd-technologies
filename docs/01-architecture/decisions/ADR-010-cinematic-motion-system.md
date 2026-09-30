@@ -4,6 +4,8 @@
 - **Fecha:** 2026-07-21
 - **Decisores:** Frontend Senior, Performance, UI, Accesibilidad
 
+> ⚠️ **Actualización (Fase 10, [ADR-012](./ADR-012-single-dark-theme.md)).** El **`ThemeToggle`** descrito aquí ya no existe y las menciones a "contraste AA en ambos temas" hay que leerlas sobre una sola paleta, la oscura. La exigencia de AA no se relaja.
+
 > ⚠️ **Actualización (Fase 9, ADR-011).** La estrategia de `prefers-reduced-motion` descrita aquí
 > ("cada componente renderiza estático si el usuario pide menos movimiento") **quedó sustituida**:
 > bifurcar el markup según `useReducedMotion()` rompía la hidratación, porque ese hook devuelve

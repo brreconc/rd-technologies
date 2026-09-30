@@ -1,0 +1,237 @@
+/* ==========================================================================
+   SECCIÓN · Contacto — tarjeta "CANAL SEGURO" (.cf-*)
+
+   El formulario se presenta como un panel de transmisión segura, coherente con
+   el lenguaje "consola/seguridad" del sitio: cabecera con estado, dos columnas
+   (mensaje de confianza + formulario), campos con ETIQUETA FLOTANTE y glow de
+   foco. Compacto para caber en pantalla. Solo CSS (CSP estricta).
+   ========================================================================== */
+
+.cf {
+  position: relative;
+  isolation: isolate;
+  overflow: hidden;
+  border-radius: 1.25rem;
+  border: 1px solid color-mix(in srgb, var(--accent-cyan) 22%, var(--border));
+  background: linear-gradient(
+    165deg,
+    color-mix(in srgb, var(--accent-cyan) 6%, var(--surface)),
+    var(--surface)
+  );
+  box-shadow:
+    0 40px 90px -50px color-mix(in srgb, var(--accent-cyan) 60%, transparent),
+    inset 0 1px 0 color-mix(in srgb, #fff 6%, transparent);
+}
+/* Aurora superior tenue (marca "panel activo"). */
+.cf::before {
+  content: "";
+  position: absolute;
+  inset: -35% -10% auto -10%;
+  height: 60%;
+  z-index: -1;
+  pointer-events: none;
+  background:
+    radial-gradient(
+      55% 100% at 28% 0%,
+      color-mix(in srgb, var(--accent-cyan) 18%, transparent),
+      transparent 70%
+    ),
+    radial-gradient(
+      50% 100% at 100% 0%,
+      color-mix(in srgb, var(--accent-purple) 16%, transparent),
+      transparent 70%
+    );
+  filter: blur(22px);
+}
+
+/* --- Cabecera tipo terminal ------------------------------------------------ */
+.cf-head {
+  display: flex;
+  align-items: center;
+  gap: 0.6rem;
+  padding: 0.7rem 1.1rem;
+  border-bottom: 1px solid var(--border);
+  background: color-mix(in srgb, #fff 3%, transparent);
+  font-family: var(--font-jetbrains-mono), ui-monospace, monospace;
+  font-size: 0.68rem;
+  letter-spacing: 0.16em;
+  text-transform: uppercase;
+  color: var(--muted);
+}
+.cf-head-dot {
+  width: 0.5rem;
+  height: 0.5rem;
+  flex: none;
+  border-radius: 50%;
+  background: var(--success);
+  box-shadow: 0 0 10px var(--success);
+  animation: cf-pulse 1.6s ease-in-out infinite;
+}
+@keyframes cf-pulse {
+  0%,
+  100% {
+    opacity: 0.5;
+  }
+  50% {
+    opacity: 1;
+  }
+}
+.cf-head-ico {
+  margin-inline-start: auto;
+  color: var(--accent-cyan);
+}
+
+/* --- Cuerpo a dos columnas ------------------------------------------------- */
+.cf-body {
+  display: grid;
+  gap: clamp(1.5rem, 3vw, 2.5rem);
+  padding: clamp(1.25rem, 3vw, 2rem);
+}
+@media (width >= 64rem) {
+  .cf-body {
+    grid-template-columns: minmax(0, 0.82fr) minmax(0, 1.1fr);
+    align-items: center;
+  }
+}
+
+/* Aside: mensaje + confianza. */
+.cf-aside {
+  text-align: left;
+}
+.cf-lead {
+  color: var(--muted);
+  margin-top: 0.75rem;
+  font-size: clamp(0.95rem, 0.9rem + 0.3vw, 1.05rem);
+  text-wrap: pretty;
+}
+.cf-trust {
+  list-style: none;
+  margin: 1.4rem 0 0;
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 0.7rem;
+}
+.cf-trust li {
+  display: flex;
+  align-items: flex-start;
+  gap: 0.6rem;
+  font-size: 0.85rem;
+  color: var(--muted);
+  line-height: 1.4;
+}
+.cf-trust svg {
+  flex: none;
+  margin-top: 0.1rem;
+  color: var(--accent-cyan);
+}
+.cf-email {
+  margin-top: 1.4rem;
+  font-size: 0.85rem;
+  color: var(--muted);
+}
+.cf-email a {
+  color: var(--fg);
+  text-decoration: underline;
+  text-decoration-style: dotted;
+  text-underline-offset: 3px;
+}
+
+/* --- Campos con ETIQUETA FLOTANTE ------------------------------------------ */
+.cf-form {
+  display: flex;
+  flex-direction: column;
+  gap: 0.85rem;
+}
+.cf-row {
+  display: grid;
+  gap: 0.85rem;
+}
+@media (width >= 40rem) {
+  .cf-row {
+    grid-template-columns: 1fr 1fr;
+  }
+}
+
+.cf-field {
+  position: relative;
+}
+/* Icono guía dentro del campo (izquierda); se tiñe al enfocar. */
+.cf-ico {
+  position: absolute;
+  left: 0.95rem;
+  top: 1.15rem;
+  width: 1.05rem;
+  height: 1.05rem;
+  z-index: 1;
+  color: color-mix(in srgb, var(--muted) 85%, transparent);
+  pointer-events: none;
+  transition: color 0.2s ease;
+}
+.cf-field:focus-within .cf-ico {
+  color: var(--accent-cyan);
+}
+.cf-field:has(.cf-input[aria-invalid="true"]) .cf-ico {
+  color: var(--danger);
+}
+/* La etiqueta va DESPUÉS del control en el DOM para poder flotar con `~`; la
+   asociación accesible la mantiene `htmlFor`/`id`. Requiere `placeholder=" "`. */
+.cf-input {
+  min-height: 3.5rem;
+  padding-top: 1.5rem;
+  padding-bottom: 0.5rem;
+  padding-left: 2.7rem;
+  /* Ligero degradado interno: da profundidad de "campo hundido". */
+  background-image: linear-gradient(
+    180deg,
+    color-mix(in srgb, #000 14%, transparent),
+    transparent 55%
+  );
+  transition:
+    border-color 0.2s ease,
+    box-shadow 0.2s ease,
+    background-color 0.2s ease;
+}
+textarea.cf-input {
+  min-height: 6rem;
+  padding-top: 1.55rem;
+}
+.cf-label {
+  position: absolute;
+  left: 2.7rem;
+  top: 1.05rem;
+  margin: 0;
+  font-size: 0.95rem;
+  font-weight: 400;
+  color: var(--muted);
+  pointer-events: none;
+  transform-origin: left center;
+  transition:
+    transform 0.18s ease,
+    color 0.18s ease;
+}
+.cf-input:focus ~ .cf-label,
+.cf-input:not(:placeholder-shown) ~ .cf-label {
+  transform: translateY(-0.6rem) scale(0.75);
+  color: var(--accent-cyan);
+}
+.cf-input:focus-visible {
+  outline: none;
+  border-color: var(--accent-cyan);
+  background-color: color-mix(in srgb, var(--accent-cyan) 5%, var(--surface));
+  box-shadow:
+    0 0 0 3px color-mix(in srgb, var(--accent-cyan) 18%, transparent),
+    0 0 26px -8px color-mix(in srgb, var(--accent-cyan) 75%, transparent);
+}
+/* Campo con error: etiqueta y borde en tono de peligro. */
+.cf-input[aria-invalid="true"] {
+  border-color: color-mix(in srgb, var(--danger) 60%, var(--border));
+}
+.cf-input[aria-invalid="true"] ~ .cf-label {
+  color: var(--danger);
+}
+.cf-err {
+  margin-top: 0.4rem;
+  font-size: 0.78rem;
+  color: var(--danger);
+}

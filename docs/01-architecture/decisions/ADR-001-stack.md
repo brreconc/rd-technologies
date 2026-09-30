@@ -4,6 +4,8 @@
 - **Fecha:** 2026-07-12
 - **Decisores:** Arquitecto Senior, Frontend Senior, Performance, AppSec
 
+> ⚠️ **Actualización (Fase 10, [ADR-012](./ADR-012-single-dark-theme.md)).** `next-themes` **ya no forma parte del stack**: se retiró junto con el tema claro. El sitio tiene tema oscuro único y la paleta vive entera en CSS.
+
 ## Contexto
 
 Landing page corporativa que debe verse impecable en cualquier dispositivo/navegador, ser

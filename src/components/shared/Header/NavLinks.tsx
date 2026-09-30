@@ -72,17 +72,36 @@ export function NavLinks() {
     <nav
       ref={navRef}
       aria-label="Principal"
-      className="relative hidden items-center gap-1 lg:flex"
+      // A partir de `xl`, no de `lg`: con seis destinos los rótulos completos
+      // ("Preguntas frecuentes", "Casos de uso") no caben a 1024px y se partían
+      // en varias líneas. Entre 1024 y 1279px manda el menú móvil, que ya es
+      // una hoja lateral completa. Se prefiere eso a recortar los rótulos.
+      className="relative hidden items-center gap-1 xl:flex"
       onPointerLeave={() => setFocused(null)}
     >
+      {/* Realce que se DESLIZA al ítem con puntero/foco (o al activo): un halo
+          suave detrás del texto que glide con muelle. */}
       {pill && (
         <m.span
           aria-hidden="true"
-          className="bg-surface-2/70 ring-accent-cyan/25 pointer-events-none absolute inset-y-1 left-0 rounded-full ring-1"
+          className="pointer-events-none absolute inset-y-1.5 left-0 rounded-lg bg-[color-mix(in_srgb,var(--fg)_7%,transparent)]"
           initial={false}
           animate={{ x: pill.x, width: pill.width }}
           transition={
-            reduce ? { duration: 0 } : { type: "spring", stiffness: 460, damping: 36, mass: 0.7 }
+            reduce ? { duration: 0 } : { type: "spring", stiffness: 500, damping: 40, mass: 0.7 }
+          }
+        />
+      )}
+
+      {/* Subrayado de gradiente que se DESLIZA al ítem resaltado (glide premium). */}
+      {pill && (
+        <m.span
+          aria-hidden="true"
+          className="from-accent-cyan to-accent-purple pointer-events-none absolute bottom-0.5 left-0 h-[2px] rounded-full bg-gradient-to-r shadow-[0_0_12px_color-mix(in_srgb,var(--accent-cyan)_70%,transparent)]"
+          initial={false}
+          animate={{ x: pill.x + 8, width: Math.max(0, pill.width - 16) }}
+          transition={
+            reduce ? { duration: 0 } : { type: "spring", stiffness: 520, damping: 42, mass: 0.6 }
           }
         />
       )}
@@ -103,18 +122,13 @@ export function NavLinks() {
             onFocus={() => setFocused(id)}
             onBlur={() => setFocused(null)}
             className={cn(
-              "relative z-10 rounded-full px-3.5 py-2 text-sm transition-colors duration-300",
-              isActive ? "text-foreground" : "text-muted hover:text-foreground",
+              "relative z-10 px-3.5 py-2 text-sm font-medium whitespace-nowrap transition-colors duration-300",
+              isActive
+                ? "text-foreground"
+                : "text-muted hover:text-foreground focus-visible:text-foreground",
             )}
           >
             {item.label}
-            <span
-              aria-hidden="true"
-              className={cn(
-                "from-accent-cyan to-accent-purple absolute inset-x-3.5 bottom-1 h-0.5 origin-left rounded-full bg-gradient-to-r transition-transform duration-300 ease-out",
-                isActive ? "scale-x-100" : "scale-x-0",
-              )}
-            />
           </a>
         );
       })}

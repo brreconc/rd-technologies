@@ -1,0 +1,160 @@
+/* ==========================================================================
+   MOCK-UP · Android (Material 3: appbar, chips, tarjetas, FAB, navbar).
+   ========================================================================== */
+/* --- Mock-up Android ---------------------------------------------------------- */
+.mk-appbar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 0.5em 0.8em 0.4em;
+}
+
+.mk-appbar-t {
+  font-family: var(--font-space-grotesk), sans-serif;
+  font-size: 0.95em;
+  font-weight: 600;
+}
+
+.mk-appbar-a {
+  display: flex;
+  gap: 0.5em;
+  color: var(--deck-dim);
+}
+
+.mk-field {
+  display: flex;
+  align-items: center;
+  gap: 0.4em;
+  margin: 0 0.7em;
+  padding: 0.45em 0.6em;
+  border-radius: 1.2em;
+  background-color: rgb(255 255 255 / 0.06);
+  font-size: 0.62em;
+  color: var(--deck-dim);
+}
+
+.mk-chips {
+  display: flex;
+  gap: 0.3em;
+  padding: 0.55em 0.7em 0.4em;
+  overflow: hidden;
+}
+
+.mk-chip {
+  flex-shrink: 0;
+  padding: 0.25em 0.55em;
+  border: 1px solid rgb(255 255 255 / 0.14);
+  border-radius: 1em;
+  font-size: 0.55em;
+  color: var(--deck-dim);
+  white-space: nowrap;
+}
+
+.mk-chip.mk-on {
+  border-color: transparent;
+  background-color: color-mix(in srgb, var(--platform-accent) 22%, transparent);
+  color: var(--platform-accent);
+}
+
+.mk-cards {
+  display: flex;
+  flex: 1;
+  flex-direction: column;
+  gap: 0.35em;
+  min-height: 0;
+  /* El hueco inferior es para el FAB: sin él, el botón flotante tapaba la
+     etiqueta de estado de la última tarjeta. */
+  padding: 0 0.7em 2.6em;
+}
+
+.mk-card {
+  display: flex;
+  flex: 1;
+  align-items: center;
+  gap: 0.5em;
+  min-height: 0;
+  padding: 0.4em 0.55em;
+  border: 1px solid rgb(255 255 255 / 0.08);
+  border-radius: 0.5em;
+  background-color: rgb(255 255 255 / 0.025);
+}
+
+.mk-card.mk-on {
+  border-color: color-mix(in srgb, var(--platform-accent) 45%, transparent);
+  background-color: color-mix(in srgb, var(--platform-accent) 8%, transparent);
+}
+
+.mk-card-i {
+  display: grid;
+  place-items: center;
+  width: 1.6em;
+  height: 1.6em;
+  flex-shrink: 0;
+  border-radius: 50%;
+  background-color: color-mix(in srgb, var(--platform-accent) 16%, transparent);
+  color: var(--platform-accent);
+  font-size: 0.85em;
+}
+
+.mk-card-t {
+  display: flex;
+  flex-direction: column;
+  min-width: 0;
+  flex: 1;
+}
+.mk-card-t b {
+  font-size: 0.62em;
+  font-weight: 500;
+  color: var(--fg);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+.mk-card-t em {
+  font-size: 0.52em;
+  font-style: normal;
+  color: var(--deck-dim);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.mk-fab {
+  position: absolute;
+  right: 0.9em;
+  bottom: 3.4em;
+  display: grid;
+  place-items: center;
+  width: 2.2em;
+  height: 2.2em;
+  border-radius: 0.7em;
+  background-color: var(--platform-accent);
+  color: #0a0a0a;
+  font-size: 1em;
+  z-index: 3;
+  box-shadow: 0 0 18px color-mix(in srgb, var(--platform-accent) 35%, transparent);
+}
+
+.mk-navbar {
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  padding: 0.45em 0 0.55em;
+  margin-top: 0.5em;
+  border-top: 1px solid rgb(255 255 255 / 0.07);
+}
+
+.mk-nav-i {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 0.2em;
+  color: var(--deck-dim);
+  font-size: 0.85em;
+}
+.mk-nav-i em {
+  font-size: 0.55em;
+  font-style: normal;
+}
+.mk-nav-i.mk-on {
+  color: var(--platform-accent);
+}

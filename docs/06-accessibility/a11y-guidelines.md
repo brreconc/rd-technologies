@@ -22,13 +22,73 @@
 ## Automatización (Fase 6 — implementado)
 
 - **axe-core en Playwright** (`e2e/a11y.spec.ts`): sin violaciones críticas/serias (WCAG 2.0/2.1
-  A y AA) en tema claro y oscuro. Complementa (no sustituye) la revisión manual con teclado y
-  lector de pantalla.
+  A y AA). Complementa (no sustituye) la revisión manual con teclado y lector de pantalla. Desde la
+  Fase 10 hay **una sola paleta** que auditar ([ADR-012](../01-architecture/decisions/ADR-012-single-dark-theme.md)),
+  pero el escaneo se ejecuta **dos veces**: una con la página tal cual y otra con el deck
+  multiplataforma en su último destino, porque ahí el acento de la escena es otro y el primer
+  escaneo no lo vería.
 - **Lighthouse Accessibility: 100** (Fase 6).
 - **Adornos decorativos:** los números de paso "01"…, iconos y resplandores llevan
   `aria-hidden="true"`; están fuera del árbol de accesibilidad y, como texto decorativo, quedan
   exentos del contraste (WCAG 1.4.3). El escaneo axe los excluye a propósito; el contenido que sí
   leen las ayudas técnicas se audita al completo. Ver [08-testing](../08-testing/testing-strategy.md).
+
+## Listas que son listas — el manifiesto (Fase 14)
+
+Los tres estratos de "Propuesta de valor" son una **`<ol>` de verdad**, no tres `div`. Son tres, van
+en orden y ese orden significa algo: primero qué se construye, luego cómo se protege, luego cómo
+dura. Los ordinales visibles `01…03` están `aria-hidden` — la lista ya numera y leerlos dos veces
+estorba—, igual que la espina de luz y los nodos, que son dibujo.
+
+**No es un carrusel.** No hay pestañas, ni acordeón, ni recorrido automático: los tres estratos están
+visibles a la vez y no hay nada que pausar. El único elemento enfocable de la sección es el enlace
+"Así trabajamos". Si alguien convierte esto en algo interactivo, hereda de golpe todo lo de la
+sección siguiente (nombres de control únicos, WCAG 2.2.2, `aria-current`). Ver
+[ADR-017](../01-architecture/decisions/ADR-017-value-props-manifesto.md).
+
+## Contenido que se mueve solo — WCAG 2.2.2 (Fases 10 y 13)
+
+Hay **dos** piezas que se mueven solas: el **deck multiplataforma** (ADR-013) recorre sus cinco
+destinos y el **recorrido del proceso** (ADR-016) sus seis pasos.
+
+> **Sus controles se llaman distinto a propósito.** Antes ambos decían "Detener el recorrido…", y
+> dos botones con el mismo nombre accesible son indistinguibles para quien navega por lista de
+> controles. Ahora son "Detener el recorrido **del proceso**" y "Detener el recorrido **de
+> plataformas**". Al añadir cualquier otro control repetido, nómbralo igual de explícito.
+
+El deck recorre sus cinco destinos por su cuenta. Eso es contenido en
+movimiento que arranca automáticamente y dura más de cinco segundos, así que el criterio 2.2.2
+(_Pausar, detener, ocultar_) obliga a que el usuario pueda pararlo. Se cubre por triplicado:
+
+1. Un **botón explícito** ("Detener el recorrido automático") junto al escenario.
+2. Se **pausa solo** al pasar el puntero por encima o al enfocar cualquier elemento del deck, para
+   que nadie pierda de vista lo que está leyendo.
+3. **Elegir un destino a mano lo detiene definitivamente**: si el usuario ha tomado el control, no
+   se le vuelve a arrebatar.
+
+Además, con `prefers-reduced-motion` el recorrido **no llega a existir** —no hay temporizador— y el
+botón ni se ofrece, porque no habría nada que parar.
+
+Regla para lo que venga: **cualquier cosa que se mueva sola y dure más de 5 s necesita un mando.**
+Si no puedes ofrecerlo, no la pongas en marcha sola.
+
+### Patrón de pestañas del deck
+
+- `tablist` / `tab` / `tabpanel` de WAI-ARIA con `tabindex` rotatorio (solo la pestaña activa es
+  tabulable; dentro se navega con flechas).
+- Se aceptan **los dos ejes** de flechas (`←→` y `↑↓`) porque el rail es una rejilla en móvil y
+  vertical en escritorio, más `Inicio` y `Fin`. La selección mueve también el foco.
+- **Ninguna pulsación se descarta.** Sin candados temporales ni banderas de "animando": si el
+  usuario pulsa cinco veces seguidas, se atienden las cinco. Suena obvio, pero el diseño del que
+  partió la Fase 11 traía un bloqueo de 700 ms que hacía inalcanzables dos de los destinos
+  desde el teclado. Hay un E2E que lo vigila.
+- El mock-up del dispositivo es decorativo (`aria-hidden`): toda la información está en el texto del
+  panel. Una región `aria-live="polite"` anuncia el destino en pantalla, porque si no los cambios
+  del recorrido automático pasarían inadvertidos a un lector de pantalla.
+- **Contraste por token, no por opacidad.** Todo el texto atenuado del deck usa `--deck-dim`
+  (`#8a8a8a`, ≥5:1 sobre las superficies del deck) en vez de blanco con transparencia, que es la
+  vía fácil para colar texto por debajo de AA sin enterarse. Ver
+  [colors-and-tokens](../02-design-system/colors-and-tokens.md#--deck-dim-un-único-gris-atenuado).
 
 ## Movimiento reducido (Fase 9 — ADR-011)
 
@@ -43,8 +103,8 @@ Resumen:
 - **Ningún componente cambia su markup según `useReducedMotion()`.** Hacerlo rompía la hidratación
   (el hook devuelve `null` en el servidor) justo para estos usuarios. Corregido en la Fase 9 y
   vigilado por [`e2e/experience.spec.ts`](../../e2e/experience.spec.ts).
-- La malla neuronal del hero pinta **un único fotograma** (red ya construida, sin partículas) y no
-  arranca el bucle `requestAnimationFrame`.
+- La consola de compilación del hero (`CodeConsole`) **salta al estado final** (código escrito,
+  compilado y asegurado) y no arranca el bucle `requestAnimationFrame`. Es decorativa (`aria-hidden`).
 - El paralaje de salida del hero se anula por completo.
 
 ## Limitación conocida: página sin JavaScript

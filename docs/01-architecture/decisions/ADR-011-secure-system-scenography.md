@@ -1,9 +1,14 @@
 # ADR-011 — Escenografía de "sistema seguro" y coreografía de scroll (Fase 9)
 
-- **Estado:** Aceptada
+- **Estado:** Aceptada. _(La parte del **fondo del hero** —la malla neuronal— fue
+  reemplazada por [ADR-019](./ADR-019-hero-code-console.md) en la Fase 16; el resto
+  del sistema de movimiento de esta ADR sigue vigente.)_
 - **Fecha:** 2026-07-23
 - **Decisores:** Frontend Senior, Performance, UI, Accesibilidad
 - **Sustituye parcialmente a:** [ADR-010](./ADR-010-cinematic-motion-system.md) (lo amplía; no lo deroga)
+- **Ampliada por:** [ADR-013](./ADR-013-platform-deck.md) (movimiento v4 y deck multiplataforma)
+
+> ⚠️ **Actualización (Fase 10, [ADR-012](./ADR-012-single-dark-theme.md)).** Las referencias a "ambos temas" y al `ThemeToggle` quedan obsoletas: hay un único tema oscuro. **La regla de oro de este ADR sigue plenamente vigente** y el deck de la Fase 10 la respeta.
 
 ## Contexto
 

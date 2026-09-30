@@ -1,0 +1,23 @@
+/* ==========================================================================
+   MOCK-UPS · Margen de seguridad contra la curva del marco.
+   ⚠️ Debe importarse DESPUÉS de todos los mock-ups: gana por orden de cascada
+   a las reglas `padding` de cada barra (ver comentario interno).
+   ========================================================================== */
+/* --- Margen de seguridad contra la curva del marco ----------------------------
+   La esquina redondeada recorta un arco de radio R en cada vértice, así que todo
+   lo que viva en la PRIMERA o la ÚLTIMA fila tiene que empezar pasado ese arco.
+   Sin esto, la hora, la batería y los rótulos de la navegación inferior salían
+   mordidos por el borde del teléfono. Va al final del bloque a propósito: las
+   reglas de cada barra usan el atajo `padding`, que ganaría por orden. */
+.mk-android .mk-status,
+.mk-ios .mk-status,
+.mk-ec .mk-status {
+  padding-inline: 2em;
+  padding-top: 0.7em;
+}
+
+.mk-android .mk-navbar,
+.mk-ios .mk-tabbar,
+.mk-ec .mk-ec-pay {
+  padding-inline: 1.8em;
+}

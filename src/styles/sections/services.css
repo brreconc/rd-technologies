@@ -1,0 +1,155 @@
+/* ==========================================================================
+   SECCIÓN · Servicios (3 pilares) — tarjetas compactas y "premium".
+   Prefijo de clase: .svc-*
+
+   La base de la tarjeta (spotlight que sigue al cursor, tilt 3D, borde de
+   gradiente, esquinas HUD) la aporta `SpotlightCard`. Aquí se COMPACTA el
+   contenido y se AÑADEN gestos de alto nivel al hover/focus: un destello que
+   barre la tarjeta, un realce con sombra tintada, el chip del icono que "salta"
+   y las viñetas que se encienden en cascada.
+   ========================================================================== */
+
+/* Realce de la tarjeta al enfocar/pasar el cursor: se eleva (lo hace Framer) y
+   gana una sombra tintada con el degradado de marca. */
+.svc-card {
+  transition:
+    box-shadow 0.45s ease,
+    border-color 0.3s ease;
+}
+.group:hover.svc-card,
+.group:focus-within.svc-card {
+  box-shadow:
+    0 26px 64px -34px color-mix(in srgb, var(--accent-cyan) 60%, transparent),
+    0 0 44px -20px color-mix(in srgb, var(--accent-purple) 50%, transparent),
+    inset 0 1px 0 color-mix(in srgb, #fff 8%, transparent);
+}
+
+/* --- Corriente de energía que ORBITA el borde ------------------------------
+   Un cometa (cabeza brillante + estela que se desvanece) recorre el PERÍMETRO
+   de la tarjeta al enfocarla. Se hace con un `conic-gradient` girando su ángulo
+   (`--svc-ang`, registrado abajo) recortado a una banda de 1px con máscara XOR,
+   así solo se ve en el borde. Solo gira la tarjeta enfocada → coste mínimo.
+   Es un gesto propio del lenguaje "consola/seguridad" del sitio, no un simple
+   barrido diagonal. */
+@property --svc-ang {
+  syntax: "<angle>";
+  inherits: false;
+  initial-value: 0deg;
+}
+
+.svc-frame {
+  position: absolute;
+  inset: 0;
+  z-index: 1;
+  padding: 1.5px; /* grosor del borde luminoso */
+  border-radius: inherit;
+  pointer-events: none;
+  /* Cometa: transparente casi toda la vuelta y, en un tramo corto, estela
+     violeta → cabeza cian casi blanca. Gira con `--svc-ang`. */
+  background: conic-gradient(
+    from var(--svc-ang),
+    transparent 0turn,
+    transparent 0.6turn,
+    color-mix(in srgb, var(--accent-purple) 85%, transparent) 0.72turn,
+    color-mix(in srgb, var(--accent-cyan) 92%, #fff) 0.8turn,
+    #ffffff 0.82turn,
+    transparent 0.85turn,
+    transparent 1turn
+  );
+  -webkit-mask:
+    linear-gradient(#000 0 0) content-box,
+    linear-gradient(#000 0 0);
+  -webkit-mask-composite: xor;
+  mask-composite: exclude;
+  opacity: 0;
+  transition: opacity 0.4s ease;
+}
+.group:hover .svc-frame,
+.group:focus-within .svc-frame {
+  opacity: 1;
+  animation: svc-orbit 2.4s linear infinite;
+}
+@keyframes svc-orbit {
+  to {
+    --svc-ang: 360deg;
+  }
+}
+
+/* Un segundo cometa desfasado media vuelta: dos luces persiguiéndose por el
+   borde. Va en el `::before` del mismo frame (no molesta a nadie). */
+.svc-frame::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  padding: 1.5px;
+  border-radius: inherit;
+  background: conic-gradient(
+    from calc(var(--svc-ang) + 180deg),
+    transparent 0turn,
+    transparent 0.66turn,
+    color-mix(in srgb, var(--accent-cyan) 80%, transparent) 0.76turn,
+    color-mix(in srgb, var(--accent-purple) 92%, #fff) 0.82turn,
+    transparent 0.86turn,
+    transparent 1turn
+  );
+  -webkit-mask:
+    linear-gradient(#000 0 0) content-box,
+    linear-gradient(#000 0 0);
+  -webkit-mask-composite: xor;
+  mask-composite: exclude;
+}
+
+/* --- Chip del icono: "salta" y gira un poco al hover ----------------------- */
+.svc-badge {
+  position: relative;
+  z-index: 2;
+  transition:
+    transform 0.45s cubic-bezier(0.16, 1, 0.3, 1),
+    background-color 0.3s ease,
+    box-shadow 0.3s ease;
+}
+.group:hover .svc-badge,
+.group:focus-within .svc-badge {
+  transform: translateY(-2px) scale(1.07) rotate(-3deg);
+}
+
+/* --- Título: se aclara al enfocar la tarjeta ------------------------------ */
+.svc-title {
+  position: relative;
+  z-index: 2;
+  letter-spacing: -0.01em;
+  transition: color 0.3s ease;
+}
+
+/* --- Viñetas: se encienden EN CASCADA al hover ---------------------------- */
+.svc-list {
+  position: relative;
+  z-index: 2;
+}
+.svc-dot {
+  transition:
+    transform 0.35s cubic-bezier(0.16, 1, 0.3, 1),
+    box-shadow 0.35s ease;
+}
+.group:hover .svc-dot,
+.group:focus-within .svc-dot {
+  transform: scale(1.35);
+  box-shadow: 0 0 10px 1px color-mix(in srgb, var(--accent-cyan) 75%, transparent);
+}
+/* El desfase por fila crea el efecto de "encendido secuencial". */
+.group:hover .svc-feat:nth-child(1) .svc-dot,
+.group:focus-within .svc-feat:nth-child(1) .svc-dot {
+  transition-delay: 0.04s;
+}
+.group:hover .svc-feat:nth-child(2) .svc-dot,
+.group:focus-within .svc-feat:nth-child(2) .svc-dot {
+  transition-delay: 0.1s;
+}
+.group:hover .svc-feat:nth-child(3) .svc-dot,
+.group:focus-within .svc-feat:nth-child(3) .svc-dot {
+  transition-delay: 0.16s;
+}
+.group:hover .svc-feat:nth-child(4) .svc-dot,
+.group:focus-within .svc-feat:nth-child(4) .svc-dot {
+  transition-delay: 0.22s;
+}

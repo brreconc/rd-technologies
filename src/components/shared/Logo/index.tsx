@@ -3,10 +3,10 @@ import { cn } from "@/lib/utils/cn";
 import { siteConfig } from "@/config/site";
 
 /**
- * Wordmark de marca (Fase 8): marca gráfica "de nodo" (evoca red/seguridad) con
- * resplandor de gradiente + wordmark. "R&D" lleva el gradiente de marca animado
- * y "TECHNOLOGIES" en versalitas espaciadas. Accesible por lector de pantalla
- * (`aria-label`); el SVG es decorativo (`aria-hidden`).
+ * Wordmark de marca con el EMBLEMA OFICIAL de R&D Technologies (hexágono con la
+ * "R" de nodos, `public/logo/emblem.png`) + el wordmark. El emblema lleva un halo
+ * de gradiente y un leve zoom al hover. Accesible por lector de pantalla
+ * (`aria-label` del enlace); la imagen es decorativa (`alt=""`).
  */
 export function Logo({ className }: { className?: string }) {
   return (
@@ -14,59 +14,32 @@ export function Logo({ className }: { className?: string }) {
       href="/"
       aria-label={`${siteConfig.name} — Inicio`}
       className={cn(
-        "group flex items-center gap-2 rounded-md transition-opacity hover:opacity-95 sm:gap-2.5",
+        "group flex items-center gap-2.5 rounded-md transition-opacity hover:opacity-95",
         className,
       )}
     >
-      <span className="relative inline-flex size-8 shrink-0 items-center justify-center sm:size-9">
-        {/* Halo de resplandor. */}
+      <span className="relative inline-flex shrink-0 items-center">
+        {/* Halo de resplandor detrás del emblema. */}
         <span
           aria-hidden="true"
-          className="from-accent-cyan/40 to-accent-purple/40 absolute inset-0 rounded-xl bg-gradient-to-br blur-md transition-opacity duration-300 group-hover:opacity-100 sm:opacity-70"
+          className="from-accent-cyan/40 to-accent-purple/40 absolute inset-0 rounded-full bg-gradient-to-br opacity-60 blur-lg transition-opacity duration-300 group-hover:opacity-100"
         />
-        <svg
-          viewBox="0 0 32 32"
+        {/* eslint-disable-next-line @next/next/no-img-element */}
+        <img
+          src="/logo/emblem.png"
+          alt=""
           aria-hidden="true"
-          className="relative size-8 transition-transform duration-300 group-hover:scale-105 sm:size-9"
-        >
-          <defs>
-            <linearGradient id="logo-grad" x1="0" y1="0" x2="1" y2="1">
-              <stop offset="0" stopColor="var(--accent-cyan)" />
-              <stop offset="1" stopColor="var(--accent-purple)" />
-            </linearGradient>
-          </defs>
-          <rect x="1.5" y="1.5" width="29" height="29" rx="8" fill="var(--surface)" />
-          <rect
-            x="1.5"
-            y="1.5"
-            width="29"
-            height="29"
-            rx="8"
-            fill="none"
-            stroke="url(#logo-grad)"
-            strokeWidth="1.5"
-          />
-          {/* Grafo de nodos: aristas + nodos. */}
-          <g stroke="url(#logo-grad)" strokeWidth="1.4" strokeLinecap="round">
-            <line x1="9" y1="22" x2="16" y2="10" />
-            <line x1="16" y1="10" x2="23" y2="18" />
-            <line x1="9" y1="22" x2="23" y2="18" />
-          </g>
-          <g fill="url(#logo-grad)">
-            <circle cx="9" cy="22" r="2.6" />
-            <circle cx="16" cy="10" r="2.6" />
-            <circle cx="23" cy="18" r="2.6" />
-          </g>
-        </svg>
+          className="relative h-9 w-auto drop-shadow-[0_2px_10px_rgba(0,245,255,0.35)] transition-transform duration-300 group-hover:scale-105 sm:h-10"
+        />
       </span>
-      {/* `whitespace-nowrap`: el wordmark nunca debe partirse a media marca,
-          ni siquiera a 320px (§5.3.4). */}
+
+      {/* `whitespace-nowrap`: el wordmark nunca se parte a media marca (§5.3.4). */}
       <span className="font-display flex flex-col leading-none whitespace-nowrap">
         <span className="text-foreground text-sm font-bold tracking-tight sm:text-base">
           <span className="text-gradient-animated">R&amp;D</span> Technologies
         </span>
-        <span className="text-muted text-[0.5rem] font-medium tracking-[0.2em] uppercase sm:text-[0.6rem] sm:tracking-[0.28em]">
-          Software · Security
+        <span className="text-muted text-[0.5rem] font-medium tracking-[0.18em] uppercase sm:text-[0.6rem] sm:tracking-[0.24em]">
+          Construimos confianza digital
         </span>
       </span>
     </Link>

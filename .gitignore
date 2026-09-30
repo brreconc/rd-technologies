@@ -53,3 +53,9 @@ next-env.d.ts
 
 # Claude Code (local)
 .claude/settings.local.json
+
+# Fuentes crudas de diseño y logs de sesión (los assets usados por la app viven
+# en public/; estas carpetas son material de trabajo, no del despliegue)
+/Images
+/Imagenes_Gen
+ID_Session_Claude.txt

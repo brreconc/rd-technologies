@@ -32,16 +32,18 @@ export const siteConfig = {
 
   // Anclas de la landing (one-page). Rutas dedicadas pendientes de decisión (§19).
   nav: [
+    { label: "Inicio", href: "#inicio" },
+    { label: "Quiénes somos", href: "#propuesta-de-valor" },
     { label: "Servicios", href: "#servicios" },
     { label: "Proceso", href: "#proceso" },
-    { label: "Casos de uso", href: "#casos-de-uso" },
+    { label: "Alianzas", href: "#alianzas" },
     { label: "Preguntas frecuentes", href: "#faq" },
     { label: "Contacto", href: "#contacto" },
   ],
 
   // PLACEHOLDERS — confirmar con el cliente (§19.8).
   contact: {
-    email: "contacto@rdtechnologies.example",
+    email: "servicio@rdtechnologies.com",
     phone: "",
   },
   social: {

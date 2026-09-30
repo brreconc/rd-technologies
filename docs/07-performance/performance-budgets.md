@@ -23,16 +23,28 @@ Requisito §11.
   por lotes, DPR ≤ 2, nº de nodos por área, pausa fuera del viewport y degradación automática.
 - ✅ **Lighthouse CI** con presupuestos que fallan la build ([`lighthouserc.json`](../../lighthouserc.json), Fase 6).
 
-## Medición actual (Fase 9, ruta `/`)
+## Medición actual (Fase 13, ruta `/`)
 
-Medido sobre `pnpm start`, sumando los `<script src>` reales de la ruta (17 ficheros):
+Medido sobre `pnpm start`, sumando los recursos reales de la ruta (18 ficheros):
 
 | Compresión                       | First Load JS | Objetivo    |
 | -------------------------------- | ------------- | ----------- |
-| gzip -9                          | ~332 KB       | —           |
-| **Brotli** (lo que sirve un CDN) | **~288 KB**   | < 200 KB ❌ |
+| **Brotli** (lo que sirve un CDN) | **~268 KB**   | < 200 KB ❌ |
+
+CSS: ~15 KB brotli.
 
 > Next 16 + Turbopack no imprime la tabla de tamaños en el build; se mide sirviendo la ruta.
+
+> **Método (fijado en la Fase 12).** Las cifras anteriores no dejaron escrito cómo se obtuvieron. A
+> partir de aquí se mide así, y conviene repetirlo igual: se carga `/` con Playwright, se recogen las
+> URL de todos los `.js` y `.css` que la página pide **de verdad**, y se comprime cada fichero
+> correspondiente de `.next/` con `brotli -q 11`. Mide lo que descarga un visitante, no todo lo que
+> hay en `.next/static` (que incluye trozos que esa ruta nunca pide).
+>
+> **La serie histórica de abajo NO es comparable con este método.** Para poder dar un delta honesto
+> se reconstruyó el commit anterior (`d018fb1`) y se midió igual: **257 KB**. Es decir, la Fase 12
+> cuesta **+1 KB brotli** —un mock-up nuevo, cinco pictogramas y un icono de `lucide`, menos los
+> muelles de la inclinación retirada—, no los −20 KB que sugeriría comparar 278 con 258.
 
 ### ⚠️ Desvío abierto sobre el presupuesto de JS
 
@@ -43,10 +55,50 @@ El objetivo de **< 200 KB** (§11) está incumplido. Trazabilidad de la medició
 | Fase 3               | ~228 KB | ~199 KB |
 | Fase 8.1 (`ef94c15`) | ~328 KB | ~284 KB |
 | Fase 9               | ~332 KB | ~288 KB |
+| Fase 10              | ~335 KB | ~290 KB |
+| Fase 11              | ~342 KB | ~278 KB |
+| Fase 11 (re-medida)  | —       | ~257 KB |
+| Fase 12              | —       | ~258 KB |
+| Fase 13              | —       | ~259 KB |
+| Fase 13 (re-medida)  | —       | ~268 KB |
+| Fase 14              | —       | ~268 KB |
 
 El salto lo produjo la **Fase 8**, cuando las tarjetas de sección pasaron de Server Components
 (`Card`) a Client Components (`SpotlightCard`) y se añadieron formularios y menú interactivos. La
-Fase 9 aporta ~4 KB.
+Fase 9 aportó ~4 KB.
+
+**La Fase 10 aporta ~2 KB netos**, y eso incluye una sección entera nueva. El deck multiplataforma
+casi se paga solo porque en la misma fase se retiró `next-themes` con el tema claro
+([ADR-012](../01-architecture/decisions/ADR-012-single-dark-theme.md)). El deck no trajo ninguna
+dependencia.
+
+**La Fase 14 cuesta 0 KB de JS y +1 KB de CSS.** El manifiesto de la propuesta de valor
+([ADR-017](../01-architecture/decisions/ADR-017-value-props-manifesto.md)) retira `SpotlightCard`
+—Client Component con muelles— de esa sección y la deja en Server Components salvo los tres
+envoltorios de entrada. Lo que gana ahí se lo come el icono extra de `lucide`, de modo que el
+resultado neto es plano.
+
+> **Ojo con la serie:** la re-medida de la Fase 13 (268 KB) NO es una regresión. El script de la
+> Fase 12 cargaba `/` y medía; el de ahora **recorre además la página entera** antes de listar los
+> ficheros, así que recoge también los trozos que solo se piden al bajar. Es el número honesto, y es
+> el que hay que usar de aquí en adelante. Para poder dar un delta real se reconstruyó `f9deb87` y
+> se midió con el script nuevo: **268 KB**, exactamente igual.
+
+**La Fase 13 cuesta +1 KB de JS y +1 KB de CSS.** El recorrido del proceso
+([ADR-016](../01-architecture/decisions/ADR-016-horizontal-process-timeline.md)) **retira Framer
+Motion de esa sección** —ya no usa `useScroll`/`useSpring`/`useTransform`— y pasa toda la animación a
+CSS. No baja el bundle porque Framer sigue haciendo falta en otras secciones, pero sí quita trabajo
+del hilo principal en cada fotograma de scroll.
+
+**La Fase 12 cuesta +1 KB brotli** (medido contra `d018fb1` con el método de arriba), pese a añadir
+un destino entero con su mock-up. Lighthouse no se movió: **99 · 100 · 96 · 100**, LCP 0,9 s,
+**CLS 0 en las tres pasadas**, TBT 0 ms.
+
+**La Fase 11 RESTA ~12 KB brotli** pese a rehacer los cuatro mock-ups con mucho más detalle
+([ADR-014](../01-architecture/decisions/ADR-014-instrument-deck.md)). Dos motivos: se retiraron los
+arrays de figuras SVG (`screens.ts`), y los iconos del interior del mock-up pasaron de
+`lucide-react` a trazos dibujados a mano en `Glyph.tsx` — a 6–10 px ninguno era identificable, así
+que se pagaba bundle por pintar manchas. El CSS sube a 12,8 KB brotli, que sigue siendo ruido.
 
 **Importante:** el desvío es de _bytes_, no de experiencia medida — Lighthouse sigue en
 **Performance 99** con **LCP 0,8 s · CLS 0 · TBT 0 ms**, porque casi todo ese JS no bloquea el
@@ -65,18 +117,49 @@ Presupuestos en [`lighthouserc.json`](../../lighthouserc.json): las cuatro categ
 **≥ 0,95** o la build de auditoría falla. Corrida local (`pnpm lhci`, preset desktop, 3 pasadas,
 build indexable):
 
-| Categoría      | Fase 6 | **Fase 9** |
-| -------------- | ------ | ---------- |
-| Performance    | 99     | **99**     |
-| Accessibility  | 100    | **100**    |
-| Best Practices | 96     | **96**     |
-| SEO            | 100    | **100**    |
+| Categoría      | Fase 6 | Fase 9 | Fase 10 | **Fase 14** |
+| -------------- | ------ | ------ | ------- | ----------- |
+| Performance    | 99     | 99     | 99      | **99**      |
+| Accessibility  | 100    | 100    | 100     | **100**     |
+| Best Practices | 96     | 96     | 96      | **96**      |
+| SEO            | 100    | 100    | 100     | **100**     |
 
-Métricas de la Fase 9: **LCP 0,8 s · CLS 0 · TBT 0 ms · FCP 0,3 s · Speed Index 0,7 s**.
+Métricas de la Fase 11: **LCP 0,8–0,9 s · CLS 0 · TBT 0 ms**.
+Métricas de la Fase 14: **LCP 0,8–0,9 s · TBT 0 ms**, y CLS 0 en dos de las tres pasadas — la
+tercera vuelve a marcar el 0,372 del footer que se describe justo debajo.
 
-> La escenografía de la Fase 9 (canvas del hero, revelados por scroll, línea de tiempo) **no movió
-> ninguna métrica**: el canvas se pinta después del texto, se pausa fuera de pantalla y no dispara
-> layout ni bloquea el hilo principal.
+> Ni la escenografía de la Fase 9 (canvas del hero, revelados por scroll, línea de tiempo) ni el
+> deck de las Fases 10–11 movieron ninguna métrica. El canvas se pinta después del texto y se pausa
+> fuera de pantalla; el deck no usa canvas ni librerías, su escenario tiene **proporción fija** (por
+> eso el morfismo del dispositivo mantiene **CLS 0**) y su recorrido automático **no existe fuera de
+> pantalla**: un `IntersectionObserver` lo apaga y no deja ni un temporizador vivo. Los mock-ups en
+> DOM de la Fase 11 son más nodos que los SVG anteriores (~120 en el de escritorio, el más denso),
+> pero solo hay **uno montado a la vez** y el TBT sigue en 0 ms.
+
+### Un CLS intermitente que NO es del deck
+
+Aproximadamente uno de cada tres pases de Lighthouse marca **CLS 0,372** en lugar de 0. Se investigó
+y **es previo a la Fase 11**: el desplazamiento lo produce el `<footer>`, que se pinta alto en la
+página antes de que llegue el contenido de `<main>` en streaming y luego baja de golpe. Se comprobó
+quitando la sección `Platforms` del árbol y reconstruyendo: el valor sale **idéntico**, 0,3682.
+
+Queda como deuda anotada, con el sospechoso ya identificado: `body` es un flex vertical con
+`min-h-dvh`, y el footer no tiene reserva de espacio mientras `main` está vacío.
+
+**Estado en la Fase 14 (sigue abierto, y conviene cerrarlo).** Se vuelve a medir y sale **el mismo
+valor exacto**, 0,372, en una de cada tres pasadas — ni la Fase 13 ni la 14 lo han movido, lo que
+confirma que no depende del contenido de las secciones. La corrección propuesta es de una línea
+(reservar altura para `<main>`), pero toca el layout raíz y afecta a páginas cortas como el 404, así
+que no se ha aplicado dentro del alcance de estas fases. Mientras tanto **la mediana de Lighthouse
+sigue en CLS 0**, que es lo que evalúan las aserciones de `lighthouserc.json`.
+
+### Nota sobre las animaciones ligadas al scroll
+
+La aurora de página, la costura entre secciones y la llegada de cada sección usan
+`animation-timeline` (CSS). En los navegadores que lo implementan corren **fuera del hilo
+principal**, así que no hay ni un solo manejador de `scroll` en JavaScript para todo ese
+movimiento. Donde no hay soporte, quedan en su estado final: no se degrada el contenido, solo el
+adorno.
 
 > Nota: Lighthouse audita un build **indexable** (`NEXT_PUBLIC_SITE_INDEXABLE=true`); con el sitio
 > en `noindex` (local) la auditoría SEO penalizaría por diseño. Con la CSP por nonce las páginas se

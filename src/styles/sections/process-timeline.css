@@ -1,0 +1,473 @@
+/* ==========================================================================
+   SECCIÓN · Proceso (línea de tiempo horizontal) — Fase 13, ADR-016.
+   Prefijo de clase: .ptl-*
+   ========================================================================== */
+/* ==========================================================================
+   LÍNEA DE TIEMPO DEL PROCESO (Fase 13, ADR-016)
+
+   Recorrido HORIZONTAL que se cuenta solo. Un cometa viaja de un hito al
+   siguiente por el raíl y cada llegada detona: onda de choque, radios de luz y
+   floración de color. Los seis pasos recorren el círculo cromático, así que el
+   conjunto se lee como un viaje aunque no se lea una palabra.
+
+   Todo el bloque se tiñe desde UNA variable, `--step-accent`, que el componente
+   fija según el hito activo, y cada pieza conoce además su propio color
+   (`--own-accent`) para poder pintarse ya recorrida sin depender del activo.
+
+   El único estado que llega de JavaScript es `data-state` en el hito y
+   `data-filled` en el tramo. Ni un cálculo de animación fuera de aquí.
+   ========================================================================== */
+
+.ptl {
+  --node: clamp(2.15rem, 7.2vw, 3.25rem);
+  --ptl-dim: #8a8a8a;
+  position: relative;
+  isolation: isolate;
+}
+
+/* Aura ambiental detrás del raíl que se tiñe con el paso activo (`--step-accent`)
+   y deriva suavemente: da profundidad y refuerza el "retinte" de toda la escena. */
+.ptl::before {
+  content: "";
+  position: absolute;
+  z-index: -1;
+  top: calc(var(--node) * -0.9);
+  left: 50%;
+  width: min(50rem, 92%);
+  height: 15rem;
+  translate: -50% 0;
+  pointer-events: none;
+  background: radial-gradient(
+    50% 62% at 50% 40%,
+    color-mix(in srgb, var(--step-accent) 17%, transparent),
+    transparent 70%
+  );
+  filter: blur(12px);
+  /* Estática (sin deriva): solo cambia de color al cambiar de paso. Animar un
+     elemento desenfocado provoca shimmer/temblor y repintados caros. */
+  transition: background 0.45s ease;
+}
+
+/* --- Raíl --------------------------------------------------------------- */
+.ptl-rail {
+  display: grid;
+  /* Una columna por paso, y el número lo pone el componente desde
+     `process.ts`: añadir o quitar un paso no obliga a tocar este archivo.
+     Caben desde 320px porque los hitos son números, no rótulos; los títulos
+     aparecen bajo ellos solo cuando hay sitio. */
+  grid-template-columns: repeat(var(--steps, 6), minmax(0, 1fr));
+  align-items: start;
+  /* En pantallas muy anchas el raíl se estiraría hasta perder el sentido de
+     recorrido: los hitos quedarían tan separados que no se leerían como una
+     secuencia. */
+  max-width: 62rem;
+  margin-inline: auto;
+}
+
+.ptl-slot {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  min-width: 0;
+}
+
+/* --- Tramo entre hitos ---------------------------------------------------
+   Va desde el centro del hito anterior hasta el de este: `left: -50%` cae en la
+   columna de al lado, porque los porcentajes se resuelven contra el ancho de la
+   celda. Así el raíl nunca depende de medir el DOM. */
+.ptl-link {
+  position: absolute;
+  top: calc(var(--node) / 2);
+  right: 50%;
+  left: -50%;
+  height: 2px;
+  translate: 0 -1px;
+  overflow: hidden;
+  background-color: var(--border);
+  pointer-events: none;
+  /* Los tramos van DEBAJO de los hitos. Sin esto, el tramo de un hito —que
+     invade la columna anterior— se pintaba sobre el círculo de su vecino por
+     ser posterior en el DOM, y la línea cruzaba los números. */
+  z-index: 0;
+}
+
+.ptl-link-fill {
+  position: absolute;
+  inset: 0;
+  transform: scaleX(0);
+  transform-origin: left center;
+  background-image: linear-gradient(90deg, var(--from-accent), var(--own-accent));
+  /* Al vaciarse (cuando el recorrido vuelve al principio) el rebobinado es
+     rápido; al llenarse dura lo que el vuelo del cometa. */
+  transition: transform 240ms ease;
+}
+
+.ptl-link[data-filled] .ptl-link-fill {
+  transform: scaleX(1);
+  transition-duration: var(--travel);
+  transition-timing-function: cubic-bezier(0.33, 0, 0.15, 1);
+  /* El tramo recorrido queda encendido, no solo pintado. */
+  box-shadow: 0 0 9px color-mix(in srgb, var(--own-accent) 65%, transparent);
+}
+
+/* El cometa. Ocupa el tramo entero y lleva el punto pintado en su borde
+   izquierdo, así que trasladarlo el 100% de su PROPIO ancho lo lleva de un hito
+   al otro exactamente. Es la forma de recorrer el tramo con `translate` puro,
+   sin animar `left` y sin repintar en cada fotograma. */
+@keyframes ptl-comet {
+  0% {
+    translate: 0 0;
+    opacity: 0;
+  }
+  14% {
+    opacity: 1;
+  }
+  86% {
+    opacity: 1;
+  }
+  100% {
+    translate: 100% 0;
+    opacity: 0;
+  }
+}
+
+.ptl-comet {
+  position: absolute;
+  inset: 0;
+  opacity: 0;
+  background-image:
+    radial-gradient(
+      circle 4px at 0 50%,
+      #fff 0%,
+      var(--own-accent) 42%,
+      color-mix(in srgb, var(--own-accent) 40%, transparent) 70%,
+      transparent 100%
+    ),
+    linear-gradient(
+      90deg,
+      transparent,
+      color-mix(in srgb, var(--from-accent) 55%, transparent) 96%,
+      transparent
+    );
+  background-repeat: no-repeat;
+  background-size:
+    100% 100%,
+    22% 100%;
+  background-position:
+    0 0,
+    -22% 0;
+}
+
+.ptl-link[data-filled] .ptl-comet {
+  animation: ptl-comet var(--travel) cubic-bezier(0.33, 0, 0.15, 1) 1 both;
+}
+
+/* --- Hito ---------------------------------------------------------------- */
+.ptl-node {
+  position: relative;
+  z-index: 1;
+  display: grid;
+  place-items: center;
+  width: var(--node);
+  height: var(--node);
+  border-radius: 50%;
+  border: 1px solid var(--border);
+  background-color: var(--bg);
+  color: var(--ptl-dim);
+  /* Área táctil de 44px sin engordar el círculo (§10). */
+  outline-offset: 4px;
+  transition:
+    border-color 0.32s ease,
+    color 0.32s ease,
+    background-color 0.32s ease,
+    box-shadow 0.32s ease,
+    scale 0.32s cubic-bezier(0.34, 1.4, 0.64, 1);
+}
+
+.ptl-node::before {
+  content: "";
+  position: absolute;
+  inset: 50%;
+  width: 2.75rem;
+  height: 2.75rem;
+  translate: -50% -50%;
+}
+
+.ptl-slot[data-state="done"] .ptl-node {
+  border-color: color-mix(in srgb, var(--own-accent) 55%, transparent);
+  color: color-mix(in srgb, var(--own-accent) 85%, #fff);
+}
+
+.ptl-slot[data-state="on"] .ptl-node {
+  border-color: var(--own-accent);
+  color: #fff;
+  scale: 1.14;
+  background-color: color-mix(in srgb, var(--own-accent) 16%, var(--bg));
+  box-shadow:
+    0 0 0 1px color-mix(in srgb, var(--own-accent) 60%, transparent),
+    0 0 30px color-mix(in srgb, var(--own-accent) 55%, transparent),
+    inset 0 0 16px color-mix(in srgb, var(--own-accent) 24%, transparent);
+}
+
+.ptl-node-num {
+  font-family: var(--font-jetbrains-mono), monospace;
+  font-size: clamp(0.62rem, 2.1vw, 0.85rem);
+  font-weight: 600;
+  letter-spacing: 0.04em;
+  line-height: 1;
+}
+
+/* --- La detonación -------------------------------------------------------
+   Tres capas: floración (el color que inunda), dos ondas de choque desfasadas y
+   diez radios de luz. Solo existe en el DOM para el hito activo, y se remonta
+   con `key` para que vuelva a dispararse en cada llegada. */
+.ptl-burst {
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+}
+
+@keyframes ptl-bloom {
+  0% {
+    transform: scale(0.2);
+    opacity: 0;
+  }
+  18% {
+    opacity: 0.95;
+  }
+  100% {
+    transform: scale(3.4);
+    opacity: 0;
+  }
+}
+
+.ptl-bloom {
+  position: absolute;
+  inset: -25%;
+  border-radius: 50%;
+  background-image: radial-gradient(
+    circle,
+    color-mix(in srgb, var(--own-accent) 82%, transparent) 0%,
+    color-mix(in srgb, var(--own-accent) 34%, transparent) 42%,
+    transparent 70%
+  );
+  animation: ptl-bloom 0.95s cubic-bezier(0.16, 1, 0.3, 1) 1 both;
+}
+
+@keyframes ptl-shock {
+  0% {
+    transform: scale(0.55);
+    opacity: 0;
+    border-width: 3px;
+  }
+  12% {
+    opacity: 1;
+  }
+  100% {
+    transform: scale(2.9);
+    opacity: 0;
+    border-width: 1px;
+  }
+}
+
+.ptl-shock {
+  position: absolute;
+  inset: 0;
+  border-radius: 50%;
+  border: 2px solid var(--own-accent);
+  animation: ptl-shock 0.82s cubic-bezier(0.16, 1, 0.3, 1) 1 both;
+}
+
+.ptl-shock-2 {
+  animation-delay: 0.11s;
+  animation-duration: 0.95s;
+  opacity: 0.55;
+}
+
+@keyframes ptl-spoke {
+  0% {
+    transform: rotate(var(--a)) translateY(calc(var(--node) * 0.3)) scaleY(0.3);
+    opacity: 0;
+  }
+  22% {
+    opacity: 1;
+  }
+  100% {
+    transform: rotate(var(--a)) translateY(calc(var(--node) * 1.05)) scaleY(1.9);
+    opacity: 0;
+  }
+}
+
+.ptl-spoke {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  width: 2px;
+  height: 0.5rem;
+  margin: -0.25rem 0 0 -1px;
+  border-radius: 1px;
+  transform-origin: center;
+  background-image: linear-gradient(to top, transparent, var(--own-accent) 45%, #fff 100%);
+  animation: ptl-spoke 0.8s cubic-bezier(0.16, 1, 0.3, 1) 1 both;
+}
+
+/* --- Rótulo bajo el hito -------------------------------------------------- */
+.ptl-caption {
+  margin-top: 0.65rem;
+  max-width: 100%;
+  font-size: 0.68rem;
+  line-height: 1.25;
+  text-align: center;
+  color: var(--ptl-dim);
+  overflow-wrap: anywhere;
+  transition: color 0.45s ease;
+  /* Por debajo de `sm` no cabe sin partirse: el título vive en la tarjeta. */
+  display: none;
+}
+
+.ptl-slot[data-state="on"] .ptl-caption {
+  color: var(--own-accent);
+}
+
+@media (min-width: 640px) {
+  .ptl-caption {
+    display: block;
+    font-size: 0.78rem;
+  }
+}
+
+/* --- Tarjetas -------------------------------------------------------------
+   Las seis comparten celda de rejilla: el alto lo fija la más larga, así que
+   cambiar de paso NO desplaza nada (CLS 0). Están siempre en el DOM y en orden,
+   de modo que un lector de pantalla las recibe todas sin esperar al recorrido. */
+.ptl-cards {
+  display: grid;
+  margin-top: clamp(1.75rem, 4vw, 2.75rem);
+  padding: 0;
+  list-style: none;
+}
+
+.ptl-card {
+  grid-area: 1 / 1;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 0.4rem;
+  max-width: 34rem;
+  margin-inline: auto;
+  padding: 0 0.5rem;
+  text-align: center;
+  opacity: 0;
+  translate: 0 0.6rem;
+  pointer-events: none;
+  transition:
+    opacity 0.34s ease,
+    translate 0.34s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+.ptl-card[data-on] {
+  opacity: 1;
+  translate: 0 0;
+  pointer-events: auto;
+  transition-delay: 0.06s;
+}
+
+.ptl-card-k {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.45rem;
+  font-family: var(--font-jetbrains-mono), monospace;
+  font-size: 0.62rem;
+  letter-spacing: 0.18em;
+  text-transform: uppercase;
+  color: var(--own-accent);
+}
+
+.ptl-card-t {
+  font-size: clamp(1.35rem, 4.2vw, 1.9rem);
+  font-weight: 600;
+  line-height: 1.15;
+  color: var(--fg);
+}
+
+.ptl-card-d {
+  color: var(--muted);
+  text-wrap: pretty;
+}
+
+/* ==========================================================================
+   UPGRADE VISUAL (nivel "increíble")
+
+   Vida durante el "dwell": el hito activo respira, el flash de llegada da punch
+   y la tarjeta activa remata con un filo de acento. Todo se activa desde el
+   mismo `data-state`/`data-on`, sin lógica nueva en JS.
+   ========================================================================== */
+
+/* El hito activo RESPIRA (glow pulsante) durante toda su estancia, así el paso
+   entre cometas ya no se percibe como algo congelado. El `scale: 1.14` del
+   estado activo se conserva porque esta animación solo toca `box-shadow`. */
+/* IMPACTO al llegar: un pop de escala que asienta (una sola vez, no en bucle →
+   nada de "temblor"). Solo anima `scale` (transform, compone en GPU). */
+.ptl-slot[data-state="on"] .ptl-node {
+  animation: ptl-node-hit 0.5s cubic-bezier(0.34, 1.5, 0.5, 1) 1 both;
+}
+@keyframes ptl-node-hit {
+  0% {
+    scale: 1.34;
+  }
+  60% {
+    scale: 1.08;
+  }
+  100% {
+    scale: 1.14;
+  }
+}
+
+/* Flash blanco instantáneo al llegar el cometa (punch cinematográfico). */
+.ptl-burst::before {
+  content: "";
+  position: absolute;
+  inset: -45%;
+  border-radius: 50%;
+  background: radial-gradient(
+    circle,
+    #fff 0%,
+    color-mix(in srgb, var(--own-accent) 55%, #fff) 22%,
+    transparent 60%
+  );
+  animation: ptl-flash 0.5s ease-out 1 both;
+}
+@keyframes ptl-flash {
+  0% {
+    opacity: 0.85;
+    transform: scale(0.4);
+  }
+  100% {
+    opacity: 0;
+    transform: scale(1.7);
+  }
+}
+
+/* Filo de acento que se dibuja bajo el título de la tarjeta activa. */
+.ptl-card-t {
+  position: relative;
+}
+.ptl-card-t::after {
+  content: "";
+  position: absolute;
+  left: 50%;
+  bottom: -0.45rem;
+  width: 2.6rem;
+  height: 2px;
+  transform: translateX(-50%) scaleX(0);
+  transform-origin: center;
+  border-radius: 999px;
+  background: linear-gradient(90deg, transparent, var(--own-accent), transparent);
+  box-shadow: 0 0 10px color-mix(in srgb, var(--own-accent) 70%, transparent);
+  transition: transform 0.5s cubic-bezier(0.16, 1, 0.3, 1);
+}
+.ptl-card[data-on] .ptl-card-t::after {
+  transform: translateX(-50%) scaleX(1);
+  transition-delay: 0.22s;
+}
