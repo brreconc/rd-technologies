@@ -1,0 +1,74 @@
+/* ==========================================================================
+   TOKENS DE DISEÑO — paleta, @theme y tipografía fluida
+   Fuente única de la identidad visual. Ver docs/02-design-system.
+   ⚠️ Este archivo lo importa src/app/globals.css. NO importar suelto.
+   ========================================================================== */
+/* ==========================================================================
+   R&D Technologies — Tokens de diseño y base global
+   Tailwind CSS v4 (config en CSS). Ver docs/02-design-system.
+
+   Theming (§6.3, ADR-012): el sitio tiene un ÚNICO tema, oscuro. Los colores
+   semánticos siguen siendo variables CSS (`--bg`, `--fg`…) y `@theme inline`
+   las mapea a utilidades de Tailwind (`bg-background`, `text-foreground`…),
+   así que sustituir la paleta es cambiar este bloque y nada más. Ya no hay
+   alternador de tema ni clase `.light`/`.dark` en <html>.
+   ========================================================================== */
+
+/* --- Paleta base (tema oscuro, único) --- */
+:root {
+  color-scheme: dark;
+  --bg: #0a0a0a; /* Fondo base */
+  --surface: #141414; /* Superficies / cards */
+  --surface-2: #1a1a1a; /* Superficies elevadas */
+  --border: #262626; /* Bordes sutiles */
+  --fg: #ffffff; /* Texto principal */
+  --muted: #b0b0b0; /* Texto secundario */
+  --ring: #00f5ff; /* Anillo de foco */
+  --danger: #ff6b6b; /* Error de formulario (AA ~7.4:1 sobre --bg) */
+  --success: #4ade80; /* Éxito de formulario (AA sobre --bg) */
+
+  /* Acentos de marca */
+  --accent-cyan: #00f5ff;
+  --accent-purple: #8b5cf6;
+  --accent-red: #ff6b6b;
+  --accent-yellow: #ffd93d;
+  --on-accent: #0a0a0a; /* Texto legible sobre acentos brillantes */
+  --gradient-from: #00f5ff;
+  --gradient-to: #8b5cf6;
+}
+
+@theme inline {
+  /* Colores semánticos (theme-aware): generan utilidades bg-, text-, border- */
+  --color-background: var(--bg);
+  --color-surface: var(--surface);
+  --color-surface-2: var(--surface-2);
+  --color-border: var(--border);
+  --color-foreground: var(--fg);
+  --color-muted: var(--muted);
+  --color-ring: var(--ring);
+  --color-danger: var(--danger);
+  --color-success: var(--success);
+
+  /* Acentos de marca (constantes) */
+  --color-accent-cyan: var(--accent-cyan);
+  --color-accent-purple: var(--accent-purple);
+  --color-accent-red: var(--accent-red);
+  --color-accent-yellow: var(--accent-yellow);
+  --color-on-accent: var(--on-accent);
+
+  /* Tipografías (self-hosted vía next/font) */
+  --font-sans: var(--font-inter);
+  --font-display: var(--font-space-grotesk);
+  --font-serif: var(--font-fraunces);
+  --font-mono: var(--font-jetbrains-mono);
+
+  /* Tipografía fluida (clamp) — sin saltos entre breakpoints (§5.3) */
+  --text-fluid-lg: clamp(1.125rem, 0.9rem + 1vw, 1.375rem);
+  --text-fluid-lg--line-height: 1.6;
+  --text-fluid-xl: clamp(1.375rem, 1rem + 1.6vw, 1.875rem);
+  --text-fluid-xl--line-height: 1.4;
+  --text-fluid-2xl: clamp(1.875rem, 1.2rem + 3vw, 3rem);
+  --text-fluid-2xl--line-height: 1.2;
+  --text-fluid-hero: clamp(2.25rem, 1.55rem + 3.4vw, 4.5rem);
+  --text-fluid-hero--line-height: 1.06;
+}

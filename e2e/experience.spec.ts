@@ -8,15 +8,18 @@ import { test, expect } from "@playwright/test";
  */
 
 test.describe("Experiencia", () => {
-  test("el hero monta la malla neuronal a tamaño completo", async ({ page }) => {
+  test("el hero monta la consola de compilación y teclea contenido", async ({ page }) => {
     await page.goto("/");
-    const canvas = page.locator('section[aria-labelledby="hero-title"] canvas');
-    await expect(canvas).toHaveCount(1);
+    const consola = page.locator('section[aria-labelledby="hero-title"] .hc');
+    await expect(consola).toHaveCount(1);
 
-    const box = await canvas.boundingBox();
+    const box = await consola.boundingBox();
     expect(box).not.toBeNull();
-    expect(box!.width).toBeGreaterThan(300);
+    expect(box!.width).toBeGreaterThan(200);
     expect(box!.height).toBeGreaterThan(200);
+
+    // La consola se ejecuta sola: aparece el prompt de arranque que teclea.
+    await expect(consola.locator(".hc-prompt").first()).toBeVisible({ timeout: 5000 });
   });
 
   test("los títulos revelados palabra a palabra conservan su texto", async ({ page }) => {

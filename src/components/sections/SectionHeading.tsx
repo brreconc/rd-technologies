@@ -6,6 +6,9 @@ interface SectionHeadingProps {
   id?: string;
   eyebrow?: string;
   title: string;
+  /** Fragmento del título que se pinta con el degradado de marca (como en la
+   *  propuesta de valor). Opcional; se pasa tal cual a `TextReveal`. */
+  highlight?: string;
   description?: string;
   centered?: boolean;
   className?: string;
@@ -26,6 +29,7 @@ export function SectionHeading({
   id,
   eyebrow,
   title,
+  highlight,
   description,
   centered = false,
   className,
@@ -58,6 +62,7 @@ export function SectionHeading({
       <TextReveal
         id={id}
         text={title}
+        highlight={highlight}
         delay={0.08}
         className="font-display text-fluid-2xl font-bold tracking-tight text-balance"
       />

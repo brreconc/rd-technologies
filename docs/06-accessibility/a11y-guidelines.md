@@ -103,8 +103,8 @@ Resumen:
 - **Ningún componente cambia su markup según `useReducedMotion()`.** Hacerlo rompía la hidratación
   (el hook devuelve `null` en el servidor) justo para estos usuarios. Corregido en la Fase 9 y
   vigilado por [`e2e/experience.spec.ts`](../../e2e/experience.spec.ts).
-- La malla neuronal del hero pinta **un único fotograma** (red ya construida, sin partículas) y no
-  arranca el bucle `requestAnimationFrame`.
+- La consola de compilación del hero (`CodeConsole`) **salta al estado final** (código escrito,
+  compilado y asegurado) y no arranca el bucle `requestAnimationFrame`. Es decorativa (`aria-hidden`).
 - El paralaje de salida del hero se anula por completo.
 
 ## Limitación conocida: página sin JavaScript

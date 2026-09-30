@@ -1,0 +1,135 @@
+/* ==========================================================================
+   MOCK-UPS · Base y piezas compartidas (.mk, .mk-ico, barra de estado…).
+   Interior del dispositivo del deck. Importar ANTES que cada plataforma.
+   ========================================================================== */
+/* ==========================================================================
+   MOCK-UPS DEL INTERIOR DEL DISPOSITIVO
+
+   Interfaces creíbles, no rectángulos de relleno: son el argumento de la
+   sección. Todo dimensiona en `cqh` (el dispositivo es el contenedor de
+   tamaño), de modo que la interfaz escala con el marco al transformarse.
+   ========================================================================== */
+
+.mk {
+  position: absolute;
+  inset: 0;
+  display: flex;
+  flex-direction: column;
+  font-family: var(--font-inter), sans-serif;
+  /* Base tipográfica del mock-up; todo lo de dentro va en `em`. */
+  font-size: 3.4cqh;
+  line-height: 1.25;
+  color: var(--fg);
+  overflow: hidden;
+  /* `body` pide `optimizeLegibility`, que a 6–8 px hace que Chromium coloque
+     mal algunos pares de glifos y abre huecos falsos dentro de las palabras
+     ("Us uarios"). Aquí manda la precisión geométrica. */
+  text-rendering: geometricPrecision;
+}
+
+.mk-ico {
+  width: 1em;
+  height: 1em;
+  flex-shrink: 0;
+  fill: none;
+  stroke: currentColor;
+  stroke-width: 1.8;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+}
+
+@keyframes mk-in {
+  from {
+    opacity: 0;
+    transform: translate3d(0, 6px, 0);
+  }
+  to {
+    opacity: 1;
+    transform: none;
+  }
+}
+
+/* Aparición escalonada de los bloques del mock-up: la interfaz se "dibuja". */
+.mk > * {
+  animation: mk-in 0.45s cubic-bezier(0.16, 1, 0.3, 1) 1 both;
+}
+.mk > *:nth-child(1) {
+  animation-delay: 0.05s;
+}
+.mk > *:nth-child(2) {
+  animation-delay: 0.11s;
+}
+.mk > *:nth-child(3) {
+  animation-delay: 0.17s;
+}
+.mk > *:nth-child(4) {
+  animation-delay: 0.23s;
+}
+.mk > *:nth-child(5) {
+  animation-delay: 0.29s;
+}
+.mk > *:nth-child(6) {
+  animation-delay: 0.35s;
+}
+.mk > *:nth-child(7) {
+  animation-delay: 0.41s;
+}
+
+/* --- Piezas compartidas ------------------------------------------------------ */
+.mk-status {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 0.5em 0.9em 0.2em;
+  font-family: var(--font-jetbrains-mono), monospace;
+  font-size: 0.62em;
+  color: var(--fg);
+}
+
+.mk-status-r {
+  display: flex;
+  align-items: center;
+  gap: 0.35em;
+}
+
+.mk-sig,
+.mk-batt {
+  display: block;
+  height: 0.55em;
+  background-color: currentColor;
+  opacity: 0.75;
+}
+.mk-sig {
+  width: 0.7em;
+  clip-path: polygon(0 100%, 100% 0, 100% 100%);
+}
+.mk-batt {
+  width: 1.1em;
+  border-radius: 0.12em;
+}
+
+.mk-punch {
+  width: 0.5em;
+  height: 0.5em;
+  border-radius: 50%;
+  background-color: #000;
+  box-shadow: inset 0 0 0 1px rgb(255 255 255 / 0.12);
+}
+
+.mk-island {
+  width: 4.2em;
+  height: 1.15em;
+  border-radius: 0.6em;
+  background-color: #000;
+  box-shadow: inset 0 0 0 1px rgb(255 255 255 / 0.08);
+}
+
+.mk-tag {
+  flex-shrink: 0;
+  font-family: var(--font-jetbrains-mono), monospace;
+  font-size: 0.5em;
+  letter-spacing: 0.08em;
+  padding: 0.18em 0.4em;
+  border: 1px solid color-mix(in srgb, var(--platform-accent) 40%, transparent);
+  color: var(--platform-accent);
+}

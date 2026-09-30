@@ -134,6 +134,19 @@
   un fragmento del titular sin dejar de ser texto plano, y `StaggerItem` admite una entrada lateral
   (`rowIn`) para filas dentro de un panel. **0 KB de JS** (se retira `SpotlightCard` de la sección) y
   +1 KB de CSS. Verificada con 101 unit + 48 E2E y Lighthouse 99/100/96/100. **Completada.**
+- ✅ **Fase 15 — El hero neuronal cobra vida (retirada en la Fase 16):**
+  ([ADR-018](./01-architecture/decisions/ADR-018-living-neural-hero.md)). La malla neuronal del hero
+  pasó a ser un "sistema vivo" con arranque cinematográfico, profundidad, interacción con el puntero y
+  un juego de virus perseguidos por agentes. **Reemplazada por la Fase 16** (cambio de temática).
+- ✅ **Fase 16 — El hero pasa a una consola de compilación:**
+  ([ADR-019](./01-architecture/decisions/ADR-019-hero-code-console.md)). Se **elimina por completo** la
+  malla neuronal (componente, motor y tests) y el hero se rehace a **dos columnas**: a la izquierda una
+  **consola de cine** (`CodeConsole`) que se ejecuta sola —teclea código real, compila con barra de
+  progreso y logs, aplica medidas de ciberseguridad y entrega la app con métricas—, con un **ejemplo
+  aleatorio por recarga** (Desarrollo Web, App Android, App iOS, App Windows); a la derecha, el mensaje
+  de marca. Toda la coreografía se deriva de una **línea temporal precalculada** recorrida por
+  `requestAnimationFrame` (sincronía exacta, 60 fps). **Sin dependencias nuevas.** Respeta
+  `prefers-reduced-motion` (salta al estado final) y mantiene el `<h1>` como LCP. **Completada.**
 
 ## Deuda técnica abierta
 

@@ -158,6 +158,24 @@ según la preferencia de movimiento, y la regla global de `prefers-reduced-motio
 | Pasar el fragmento resaltado del titular como JSX     | Rompe el troceado por palabras de `TextReveal` y obliga a `constants/value-props.ts` a importar React. `highlight` es un dato. |
 | Columna izquierda `sticky`                            | La sección mide una pantalla escasa: no hay recorrido que acompañar, y el pegado se notaría como un tirón.                     |
 
+## Evolución — línea de tiempo automática en los estratos
+
+El realce de los estratos dejó de depender solo de `:hover`/`:focus-within`: ahora
+corren como una **línea de tiempo automática** `01 → 02 → 03` que se reinicia en
+bucle (`ValueProps/StrataTimeline.tsx`). Una única fuente de verdad —el índice
+`active`, que avanza a ritmo fijo (`STEP_MS`)— dirige toda la coreografía, que se
+DERIVA en CSS desde `[data-active]`: un **anillo de progreso** cónico se llena en
+el nodo activo durante el paso, un **haz** baja por la espina para "entregar el
+testigo" al nodo siguiente, el subrayado de acento se dibuja sincronizado y los
+estratos en reposo se **atenúan** (con `filter`, no `opacity`, que Framer deja en
+línea). La sincronía es exacta porque cada animación dura `var(--vpx-step)`, que
+fija el componente. El bucle se **detiene fuera del viewport** y **no arranca con
+`prefers-reduced-motion`** (queda el primer estrato resaltado, quieto); el
+hover/focus manuales siguen operativos por encima. Esto matiza la tabla de "qué se
+descartó" (espina en bucle): el motivo en movimiento aquí es un temporizador
+acotado y accesible, no un cometa perpetuo. Además, el párrafo de entrada pasa a
+ir **justificado** (con guionado) para que el bloque se lea ordenado.
+
 ## Referencias
 
 - [ADR-011](./ADR-011-secure-system-scenography.md) — regla de oro de hidratación y política de movimiento.

@@ -1,0 +1,375 @@
+/* ==========================================================================
+   SECCIÓN · Por qué elegirnos — TIMELINE HORIZONTAL enterprise.
+   Prefijo de clase: .dfe-*   ·   Driver: Differentiators/DiffTimeline.tsx
+
+   Dos capas:
+   1) Base accesible (sin `data-cycling`): rejilla con los 5 motivos visibles;
+      la línea superior es decorativa y se oculta.
+   2) Modo CICLO (`.dfe[data-cycling]`, ≥ lg): una línea fina con nodos y un
+      playhead que se desliza a la parada activa; debajo, tarjetas-panel que
+      aparecen escalonadas y donde la del motivo activo se eleva y se enmarca.
+   ========================================================================== */
+
+.dfe {
+  --df-ease: cubic-bezier(0.16, 1, 0.3, 1);
+  --dfe-gap: clamp(0.75rem, 1.4vw, 1.25rem);
+  position: relative;
+}
+
+/* --- Línea superior (solo modo ciclo, ≥ lg) -------------------------------- */
+.dfe-rail {
+  display: none;
+}
+
+/* --- Tarjetas -------------------------------------------------------------- */
+.dfe-track {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: grid;
+  gap: var(--dfe-gap);
+}
+@media (width >= 48rem) {
+  .dfe-track {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+}
+@media (width >= 64rem) {
+  .dfe-track {
+    grid-template-columns: repeat(5, minmax(0, 1fr));
+  }
+}
+
+.dfe-card {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  gap: 0.6rem;
+  padding: clamp(1rem, 1.6vw, 1.35rem);
+  border: 1px solid var(--border);
+  border-radius: 0.9rem;
+  background: color-mix(in srgb, var(--surface) 62%, transparent);
+  transition:
+    transform 0.5s var(--df-ease),
+    box-shadow 0.5s ease,
+    border-color 0.4s ease,
+    background-color 0.4s ease;
+}
+/* Filo de acento superior que aparece en la tarjeta activa. */
+.dfe-card::after {
+  content: "";
+  position: absolute;
+  top: -1px;
+  left: 1.1rem;
+  right: 1.1rem;
+  height: 2px;
+  border-radius: 999px;
+  background: linear-gradient(90deg, transparent, var(--df-accent), transparent);
+  transform: scaleX(0);
+  transition: transform 0.5s var(--df-ease);
+}
+
+.dfe-ic {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 2.6rem;
+  height: 2.6rem;
+  flex: none;
+  border-radius: 0.75rem;
+  color: var(--df-accent);
+  background: color-mix(in srgb, var(--df-accent) 12%, transparent);
+  box-shadow: inset 0 0 0 1px color-mix(in srgb, var(--df-accent) 28%, transparent);
+  transition:
+    background-color 0.4s ease,
+    box-shadow 0.4s ease,
+    transform 0.5s var(--df-ease);
+}
+.dfe-ic svg {
+  width: 1.3rem;
+  height: 1.3rem;
+}
+.dfe-title {
+  color: var(--fg);
+  font-size: 1.02rem;
+  font-weight: 650;
+  letter-spacing: -0.01em;
+  line-height: 1.3;
+}
+.dfe-desc {
+  color: var(--muted);
+  font-size: 0.9rem;
+  line-height: 1.55;
+  text-wrap: pretty;
+}
+
+/* ==========================================================================
+   MODO CICLO
+   ========================================================================== */
+
+/* La línea superior solo tiene sentido en la fila de 5 columnas (≥ lg). */
+@media (width >= 64rem) {
+  .dfe[data-cycling] .dfe-rail {
+    display: block;
+    position: relative;
+    height: 1.5rem;
+    margin-bottom: clamp(1.25rem, 2.5vw, 1.9rem);
+  }
+}
+
+/* Línea base tenue de extremo a extremo. */
+.dfe-line {
+  position: absolute;
+  top: 50%;
+  left: 0;
+  right: 0;
+  height: 1px;
+  transform: translateY(-50%);
+  background: linear-gradient(
+    90deg,
+    transparent,
+    color-mix(in srgb, var(--fg) 18%, transparent) 12%,
+    color-mix(in srgb, var(--fg) 18%, transparent) 88%,
+    transparent
+  );
+}
+
+/* Progreso LUMINOSO: se llena de la izquierda hasta el playhead, teñido con el
+   color del motivo activo, con un brillo que fluye por encima (se siente vivo). */
+.dfe-fill {
+  position: absolute;
+  top: 50%;
+  left: 0;
+  width: 0;
+  height: 2px;
+  transform: translateY(-50%);
+  border-radius: 999px;
+  overflow: hidden;
+  background: linear-gradient(
+    90deg,
+    color-mix(in srgb, var(--accent-cyan) 55%, transparent),
+    var(--df-accent)
+  );
+  box-shadow: 0 0 14px color-mix(in srgb, var(--df-accent) 70%, transparent);
+  transition:
+    width 0.6s var(--df-ease),
+    background 0.5s ease,
+    box-shadow 0.5s ease;
+  z-index: 1;
+}
+.dfe-fill-flow {
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(
+    90deg,
+    transparent,
+    color-mix(in srgb, #fff 65%, transparent),
+    transparent
+  );
+  background-size: 40% 100%;
+  background-repeat: no-repeat;
+  animation: dfe-flow 1.5s linear infinite;
+}
+@keyframes dfe-flow {
+  from {
+    background-position: -45% 0;
+  }
+  to {
+    background-position: 145% 0;
+  }
+}
+
+/* Los nodos comparten la MISMA rejilla que las tarjetas → quedan centrados
+   sobre cada columna. */
+.dfe-nodes {
+  position: relative;
+  z-index: 1;
+  display: grid;
+  grid-template-columns: repeat(5, minmax(0, 1fr));
+  gap: var(--dfe-gap);
+  height: 100%;
+  align-items: center;
+}
+.dfe-node {
+  justify-self: center;
+  width: 0.7rem;
+  height: 0.7rem;
+  border-radius: 50%;
+  background: var(--background);
+  box-shadow: inset 0 0 0 1.5px color-mix(in srgb, var(--fg) 28%, transparent);
+  transition:
+    box-shadow 0.4s ease,
+    background-color 0.4s ease,
+    transform 0.4s var(--df-ease);
+}
+.dfe-node[data-done] {
+  background: color-mix(in srgb, var(--df-accent) 55%, var(--background));
+  box-shadow:
+    inset 0 0 0 1.5px var(--df-accent),
+    0 0 9px -2px color-mix(in srgb, var(--df-accent) 70%, transparent);
+}
+.dfe-node[data-active] {
+  transform: scale(1.6);
+  background: var(--df-accent);
+  box-shadow:
+    inset 0 0 0 1.5px #fff,
+    0 0 24px 2px color-mix(in srgb, var(--df-accent) 95%, transparent);
+}
+/* Pulso sutil al encenderse (una vez por activación). */
+.dfe-node::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  border-radius: 50%;
+  border: 1px solid var(--df-accent);
+  opacity: 0;
+  pointer-events: none;
+}
+.dfe-node[data-active]::before {
+  animation: dfe-ping 1s ease-out;
+}
+@keyframes dfe-ping {
+  0% {
+    opacity: 0.8;
+    transform: scale(1);
+  }
+  100% {
+    opacity: 0;
+    transform: scale(3.2);
+  }
+}
+
+/* Playhead: punto luminoso que se desliza a la parada activa (posición medida). */
+.dfe-head {
+  position: absolute;
+  top: 50%;
+  left: 0;
+  width: 0.62rem;
+  height: 0.62rem;
+  border-radius: 50%;
+  transform: translate(-50%, -50%);
+  background: radial-gradient(circle, #fff, var(--df-accent) 55%);
+  box-shadow:
+    0 0 10px 2px #fff,
+    0 0 26px 4px color-mix(in srgb, var(--df-accent) 95%, transparent);
+  opacity: 0;
+  z-index: 3;
+  transition:
+    left 0.6s var(--df-ease),
+    background 0.5s ease,
+    box-shadow 0.5s ease,
+    opacity 0.4s ease;
+}
+/* Halo que respira alrededor del playhead. */
+.dfe-head::before {
+  content: "";
+  position: absolute;
+  inset: -0.45rem;
+  border-radius: 50%;
+  background: radial-gradient(
+    circle,
+    color-mix(in srgb, var(--df-accent) 55%, transparent),
+    transparent 70%
+  );
+  animation: dfe-head-halo 1.8s ease-in-out infinite;
+}
+@keyframes dfe-head-halo {
+  0%,
+  100% {
+    opacity: 0.5;
+    transform: scale(0.9);
+  }
+  50% {
+    opacity: 1;
+    transform: scale(1.25);
+  }
+}
+.dfe[data-cycling] .dfe-head {
+  opacity: 1;
+}
+
+/* --- Tarjetas en modo ciclo: entrada escalonada + realce del activo -------- */
+.dfe[data-inview] .dfe-card {
+  /* `backwards`, NO `both`: mantiene el estado oculto durante el retardo (para el
+     escalonado) y, al terminar, cede el control al realce del activo —si fuese
+     `both`, el `transform: none` final anularía la elevación del activo. */
+  animation: dfe-enter 0.6s var(--df-ease) backwards;
+  animation-delay: calc(var(--i) * 0.09s);
+}
+@keyframes dfe-enter {
+  from {
+    opacity: 0;
+    transform: translateY(18px) scale(0.97);
+    filter: blur(5px);
+  }
+  to {
+    opacity: 1;
+    transform: none;
+    filter: none;
+  }
+}
+
+.dfe-card[data-active] {
+  transform: translateY(-8px);
+  border-color: color-mix(in srgb, var(--df-accent) 65%, var(--border));
+  background: color-mix(in srgb, var(--df-accent) 13%, var(--surface));
+  box-shadow:
+    0 26px 55px -26px color-mix(in srgb, var(--df-accent) 95%, transparent),
+    0 0 30px -14px color-mix(in srgb, var(--df-accent) 85%, transparent),
+    inset 0 1px 0 color-mix(in srgb, #fff 9%, transparent);
+}
+.dfe-card[data-active]::after {
+  transform: scaleX(1);
+  box-shadow: 0 0 12px color-mix(in srgb, var(--df-accent) 85%, transparent);
+}
+/* Borde de acento (gradiente enmascarado) que respira en la tarjeta activa. */
+.dfe-card::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  border-radius: inherit;
+  padding: 1px;
+  background: linear-gradient(
+    140deg,
+    color-mix(in srgb, var(--df-accent) 85%, transparent),
+    transparent 45%,
+    color-mix(in srgb, var(--df-accent) 45%, transparent)
+  );
+  -webkit-mask:
+    linear-gradient(#000 0 0) content-box,
+    linear-gradient(#000 0 0);
+  -webkit-mask-composite: xor;
+  mask-composite: exclude;
+  opacity: 0;
+  transition: opacity 0.4s ease;
+  pointer-events: none;
+}
+.dfe-card[data-active]::before {
+  opacity: 1;
+  animation: dfe-border-breathe 2.6s ease-in-out infinite;
+}
+@keyframes dfe-border-breathe {
+  0%,
+  100% {
+    opacity: 0.55;
+  }
+  50% {
+    opacity: 1;
+  }
+}
+.dfe-card[data-active] .dfe-ic {
+  transform: translateY(-1px) scale(1.06);
+  color: #fff;
+  background: linear-gradient(
+    150deg,
+    var(--df-accent),
+    color-mix(in srgb, var(--df-accent) 55%, #0b0d12)
+  );
+  box-shadow:
+    inset 0 0 0 1px color-mix(in srgb, #fff 30%, transparent),
+    0 0 30px -6px color-mix(in srgb, var(--df-accent) 95%, transparent);
+}
+
+/* Cuando el realce del activo pisa la entrada escalonada, la entrada manda solo
+   durante su breve animación; el `transform` del activo se aplica después por la
+   transición, sin saltos (ambos usan el mismo easing). */

@@ -73,7 +73,7 @@ Contenido tipado en `src/lib/constants` (no hardcodeado). Helpers: `SectionHeadi
 
 | Sección           | Ancla                 | Fuente de contenido                                     |
 | ----------------- | --------------------- | ------------------------------------------------------- |
-| `Hero`            | —                     | copy inline (oficial) + `HeroBackdrop`/`HeroStage`      |
+| `Hero`            | —                     | copy inline (oficial) + `CodeConsole`/`HeroStage`       |
 | `TechMarquee`     | —                     | `constants/tech`                                        |
 | `ValueProps`      | `#propuesta-de-valor` | `constants/value-props` (manifiesto editorial, Fase 14) |
 | `Services`        | `#servicios`          | `constants/services`                                    |
@@ -196,14 +196,18 @@ E-commerce).
 | `Reveal`                  | Entrada fade+subida al hacer scroll (`mode="scroll"`) o al montar (`mode="mount"`); opción `blur`.                                                                                                                         |
 | `Stagger` / `StaggerItem` | Lista con entrada escalonada de sus ítems. Por defecto `cardIn` (llegada 3D, para tarjetas sueltas); `StaggerItem` acepta otra variante — `rowIn` es la entrada lateral sin giro, para filas dentro de un panel con borde. |
 | `TextReveal`              | Título revelado **palabra a palabra** desde detrás de su máscara. Usado por todos los `SectionHeading`. Con `highlight` tiñe un fragmento contiguo con el degradado de marca sin dejar de recibir texto plano.             |
-| `NeuralNetwork`           | Malla neuronal del hero en `<canvas>`: arranque, tráfico de datos e intrusiones interceptadas. Ver ADR-011.                                                                                                                |
 | `ScrollProgress`          | Barra de progreso de lectura fija arriba (`aria-hidden`).                                                                                                                                                                  |
 | `MagneticButton`          | El CTA se desplaza hacia el cursor con muelle; sin listeners con movimiento reducido.                                                                                                                                      |
 | `CountUp`                 | Cuenta de 0 al valor al entrar en pantalla; el HTML contiene siempre el valor final.                                                                                                                                       |
 | `Marquee`                 | Cinta infinita en CSS puro con copia `aria-hidden` para no duplicar contenido.                                                                                                                                             |
 
-La lógica de la malla vive aparte, **sin DOM**, en `animations/NeuralNetwork/engine.ts` (probada con
-Vitest en `engine.test.ts`).
+El hero (`sections/Hero`) muestra a la izquierda la **`CodeConsole`** (Fase 16, ADR-019): una
+consola de compilación que teclea código, compila y aplica ciberseguridad, con un ejemplo distinto
+por recarga (Web, Android, iOS o Windows). Al terminar, **`AppDemo`** cubre la consola y muestra la
+app "en ejecución" en el marco de su dispositivo, con un **logo 3D** (emblemas originales en
+`Hero/logos.tsx`). El contenido vive como datos en `lib/constants/hero-console.ts` (probado con
+Vitest en `hero-console.test.ts`). El hero encaja exacto en el viewport (`calc(100svh - 4rem)`) sin
+scroll.
 
 Detalle completo en [design-system/motion](../02-design-system/motion.md). Framer Motion
 optimizado con `LazyMotion` + `m.*` + carga diferida del motor (§11).

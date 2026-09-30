@@ -14,6 +14,6 @@ export interface Stat {
 export const stats: Stat[] = [
   { value: 50, suffix: "+", label: "Proyectos entregados" },
   { value: 99.9, suffix: "%", decimals: 1, label: "Disponibilidad media" },
-  { value: 10, suffix: "+", label: "Años de experiencia" },
+  { value: 5, suffix: "+", label: "Años de experiencia" },
   { value: 24, suffix: "/7", label: "Soporte y monitorización" },
 ];

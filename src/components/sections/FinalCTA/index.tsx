@@ -1,4 +1,4 @@
-import { ShieldCheck } from "lucide-react";
+import { ShieldCheck, Lock, MailCheck } from "lucide-react";
 import { Container, Section } from "@/components/ui/container";
 import { Reveal } from "@/components/animations/Reveal";
 import { TextReveal } from "@/components/animations/TextReveal";
@@ -6,65 +6,64 @@ import { ContactForm } from "@/components/forms/ContactForm";
 import { siteConfig } from "@/config/site";
 
 /**
- * Sección "CTA final" (§8.9). Aloja el formulario de contacto real (Fase 4).
+ * Sección "CTA final" / Contacto (§8.9). Aloja el formulario real (Fase 4).
  *
- * Mejora progresiva (§3.2): el formulario es la vía enriquecida (requiere JS),
- * pero SIEMPRE queda visible un enlace de correo directo, de modo que el CTA de
- * contacto funciona aunque el JavaScript falle o esté desactivado.
+ * El formulario se presenta como una tarjeta de CANAL SEGURO (coherente con el
+ * lenguaje "consola/seguridad" del sitio): cabecera de estado, a la izquierda el
+ * mensaje y las garantías, a la derecha el formulario con etiquetas flotantes.
+ * Compacto para verse completo en pantalla. Estilos en styles/sections/contact.css.
  *
- * El "radar" del fondo (Fase 9) cierra el relato que abre el hero: la landing
- * empieza con una malla que se defiende y termina con un canal vigilado. La nota
- * bajo el formulario describe protecciones REALES del proyecto (validación con
- * el mismo esquema Zod en cliente y servidor, saneado, anti-bot y límite de
- * peticiones por IP) — ver docs/05-security.
+ * Mejora progresiva (§3.2): siempre queda visible un enlace de correo directo,
+ * de modo que el contacto funciona aunque el JavaScript falle o esté desactivado.
  */
 export function FinalCTA() {
   return (
-    <Section id="contacto" aria-labelledby="cta-title" className="section-edge">
+    <Section id="contacto" aria-labelledby="cta-title" className="section-edge py-12 sm:py-16">
       <Container>
         <Reveal>
-          <div className="gradient-border border-border bg-surface relative overflow-hidden rounded-2xl border px-6 py-14 sm:px-12">
-            <div aria-hidden="true" className="grid-dots opacity-40" />
-            <div aria-hidden="true" className="radar-sweep" />
-            <div
-              aria-hidden="true"
-              className="pointer-events-none absolute inset-0 -z-10"
-              style={{
-                background:
-                  "radial-gradient(60% 80% at 50% 0%, rgba(0,245,255,0.14), transparent 70%), radial-gradient(50% 60% at 100% 100%, rgba(139,92,246,0.12), transparent 70%)",
-              }}
-            />
-            <div className="mx-auto max-w-2xl text-center">
-              <TextReveal
-                id="cta-title"
-                text="¿Listo para construir tu próximo producto digital?"
-                className="font-display text-fluid-2xl font-bold tracking-tight text-balance"
-              />
-              <Reveal delay={0.18} y={16}>
-                <p className="text-fluid-lg text-muted mx-auto mt-4 max-w-xl text-pretty">
-                  Hablemos de tu proyecto sin compromiso.
-                </p>
-              </Reveal>
+          <div className="cf">
+            <div className="cf-head">
+              <span aria-hidden="true" className="cf-head-dot" />
+              Canal seguro · cifrado en tránsito
+              <ShieldCheck className="cf-head-ico size-3.5" aria-hidden="true" />
             </div>
 
-            <div className="mx-auto mt-10 max-w-2xl">
-              <ContactForm />
+            <div className="cf-body">
+              {/* Mensaje + garantías */}
+              <aside className="cf-aside">
+                <TextReveal
+                  id="cta-title"
+                  text="¿Listo para construir tu próximo producto digital?"
+                  highlight="producto digital"
+                  className="font-display text-fluid-xl font-bold tracking-tight text-balance"
+                />
+                <p className="cf-lead">Hablemos de tu proyecto sin compromiso.</p>
 
-              <p className="text-muted mt-6 flex flex-wrap items-center justify-center gap-x-2 gap-y-1 text-center font-mono text-xs">
-                <ShieldCheck className="text-accent-cyan size-4 shrink-0" aria-hidden="true" />
-                Validación y saneado en cliente y servidor · anti-bot · límite de peticiones por IP
-              </p>
+                <ul className="cf-trust">
+                  <li>
+                    <ShieldCheck className="size-4" aria-hidden="true" />
+                    Seguro desde el diseño: validación y saneado en cliente y servidor.
+                  </li>
+                  <li>
+                    <Lock className="size-4" aria-hidden="true" />
+                    Anti-bot y límite de peticiones por IP.
+                  </li>
+                  <li>
+                    <MailCheck className="size-4" aria-hidden="true" />
+                    Te respondemos por correo. No compartimos tus datos.
+                  </li>
+                </ul>
 
-              <p className="text-muted mt-4 text-center text-sm">
-                ¿Prefieres el correo? Escríbenos a{" "}
-                <a
-                  href={`mailto:${siteConfig.contact.email}`}
-                  className="text-foreground underline decoration-dotted underline-offset-4"
-                >
-                  {siteConfig.contact.email}
-                </a>
-                .
-              </p>
+                <p className="cf-email">
+                  ¿Prefieres el correo? Escríbenos a{" "}
+                  <a href={`mailto:${siteConfig.contact.email}`}>{siteConfig.contact.email}</a>.
+                </p>
+              </aside>
+
+              {/* Formulario */}
+              <div>
+                <ContactForm />
+              </div>
             </div>
           </div>
         </Reveal>

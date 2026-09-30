@@ -1,11 +1,9 @@
-import type { CSSProperties } from "react";
 import { ArrowUpRight } from "lucide-react";
 import { Container, Section } from "@/components/ui/container";
 import { Reveal } from "@/components/animations/Reveal";
 import { TextReveal } from "@/components/animations/TextReveal";
-import { Stagger, StaggerItem } from "@/components/animations/Stagger";
-import { rowIn } from "@/lib/animations/framer-variants";
 import { valueProps } from "@/lib/constants/value-props";
+import { StrataTimeline } from "./StrataTimeline";
 
 /**
  * Sección "Propuesta de valor" (§8.2) — el MANIFIESTO de la casa (ADR-017).
@@ -42,11 +40,12 @@ import { valueProps } from "@/lib/constants/value-props";
  *
  * ## Movimiento (§5.4, ADR-011)
  *
- * Tres gestos, todos de entrada y ninguno en bucle: las palabras del titular
- * suben tras su máscara, los estratos entran escalonados desde la izquierda
- * (`rowIn`, sin giro 3D: dentro de un panel con borde se notaría el despegue)
- * y la espina se dibuja de arriba abajo atada al scroll con CSS puro. Con
- * `prefers-reduced-motion` no queda ninguno en pie.
+ * De entrada: las palabras del titular suben tras su máscara, los estratos
+ * entran escalonados desde la izquierda (`rowIn`) y la espina se dibuja atada al
+ * scroll. En reposo, el panel corre una LÍNEA DE TIEMPO en bucle (01 → 02 → 03)
+ * gestionada por `StrataTimeline`: el estado se deriva en CSS y se detiene fuera
+ * del viewport. Con `prefers-reduced-motion` no hay bucle (queda el primer
+ * estrato resaltado, quieto).
  */
 export function ValueProps() {
   return (
@@ -70,7 +69,11 @@ export function ValueProps() {
             />
 
             <Reveal delay={0.18} y={16}>
-              <p className="text-fluid-lg text-muted mt-6 text-pretty">{valueProps.lead}</p>
+              {/* Justificado (con guionado) para que el bloque se lea ordenado,
+                  con los bordes izquierdo y derecho alineados. */}
+              <p className="text-fluid-lg text-muted mt-6 text-justify hyphens-auto">
+                {valueProps.lead}
+              </p>
             </Reveal>
 
             <Reveal delay={0.28} y={12}>
@@ -84,36 +87,7 @@ export function ValueProps() {
             </Reveal>
           </div>
 
-          <Stagger as="ol" className="vpx-strata">
-            {valueProps.strata.map((stratum, index) => (
-              <StaggerItem
-                key={stratum.title}
-                variants={rowIn}
-                className="vpx-stratum"
-                style={{ "--own-accent": stratum.accent } as CSSProperties}
-              >
-                {/* Columna del nodo. La espina que baja hasta el siguiente
-                    estrato es el `::after` de este raíl, no un nodo suelto:
-                    así mide sola lo que mida la fila. */}
-                <span aria-hidden="true" className="vpx-rail">
-                  <span className="vpx-node">
-                    <stratum.icon className="size-5" />
-                  </span>
-                </span>
-
-                <div className="vpx-body">
-                  <p className="vpx-tag" aria-hidden="true">
-                    <span className="vpx-ord">{String(index + 1).padStart(2, "0")}</span>
-                    {stratum.tag}
-                  </p>
-                  <h3 className="vpx-title font-display">{stratum.title}</h3>
-                  <p className="vpx-desc">{stratum.description}</p>
-                </div>
-
-                <span aria-hidden="true" className="vpx-edge" />
-              </StaggerItem>
-            ))}
-          </Stagger>
+          <StrataTimeline />
         </div>
       </Container>
     </Section>

@@ -58,12 +58,14 @@ describe("pasos del proceso", () => {
 });
 
 describe("ritmo del recorrido", () => {
-  it("deja tiempo de sobra para leer cada paso", () => {
-    // El vuelo tiene que ser perceptible pero no lento, y la parada tiene que
-    // permitir leer una frase entera antes de continuar.
+  it("mantiene un ritmo ágil pero legible en cada paso", () => {
+    // El vuelo es perceptible pero rápido, y la parada permite leer el título y
+    // su frase sin que el recorrido se sienta lento. El tiempo visible por paso
+    // (vuelo + parada) es el que de verdad importa para poder leerlo.
     expect(TRAVEL_MS).toBeGreaterThanOrEqual(400);
     expect(TRAVEL_MS).toBeLessThanOrEqual(1200);
-    expect(DWELL_MS).toBeGreaterThanOrEqual(2500);
+    expect(DWELL_MS).toBeGreaterThanOrEqual(1500);
+    expect(TRAVEL_MS + DWELL_MS).toBeGreaterThanOrEqual(2000);
   });
 
   it("recorre los seis pasos en menos de medio minuto", () => {

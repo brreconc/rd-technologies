@@ -1,0 +1,464 @@
+/* ==========================================================================
+   SECCIÓN · Propuesta de valor (manifiesto editorial) — Fase 14, ADR-017.
+   Prefijo de clase: .vpx-*
+   ========================================================================== */
+/* ==========================================================================
+   PROPUESTA DE VALOR — manifiesto editorial (Fase 14, ADR-017)
+
+   Dos piezas con pesos distintos: una columna de entrada (antetítulo, titular
+   y dos frases) y un PANEL DE ESTRATOS de vidrio a su derecha. El panel es una
+   sola pieza —no tres tarjetas— y lo que engarza sus tres filas es una espina
+   de luz que las atraviesa de arriba abajo.
+
+   Cada estrato conoce su propio color en `--own-accent`, así que el nodo, el
+   resplandor y el filo inferior se tiñen sin una sola línea de JavaScript.
+   ========================================================================== */
+
+.vpx {
+  display: grid;
+  gap: clamp(2.5rem, 5vw, 3.5rem);
+}
+
+/* A partir de `lg` la composición se rompe en dos columnas desiguales: el
+   texto pesa 5 y el panel 7. La asimetría es el punto — dos mitades iguales
+   volverían a leerse como el bloque centrado que esta sección era. */
+@media (width >= 64rem) {
+  .vpx {
+    grid-template-columns: minmax(0, 5fr) minmax(0, 7fr);
+    gap: clamp(3rem, 6vw, 5rem);
+    align-items: center;
+  }
+}
+
+/* --- Columna de entrada -------------------------------------------------- */
+
+.vpx-eyebrow {
+  display: flex;
+  align-items: center;
+  gap: 0.625rem;
+  color: var(--muted);
+  font-family: var(--font-jetbrains-mono), ui-monospace, monospace;
+  font-size: 0.75rem;
+  letter-spacing: 0.2em;
+  text-transform: uppercase;
+}
+.vpx-eyebrow-rule {
+  width: 2rem;
+  height: 1px;
+  flex: none;
+  background: linear-gradient(90deg, var(--accent-cyan), var(--accent-purple));
+}
+
+.vpx-link {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5rem;
+  margin-top: 2rem;
+  /* 44px de alto de destino táctil (§5.3) sin caja visible alrededor. */
+  min-height: 2.75rem;
+  color: var(--fg);
+  font-size: 0.9375rem;
+  font-weight: 500;
+  text-decoration: underline;
+  text-decoration-color: color-mix(in srgb, var(--accent-cyan) 55%, transparent);
+  text-underline-offset: 0.35em;
+  text-decoration-thickness: 1px;
+  transition:
+    color 0.3s ease,
+    text-decoration-color 0.3s ease;
+}
+.vpx-link:hover {
+  text-decoration-color: var(--accent-cyan);
+}
+
+/* --- Panel de estratos --------------------------------------------------- */
+
+.vpx-strata {
+  --vpx-pad: clamp(1rem, 2.6vw, 1.75rem);
+  position: relative;
+  isolation: isolate;
+  border: 1px solid var(--border);
+  border-radius: 1.125rem;
+  background-color: var(--surface);
+  padding-block: clamp(0.5rem, 1.4vw, 0.75rem);
+  /* `clip` y no `hidden`: recorta el resplandor a la esquina redondeada sin
+     crear un contenedor de scroll (la misma razón que en el `body`). */
+  overflow: clip;
+}
+
+/* Aire de la pieza: un halo frío en la esquina superior derecha, del mismo
+   vocabulario que la costura entre secciones. Va detrás de todo (`z-index`
+   negativo dentro del `isolation` del panel, así que no se escapa). */
+.vpx-strata::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  z-index: -1;
+  pointer-events: none;
+  background:
+    radial-gradient(
+      70% 55% at 100% 0%,
+      color-mix(in srgb, var(--accent-purple) 12%, transparent),
+      transparent 70%
+    ),
+    linear-gradient(180deg, color-mix(in srgb, var(--fg) 4%, transparent), transparent 40%);
+}
+
+/* Hilo de luz en el canto superior: el mismo gesto que abre cada sección. */
+.vpx-strata::after {
+  content: "";
+  position: absolute;
+  top: 0;
+  inset-inline: 14%;
+  height: 1px;
+  pointer-events: none;
+  background: linear-gradient(
+    90deg,
+    transparent,
+    color-mix(in srgb, var(--accent-cyan) 70%, transparent),
+    transparent
+  );
+}
+
+/* --- Un estrato ---------------------------------------------------------- */
+
+.vpx-stratum {
+  --vpx-node: clamp(2.5rem, 6vw, 2.875rem);
+  /* El relleno vertical es una variable porque la espina necesita conocerlo:
+     para alcanzar el nodo siguiente tiene que cruzar este relleno y el de la
+     fila de abajo. Ver `.vpx-rail::after`. */
+  --vpx-pad-y: clamp(1.1rem, 2.6vw, 1.5rem);
+  position: relative;
+  display: grid;
+  grid-template-columns: var(--vpx-node) minmax(0, 1fr);
+  gap: clamp(0.875rem, 2.4vw, 1.25rem);
+  align-items: stretch;
+  padding: var(--vpx-pad-y) var(--vpx-pad);
+  transition: background-color 0.4s ease;
+}
+
+/* Separador entre filas. Se dibuja como pseudo-elemento y no como `border`
+   para que el filo de acento pueda montarse justo encima sin sumar 1px. */
+.vpx-stratum + .vpx-stratum::before {
+  content: "";
+  position: absolute;
+  top: 0;
+  inset-inline: var(--vpx-pad);
+  height: 1px;
+  background-color: var(--border);
+}
+
+@media (hover: hover) {
+  .vpx-stratum:hover {
+    background-color: color-mix(in srgb, var(--own-accent) 5%, transparent);
+  }
+}
+.vpx-stratum:focus-within {
+  background-color: color-mix(in srgb, var(--own-accent) 5%, transparent);
+}
+
+/* --- Raíl y espina ------------------------------------------------------- */
+
+.vpx-rail {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 0.625rem;
+}
+
+/* La espina: el tramo que baja del nodo hasta el nodo siguiente. Es el
+   `::after` del raíl y no un elemento aparte, así que mide exactamente lo que
+   sobre en la fila, sea cual sea el largo del texto.
+
+   El margen negativo es lo que la hace LLEGAR: el raíl solo ocupa la caja de
+   contenido de su fila, así que sin él la línea se paraba en el aire, a medio
+   camino entre un nodo y el siguiente, y parecía rota. Cruza el relleno
+   inferior de esta fila y el superior de la de abajo — de ahí el `2 ×`. */
+.vpx-rail::after {
+  content: "";
+  flex: 1;
+  width: 1px;
+  min-height: 0.75rem;
+  margin-bottom: calc(-2 * var(--vpx-pad-y));
+  background: linear-gradient(
+    180deg,
+    color-mix(in srgb, var(--own-accent) 55%, transparent),
+    color-mix(in srgb, var(--own-accent) 12%, transparent)
+  );
+  transform-origin: top;
+}
+/* El último estrato no continúa hacia ninguna parte. */
+.vpx-stratum:last-child .vpx-rail::after {
+  display: none;
+}
+
+.vpx-node {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: var(--vpx-node);
+  height: var(--vpx-node);
+  flex: none;
+  border-radius: 0.875rem;
+  color: var(--own-accent);
+  background-color: color-mix(in srgb, var(--own-accent) 10%, transparent);
+  box-shadow: inset 0 0 0 1px color-mix(in srgb, var(--own-accent) 22%, transparent);
+  transition:
+    background-color 0.4s ease,
+    box-shadow 0.4s ease;
+}
+.vpx-stratum:hover .vpx-node,
+.vpx-stratum:focus-within .vpx-node {
+  background-color: color-mix(in srgb, var(--own-accent) 16%, transparent);
+  box-shadow:
+    inset 0 0 0 1px color-mix(in srgb, var(--own-accent) 45%, transparent),
+    0 0 28px -8px color-mix(in srgb, var(--own-accent) 80%, transparent);
+}
+
+/* --- Texto del estrato --------------------------------------------------- */
+
+.vpx-body {
+  min-width: 0;
+}
+
+.vpx-tag {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  color: var(--muted);
+  font-family: var(--font-jetbrains-mono), ui-monospace, monospace;
+  font-size: 0.6875rem;
+  letter-spacing: 0.18em;
+  text-transform: uppercase;
+}
+.vpx-ord {
+  color: var(--own-accent);
+  font-variant-numeric: tabular-nums;
+}
+
+.vpx-title {
+  margin-top: 0.375rem;
+  color: var(--fg);
+  font-size: 1.0625rem;
+  font-weight: 600;
+  letter-spacing: -0.01em;
+}
+
+.vpx-desc {
+  margin-top: 0.375rem;
+  color: var(--muted);
+  text-wrap: pretty;
+}
+
+/* --- Filo de acento: se dibuja bajo la fila al posarse encima ------------- */
+
+.vpx-edge {
+  position: absolute;
+  bottom: 0;
+  inset-inline: var(--vpx-pad);
+  height: 1px;
+  pointer-events: none;
+  background: linear-gradient(90deg, var(--own-accent), transparent);
+  transform: scaleX(0);
+  transform-origin: left;
+  transition: transform 0.55s cubic-bezier(0.16, 1, 0.3, 1);
+}
+.vpx-stratum:hover .vpx-edge,
+.vpx-stratum:focus-within .vpx-edge {
+  transform: scaleX(1);
+}
+
+/* --- La espina se DIBUJA al entrar la sección ----------------------------
+   Ligada al scroll con CSS puro, sin JavaScript ni observadores, igual que la
+   costura de sección. Donde no hay `animation-timeline` queda pintada entera,
+   que es su estado final. */
+@keyframes vpx-spine-draw {
+  from {
+    transform: scaleY(0);
+  }
+  to {
+    transform: scaleY(1);
+  }
+}
+
+@supports (animation-timeline: view()) {
+  @media (prefers-reduced-motion: no-preference) {
+    .vpx-rail::after {
+      animation: vpx-spine-draw linear both;
+      animation-timeline: view();
+      animation-range: entry 15% cover 30%;
+    }
+  }
+}
+
+/* ==========================================================================
+   LÍNEA DE TIEMPO AUTOMÁTICA (01 → 02 → 03 → reinicia) — driver en
+   `ValueProps/StrataTimeline.tsx`. Toda la coreografía se DERIVA del estado
+   `[data-active]`; la duración de cada animación es `var(--vpx-step)` (la fija
+   el componente), así que coincide EXACTA con el reloj de JS → sincronía total.
+   ========================================================================== */
+
+/* En reposo (mientras el ciclo corre), los estratos inactivos se ATENÚAN para
+   enfocar la atención en el activo. Se hace con `filter` —no con `opacity`—
+   porque Framer deja `opacity` en línea tras la entrada y ganaría a la cascada. */
+.vpx-strata[data-cycling] .vpx-stratum {
+  transition:
+    filter 0.5s ease,
+    background-color 0.4s ease;
+}
+.vpx-strata[data-cycling] .vpx-stratum:not([data-active="true"]) {
+  filter: brightness(0.66) saturate(0.9);
+}
+
+/* El estrato activo se tiñe (igual que el hover, pero lo enciende el ciclo). */
+.vpx-stratum[data-active="true"] {
+  background-color: color-mix(in srgb, var(--own-accent) 6%, transparent);
+}
+
+/* --- Reflector que se DESLIZA a la fila activa (glide premium) --------------
+   El componente mide la fila y fija `transform: translateY()` + `height`; aquí
+   solo se estiliza y se anima el deslizamiento. Va DETRÁS de las filas (z:0) y
+   se tiñe con el color de la plataforma activa (`--spot-accent`). */
+.vpx-spot {
+  position: absolute;
+  left: 0;
+  right: 0;
+  top: 0;
+  z-index: 0;
+  pointer-events: none;
+  border-radius: 0.9rem;
+  background: radial-gradient(
+    130% 78% at 16% 50%,
+    color-mix(in srgb, var(--spot-accent, var(--accent-cyan)) 22%, transparent),
+    transparent 72%
+  );
+  box-shadow: inset 0 0 0 1px
+    color-mix(in srgb, var(--spot-accent, var(--accent-cyan)) 20%, transparent);
+  opacity: 0;
+  transition:
+    transform 0.7s cubic-bezier(0.16, 1, 0.3, 1),
+    height 0.7s cubic-bezier(0.16, 1, 0.3, 1),
+    background 0.5s ease,
+    box-shadow 0.5s ease,
+    opacity 0.5s ease;
+}
+.vpx-strata[data-cycling] .vpx-spot {
+  opacity: 1;
+}
+
+/* Nodo activo: glow potente + un leve zoom (sin aros). */
+.vpx-node {
+  transition:
+    background-color 0.4s ease,
+    box-shadow 0.4s ease,
+    transform 0.5s cubic-bezier(0.16, 1, 0.3, 1);
+}
+.vpx-stratum[data-active="true"] .vpx-node {
+  transform: scale(1.08);
+  background-color: color-mix(in srgb, var(--own-accent) 20%, transparent);
+  box-shadow:
+    inset 0 0 0 1px color-mix(in srgb, var(--own-accent) 55%, transparent),
+    0 0 34px -6px color-mix(in srgb, var(--own-accent) 90%, transparent);
+}
+
+/* --- Haz que baja por la espina y "entrega el testigo" al nodo siguiente ----
+   Es el `::before` del raíl (la línea base sigue siendo el `::after`). Un tramo
+   brillante viaja de este nodo al siguiente durante el paso, llegando justo
+   cuando el siguiente se activa. */
+.vpx-rail {
+  position: relative;
+}
+.vpx-rail::before {
+  content: "";
+  position: absolute;
+  left: 50%;
+  width: 2px;
+  transform: translateX(-50%);
+  top: calc(var(--vpx-node) + 0.55rem);
+  bottom: calc(-2 * var(--vpx-pad-y));
+  border-radius: 999px;
+  pointer-events: none;
+  z-index: 2;
+  background: linear-gradient(
+    180deg,
+    transparent,
+    color-mix(in srgb, var(--own-accent) 92%, #fff) 45%,
+    color-mix(in srgb, var(--own-accent) 92%, #fff) 55%,
+    transparent
+  );
+  background-size: 100% 42%;
+  background-repeat: no-repeat;
+  background-position: 0 -42%;
+  filter: drop-shadow(0 0 6px color-mix(in srgb, var(--own-accent) 80%, transparent));
+  opacity: 0;
+}
+.vpx-stratum:last-child .vpx-rail::before {
+  display: none;
+}
+.vpx-stratum[data-active="true"] .vpx-rail::before {
+  opacity: 1;
+  animation: vpx-beam var(--vpx-step, 2800ms) cubic-bezier(0.4, 0, 0.2, 1) both;
+}
+@keyframes vpx-beam {
+  from {
+    background-position: 0 -42%;
+  }
+  to {
+    background-position: 0 142%;
+  }
+}
+
+/* --- Subrayado de acento: se DIBUJA durante el paso (sincronizado) ---------- */
+.vpx-stratum[data-active="true"] .vpx-edge {
+  animation: vpx-edge-draw var(--vpx-step, 2800ms) cubic-bezier(0.16, 1, 0.3, 1) both;
+}
+@keyframes vpx-edge-draw {
+  from {
+    transform: scaleX(0);
+  }
+  to {
+    transform: scaleX(1);
+  }
+}
+
+/* --- Ordinal y etiqueta: se encienden con el paso -------------------------- */
+.vpx-ord,
+.vpx-tag {
+  transition:
+    color 0.4s ease,
+    text-shadow 0.4s ease;
+}
+.vpx-stratum[data-active="true"] .vpx-ord {
+  color: color-mix(in srgb, var(--own-accent) 55%, #fff);
+  text-shadow: 0 0 12px color-mix(in srgb, var(--own-accent) 60%, transparent);
+}
+.vpx-stratum[data-active="true"] .vpx-tag {
+  color: var(--fg);
+}
+
+/* --- Barrido de luz que cruza la fila activa una vez por paso -------------- */
+.vpx-stratum[data-active="true"]::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  z-index: 1;
+  pointer-events: none;
+  background: linear-gradient(
+    100deg,
+    transparent 42%,
+    color-mix(in srgb, var(--own-accent) 20%, transparent) 50%,
+    transparent 58%
+  );
+  background-size: 220% 100%;
+  background-repeat: no-repeat;
+  background-position: 175% 0;
+  animation: vpx-sheen var(--vpx-step, 2800ms) ease-out both;
+}
+@keyframes vpx-sheen {
+  from {
+    background-position: 175% 0;
+  }
+  to {
+    background-position: -75% 0;
+  }
+}

@@ -1,13 +1,11 @@
 "use client";
 
 import * as React from "react";
-import { Pause, Play } from "lucide-react";
 import { cn } from "@/lib/utils/cn";
-import { useMounted } from "@/lib/hooks/use-mounted";
 import { processSteps, TRAVEL_MS, DWELL_MS } from "@/lib/constants/process";
 
 /** Radios de luz que salen de un hito al detonar. */
-const SPOKES = 10;
+const SPOKES = 14;
 
 const pad2 = (n: number) => String(n + 1).padStart(2, "0");
 
@@ -45,18 +43,17 @@ const pad2 = (n: number) => String(n + 1).padStart(2, "0");
  *    Un lector de pantalla recibe la lista entera de una vez y **nadie tiene que
  *    esperar a que el recorrido llegue a un paso para poder leerlo**.
  *
- * **WCAG 2.2.2 (Pausar, detener, ocultar).** El recorrido arranca solo y dura
- * más de cinco segundos, así que hay que poder pararlo. Por triplicado: botón
- * explícito, pausa al pasar el puntero o enfocar dentro, y elegir un hito a mano
- * lo detiene definitivamente. Con `prefers-reduced-motion` no llega a existir.
+ * **Movimiento.** El recorrido corre siempre mientras la sección está a la vista
+ * (no se pausa al pasar el puntero, para que nunca se perciba "congelado"), y
+ * elegir un hito a mano solo salta a ese paso sin detenerlo. Con
+ * `prefers-reduced-motion` no llega a existir: queda una lista estática que se
+ * recorre a mano con los hitos.
  *
  * ## Hidratación (ADR-011)
  *
  * El markup NO se bifurca según la preferencia de movimiento. La política vive
  * entera en CSS; lo único que decide el cliente —si corre el temporizador— se
- * consulta con `matchMedia` dentro de un efecto, que no viaja en el HTML. El
- * botón de pausa va detrás de `useMounted()`, que devuelve `false` en el
- * servidor y en el primer render de cliente.
+ * consulta con `matchMedia` dentro de un efecto, que no viaja en el HTML.
  *
  * ## Rendimiento (§11)
  *
@@ -66,10 +63,7 @@ const pad2 = (n: number) => String(n + 1).padStart(2, "0");
  * Fuera de pantalla no queda ni un temporizador vivo (`IntersectionObserver`).
  */
 export function Timeline({ className }: { className?: string }) {
-  const mounted = useMounted();
   const [activeIndex, setActiveIndex] = React.useState(0);
-  const [autoplay, setAutoplay] = React.useState(true);
-  const [paused, setPaused] = React.useState(false);
   const [visible, setVisible] = React.useState(false);
   const [reduce, setReduce] = React.useState(false);
 
@@ -95,8 +89,12 @@ export function Timeline({ className }: { className?: string }) {
   React.useEffect(() => {
     const host = rootRef.current;
     if (!host) return;
+    // `rootMargin: 0`: la sección cuenta como visible en cuanto asoma en el
+    // viewport (antes un margen del 15 % la "apagaba" al quedar en el borde, y
+    // el recorrido parecía trabarse). Con `threshold: 0` funciona aunque la
+    // sección sea más alta que la ventana (lección de ADR-015).
     const observer = new IntersectionObserver(([entry]) => setVisible(entry.isIntersecting), {
-      rootMargin: "-15% 0px -15% 0px",
+      rootMargin: "0px",
       threshold: 0,
     });
     observer.observe(host);
@@ -104,19 +102,16 @@ export function Timeline({ className }: { className?: string }) {
   }, []);
 
   React.useEffect(() => {
-    if (reduce || !autoplay || paused || !visible) return;
+    if (reduce || !visible) return;
     const timer = window.setTimeout(
       () => setActiveIndex((i) => (i + 1) % processSteps.length),
       TRAVEL_MS + DWELL_MS,
     );
     return () => window.clearTimeout(timer);
-  }, [reduce, autoplay, paused, visible, activeIndex]);
+  }, [reduce, visible, activeIndex]);
 
-  /** Elegir un hito a mano cede el control al usuario y no se le vuelve a quitar. */
-  const select = (index: number) => {
-    setActiveIndex(index);
-    setAutoplay(false);
-  };
+  /** Elegir un hito a mano SOLO salta a ese paso; el recorrido sigue corriendo. */
+  const select = (index: number) => setActiveIndex(index);
 
   return (
     <div
@@ -132,10 +127,6 @@ export function Timeline({ className }: { className?: string }) {
           "--steps": processSteps.length,
         } as React.CSSProperties
       }
-      onPointerEnter={() => setPaused(true)}
-      onPointerLeave={() => setPaused(false)}
-      onFocusCapture={() => setPaused(true)}
-      onBlurCapture={() => setPaused(false)}
     >
       <div className="ptl-rail" role="group" aria-label="Ir a un paso del proceso">
         {processSteps.map((step, index) => (
@@ -220,27 +211,6 @@ export function Timeline({ className }: { className?: string }) {
       <p aria-live="polite" className="sr-only">
         Paso en pantalla: {active.title}
       </p>
-
-      {mounted && !reduce ? (
-        <div className="mt-7 flex justify-center">
-          <button
-            type="button"
-            onClick={() => setAutoplay((on) => !on)}
-            className="text-muted hover:text-foreground border-border hover:border-accent-cyan/50 inline-flex items-center gap-2 rounded-full border px-3.5 py-2 text-xs transition-colors"
-          >
-            {autoplay ? (
-              <Pause className="size-3.5" aria-hidden="true" />
-            ) : (
-              <Play className="size-3.5" aria-hidden="true" />
-            )}
-            {/* El nombre dice DE QUÉ recorrido habla: la página tiene otro
-                control igual en el deck de plataformas, y dos botones con el
-                mismo nombre accesible son indistinguibles para quien navega por
-                lista de controles. */}
-            {autoplay ? "Detener el recorrido del proceso" : "Reanudar el recorrido del proceso"}
-          </button>
-        </div>
-      ) : null}
     </div>
   );
 }

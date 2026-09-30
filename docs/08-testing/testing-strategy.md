@@ -161,7 +161,7 @@ opacidad 1 y sin transformación, sin un solo error de consola.
 
 ## Resultados (última corrida local, Chromium)
 
-- **Unit (Vitest):** 101 tests en verde (incluye el motor de la malla neuronal y la geometría del deck).
+- **Unit (Vitest):** 93 tests en verde (incluye los escenarios de la consola del hero y la geometría del deck).
 - **E2E + responsive + a11y (Playwright):** 48 tests en verde.
 - **Lighthouse (build indexable):** Performance **99**, Accessibility **100**,
   Best Practices **96**, SEO **100**; LCP 0,9 s · TBT 0 ms. CLS 0 en dos de las tres pasadas; la

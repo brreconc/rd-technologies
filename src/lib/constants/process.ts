@@ -64,7 +64,7 @@ export const processSteps = [
   },
 ] satisfies ProcessStep[];
 
-/** Milisegundos que dura el viaje de un hito al siguiente. */
-export const TRAVEL_MS = 760;
+/** Milisegundos que dura el viaje de un hito al siguiente (ágil pero legible). */
+export const TRAVEL_MS = 520;
 /** Milisegundos que el recorrido se detiene en cada hito antes de continuar. */
-export const DWELL_MS = 3200;
+export const DWELL_MS = 1700;

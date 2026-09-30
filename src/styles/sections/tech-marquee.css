@@ -1,0 +1,205 @@
+/* ==========================================================================
+   CINTA DE STACK TECNOLÓGICO — versión "ultra premium" (rediseño)
+
+   Cada tecnología es una PÍLDORA de vidrio con borde en degradado (anillo
+   cónico), un nodo luminoso con color propio y un pulso orgánico; al pasar el
+   cursor se eleva, el anillo gira y un destello la barre. La banda tiene luz
+   ambiental y una hairline superior encendida. Prefijo: .tech-*
+   Solo CSS (CSP estricta): sin imágenes ni dependencias.
+   ========================================================================== */
+
+/* Ángulo animable del anillo cónico (registrado para poder transicionarlo). */
+@property --tech-a {
+  syntax: "<angle>";
+  inherits: false;
+  initial-value: 0deg;
+}
+
+/* --- Banda ----------------------------------------------------------------- */
+.tech-band {
+  /* Poco padding propio: el "colchón" vertical para que la píldora se eleve en
+     hover sin recortarse lo pone el marquee (abajo). Banda ~15% más baja. */
+  padding-block: clamp(0.28rem, 0.2rem + 0.35vw, 0.5rem);
+  background:
+    radial-gradient(
+      120% 140% at 50% -40%,
+      color-mix(in srgb, var(--accent-cyan) 9%, transparent),
+      transparent 60%
+    ),
+    color-mix(in srgb, var(--surface) 32%, var(--background));
+}
+
+/* CLAVE del recorte: tanto la sección como `.marquee` usan `overflow: hidden`
+   (necesario en horizontal para el bucle y para no provocar scroll lateral),
+   pero eso TAMBIÉN recorta en vertical. Al elevarse la píldora en hover
+   (`translateY`), su parte superior chocaba contra ese borde y se cortaba.
+   Damos al marquee un padding vertical generoso: el borde que recorta queda por
+   ENCIMA/DEBAJO de las píldoras, así que se elevan hacia ese margen —y su
+   resplandor respira— sin recortarse. El padding es vertical, no afecta al
+   bucle horizontal ni al degradado de bordes (que es horizontal). */
+.tech-band .marquee {
+  padding-block: 0.95rem;
+}
+
+/* Hairline superior encendida que respira (marca "panel activo"). */
+.tech-band-glow {
+  position: absolute;
+  inset-inline: 0;
+  top: 0;
+  height: 1px;
+  pointer-events: none;
+  background: linear-gradient(
+    90deg,
+    transparent,
+    color-mix(in srgb, var(--accent-cyan) 70%, transparent),
+    color-mix(in srgb, var(--accent-purple) 70%, transparent),
+    transparent
+  );
+  opacity: 0.7;
+  animation: tech-band-breathe 6s ease-in-out infinite;
+}
+@keyframes tech-band-breathe {
+  0%,
+  100% {
+    opacity: 0.35;
+  }
+  50% {
+    opacity: 0.85;
+  }
+}
+
+/* --- Etiqueta lateral fija "STACK" ---------------------------------------- */
+.tech-label {
+  display: flex;
+  align-items: center;
+  height: 100%;
+  padding-inline: 1.35rem 0.8rem;
+  /* Fondo OPACO: impide que las píldoras se lean por debajo del rótulo. */
+  background: color-mix(in srgb, var(--surface) 42%, var(--background));
+  font-family: var(--font-jetbrains-mono), ui-monospace, monospace;
+  font-size: 0.66rem;
+  font-weight: 600;
+  letter-spacing: 0.26em;
+  text-transform: uppercase;
+  color: color-mix(in srgb, var(--accent-cyan) 80%, #fff);
+}
+.tech-label-fade {
+  width: 3.5rem;
+  background: linear-gradient(
+    90deg,
+    color-mix(in srgb, var(--surface) 42%, var(--background)),
+    transparent
+  );
+}
+
+/* --- Píldora premium ------------------------------------------------------- */
+.tech-chip {
+  --tech-a: 0deg;
+  /* El color lo aporta el componente (`--glow` = color de marca de la tecnología);
+     este es solo un respaldo por si faltara. */
+  --glow: var(--accent-cyan);
+
+  position: relative;
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5rem;
+  padding: 0.32rem 0.82rem;
+  border: 1px solid transparent;
+  border-radius: 999px;
+  font-family: var(--font-jetbrains-mono), ui-monospace, monospace;
+  font-size: clamp(0.72rem, 0.68rem + 0.15vw, 0.82rem);
+  font-weight: 500;
+  line-height: 1.1;
+  white-space: nowrap;
+  color: color-mix(in srgb, var(--fg) 80%, var(--glow));
+  /* Relleno de vidrio (padding-box) + anillo cónico en el borde (border-box). */
+  background:
+    linear-gradient(
+        color-mix(in srgb, #0b0d12 78%, var(--surface)),
+        color-mix(in srgb, #0b0d12 88%, var(--surface))
+      )
+      padding-box,
+    conic-gradient(
+        from var(--tech-a),
+        color-mix(in srgb, var(--glow) 85%, transparent),
+        transparent 28%,
+        transparent 72%,
+        color-mix(in srgb, var(--glow) 85%, transparent)
+      )
+      border-box;
+  box-shadow:
+    0 6px 22px -14px color-mix(in srgb, var(--glow) 90%, transparent),
+    inset 0 1px 0 color-mix(in srgb, #fff 8%, transparent);
+  overflow: hidden;
+  transition:
+    transform 0.4s cubic-bezier(0.16, 1, 0.3, 1),
+    box-shadow 0.4s ease,
+    color 0.4s ease;
+}
+
+/* Destello diagonal que barre la píldora al pasar el cursor. */
+.tech-chip::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  z-index: 1;
+  pointer-events: none;
+  background: linear-gradient(
+    115deg,
+    transparent 35%,
+    color-mix(in srgb, #fff 45%, transparent) 50%,
+    transparent 65%
+  );
+  transform: translateX(-130%);
+  transition: transform 0.7s cubic-bezier(0.4, 0, 0.2, 1);
+}
+.tech-chip:hover {
+  transform: translateY(-2px);
+  color: #fff;
+  box-shadow:
+    0 7px 18px -13px color-mix(in srgb, var(--glow) 85%, transparent),
+    0 0 0 1px color-mix(in srgb, var(--glow) 45%, transparent),
+    inset 0 1px 0 color-mix(in srgb, #fff 14%, transparent);
+  /* El anillo cónico gira solo mientras hay hover (barato: una sola píldora). */
+  animation: tech-spin 3s linear infinite;
+}
+.tech-chip:hover::before {
+  transform: translateX(130%);
+}
+@keyframes tech-spin {
+  to {
+    --tech-a: 360deg;
+  }
+}
+
+/* Nodo luminoso con su color + halo que pulsa (desfasado por índice). */
+.tech-node {
+  position: relative;
+  z-index: 2;
+  flex-shrink: 0;
+  width: 0.45rem;
+  height: 0.45rem;
+  border-radius: 50%;
+  background: var(--glow);
+  box-shadow: 0 0 9px 1px color-mix(in srgb, var(--glow) 80%, transparent);
+}
+.tech-node::after {
+  content: "";
+  position: absolute;
+  inset: -2px;
+  border-radius: 50%;
+  border: 1px solid color-mix(in srgb, var(--glow) 65%, transparent);
+  animation: tech-ping 2.6s ease-out infinite;
+  animation-delay: calc(var(--i, 0) * -0.22s);
+}
+@keyframes tech-ping {
+  0% {
+    transform: scale(0.5);
+    opacity: 0.9;
+  }
+  70%,
+  100% {
+    transform: scale(1.5);
+    opacity: 0;
+  }
+}

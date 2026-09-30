@@ -1,0 +1,106 @@
+/* ==========================================================================
+   MOVIMIENTO REDUCIDO — anulaciones específicas de componentes (deck, mock-ups
+   y proceso) que deben GANAR la cascada. Se importa el ÚLTIMO en globals.css.
+   La regla global de movimiento reducido vive en src/styles/base.css.
+   Al añadir animaciones nuevas, añade aquí su neutralización (WCAG 2.3.3).
+   ========================================================================== */
+/* --- Movimiento reducido ------------------------------------------------------ */
+/* El bloque global de `prefers-reduced-motion` ya neutraliza duraciones, pero
+   estas animaciones son de entrada: hay que garantizar además que el estado
+   final sea visible y que nada quede parpadeando (WCAG 2.3.3). */
+@media (prefers-reduced-motion: reduce) {
+  .deck-sweep {
+    display: none;
+  }
+  .deck-el,
+  .mk > * {
+    animation: none;
+    opacity: 1;
+    transform: none;
+  }
+  .deck-state-dot,
+  .mk-cursor {
+    animation: none;
+    opacity: 1;
+  }
+  /* El escaparate se queda quieto y con el aviso ya puesto: el mensaje sigue
+     leyéndose sin que nada parpadee ni se desplace. */
+  .mk-ec-badge,
+  .mk-ec-cta {
+    animation: none;
+  }
+  .mk-ec-toast {
+    animation: none;
+    opacity: 1;
+    transform: none;
+  }
+  .deck-stage-glow,
+  .deck-cross {
+    transition: none;
+  }
+
+  /* Línea de tiempo del proceso: la detonación desaparece entera (es puro
+     movimiento) y el raíl se queda pintado en su estado final. La tarjeta activa
+     sigue visible, así que la sección se maneja como lo que ya es sin animación:
+     seis botones y un panel. */
+  .ptl-burst {
+    display: none;
+  }
+  .ptl-comet {
+    animation: none;
+    opacity: 0;
+  }
+  .ptl-link-fill,
+  .ptl-node,
+  .ptl-caption,
+  .ptl-card {
+    transition: none;
+  }
+  .ptl-card[data-on] {
+    opacity: 1;
+    translate: none;
+  }
+
+  /* Cinta de stack: sin pulso, sin giro ni respiración; los nodos y el borde se
+     quedan encendidos y legibles (el bloque global ya congela las duraciones). */
+  .tech-node::after,
+  .tech-band-glow {
+    animation: none;
+  }
+  .tech-chip:hover {
+    animation: none;
+  }
+
+  /* Consola del hero: el carrusel no rota (el reloj JS ya no avanza con
+     movimiento reducido); la escena se queda quieta en su estado final. */
+  .hc-stage {
+    animation: none;
+    opacity: 1;
+    transform: none;
+    filter: none;
+  }
+
+  /* Propuesta de valor: la línea de tiempo no corre (el ciclo JS no arranca).
+     Se retiran el haz de la espina y el reflector, y no se atenúa ni se escala
+     ningún estrato: queda el primero resaltado, quieto. */
+  .vpx-rail::before,
+  .vpx-spot {
+    display: none;
+  }
+  .vpx-stratum[data-active="true"]::after {
+    animation: none;
+  }
+  .vpx-stratum[data-active="true"] .vpx-node {
+    transform: none;
+  }
+  .vpx-stratum {
+    filter: none !important;
+  }
+
+  /* Servicios: la corriente que orbita el borde es puro movimiento → se retira
+     (la tarjeta conserva su realce estático de hover/focus). */
+  .svc-frame {
+    animation: none;
+    opacity: 0;
+  }
+}

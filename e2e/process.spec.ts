@@ -4,9 +4,9 @@ import { test, expect, type Page } from "@playwright/test";
  * E2E de la línea de tiempo horizontal del proceso (Fase 13, ADR-016).
  *
  * Lo que se protege no es el aspecto sino los CONTRATOS: el recorrido avanza
- * solo y se puede parar (WCAG 2.2.2), los seis pasos están SIEMPRE en el DOM
- * —nadie tiene que esperar a la animación para poder leerlos—, cero
- * desbordamiento y degradación limpia con `prefers-reduced-motion`.
+ * solo y no se queda congelado, los seis pasos están SIEMPRE en el DOM —nadie
+ * tiene que esperar a la animación para poder leerlos—, cero desbordamiento y
+ * degradación limpia con `prefers-reduced-motion` (sin recorrido automático).
  */
 
 async function abrirProceso(page: Page) {
@@ -56,7 +56,7 @@ test.describe("Línea de tiempo del proceso", () => {
     await expect(lista).toContainText("soporte continuo");
   });
 
-  test("el recorrido avanza solo y se puede detener (WCAG 2.2.2)", async ({ page }) => {
+  test("el recorrido avanza solo y NO se detiene (sigue vivo)", async ({ page }) => {
     // Ventana deliberadamente más baja que la sección: el observador usa
     // `rootMargin` justamente para que eso no lo desactive (lección de ADR-015).
     await page.setViewportSize({ width: 1280, height: 620 });
@@ -65,28 +65,16 @@ test.describe("Línea de tiempo del proceso", () => {
     const primero = await pasoActivo(page);
     await expect.poll(async () => pasoActivo(page), { timeout: 15_000 }).not.toBe(primero);
 
-    // El control lo detiene, y a partir de ahí ya no cambia solo.
-    const detener = page.getByRole("button", { name: /Detener el recorrido del proceso/i });
-    await expect(detener).toBeVisible();
-    await detener.click();
-
-    const congelado = await pasoActivo(page);
-    await page.waitForTimeout(6000);
-    expect(await pasoActivo(page)).toBe(congelado);
+    // Y NO se queda congelado: vuelve a cambiar por sí solo.
+    const segundo = await pasoActivo(page);
+    await expect.poll(async () => pasoActivo(page), { timeout: 15_000 }).not.toBe(segundo);
   });
 
-  test("elegir un hito a mano toma el control y no se lo devuelve", async ({ page }) => {
+  test("elegir un hito a mano salta a ese paso", async ({ page }) => {
     await abrirProceso(page);
 
     await page.getByRole("button", { name: /Paso 5/ }).click();
     await expect(page.locator(".ptl-card[data-on] .ptl-card-t")).toHaveText("Lanzamos");
-
-    // Ya no avanza solo: el usuario ha tomado el control.
-    await page.waitForTimeout(6000);
-    await expect(page.locator(".ptl-card[data-on] .ptl-card-t")).toHaveText("Lanzamos");
-    await expect(
-      page.getByRole("button", { name: /Reanudar el recorrido del proceso/i }),
-    ).toBeVisible();
   });
 
   test("los hitos se alcanzan y se activan con el teclado", async ({ page }) => {

@@ -6,8 +6,8 @@ import { siteConfig } from "@/config/site";
  * presentación en el conmutador de apps del sistema.
  *
  * `theme_color`/`background_color` usan el fondo del tema oscuro (por defecto).
- * Los iconos reutilizan el favicon existente; iconos maskable dedicados quedan
- * para cuando exista identidad gráfica (§19.1).
+ * Iconos: el emblema oficial de R&D Technologies (`public/logo/`), con una
+ * versión `maskable` (zona segura amplia sobre fondo oscuro).
  */
 export default function manifest(): MetadataRoute.Manifest {
   return {
@@ -22,6 +22,10 @@ export default function manifest(): MetadataRoute.Manifest {
     background_color: "#0a0a0a",
     theme_color: "#0a0a0a",
     categories: ["business", "technology", "productivity"],
-    icons: [{ src: "/favicon.ico", sizes: "any", type: "image/x-icon" }],
+    icons: [
+      { src: "/favicon.ico", sizes: "any", type: "image/x-icon" },
+      { src: "/logo/emblem-square.png", sizes: "512x512", type: "image/png", purpose: "any" },
+      { src: "/logo/maskable.png", sizes: "512x512", type: "image/png", purpose: "maskable" },
+    ],
   };
 }

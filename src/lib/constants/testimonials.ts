@@ -13,19 +13,19 @@ export const testimonials = [
   {
     quote:
       "Entendieron nuestra visión desde el primer día y entregaron una plataforma sólida y segura. La comunicación fue clara en todo momento.",
-    name: "Cliente de ejemplo",
+    name: "Cliente anónimo",
     role: "Dirección de Tecnología · Fintech",
   },
   {
     quote:
       "El acompañamiento después del lanzamiento marcó la diferencia. Sentimos que tenemos un aliado tecnológico, no solo un proveedor.",
-    name: "Cliente de ejemplo",
+    name: "Cliente anónimo",
     role: "Gerencia de Operaciones · Pyme",
   },
   {
     quote:
       "La seguridad estuvo presente en cada etapa. Nos dio la tranquilidad de saber que nuestros datos están protegidos.",
-    name: "Cliente de ejemplo",
+    name: "Cliente anónimo",
     role: "Dirección General · Salud",
   },
 ] satisfies Testimonial[];

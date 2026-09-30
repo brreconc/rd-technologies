@@ -1,0 +1,178 @@
+/* ==========================================================================
+   MOCK-UP · iOS (HIG: nav, segmentos, grupos, gráfico de barras, tabbar).
+   ========================================================================== */
+/* --- Mock-up iOS -------------------------------------------------------------- */
+.mk-ios-nav {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  padding: 0.7em 0.8em 0.3em;
+}
+
+.mk-ios-title {
+  font-family: var(--font-space-grotesk), sans-serif;
+  font-size: 1.25em;
+  font-weight: 700;
+  letter-spacing: -0.01em;
+}
+
+.mk-ios-act {
+  font-size: 0.6em;
+  color: var(--platform-accent);
+}
+
+.mk-seg {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 0.1em;
+  margin: 0.2em 0.8em 0;
+  padding: 0.14em;
+  border-radius: 0.5em;
+  background-color: rgb(255 255 255 / 0.07);
+}
+
+.mk-seg-i {
+  padding: 0.28em 0;
+  border-radius: 0.38em;
+  text-align: center;
+  font-size: 0.55em;
+  color: var(--deck-dim);
+}
+
+.mk-seg-i.mk-on {
+  background-color: color-mix(in srgb, var(--platform-accent) 24%, transparent);
+  color: var(--fg);
+}
+
+.mk-ios-group {
+  margin: 0.7em 0.8em 0;
+  border-radius: 0.6em;
+  background-color: rgb(255 255 255 / 0.045);
+  overflow: hidden;
+}
+
+.mk-ios-row {
+  display: flex;
+  align-items: center;
+  gap: 0.5em;
+  padding: 0.45em 0.6em;
+  border-bottom: 1px solid rgb(255 255 255 / 0.06);
+}
+.mk-ios-row:last-child {
+  border-bottom: 0;
+}
+
+.mk-ios-ico {
+  display: grid;
+  place-items: center;
+  width: 1.3em;
+  height: 1.3em;
+  flex-shrink: 0;
+  border-radius: 0.3em;
+  background-color: color-mix(in srgb, var(--platform-accent) 20%, transparent);
+  color: var(--platform-accent);
+  font-size: 0.8em;
+}
+
+.mk-ios-label {
+  flex: 1;
+  min-width: 0;
+  font-size: 0.62em;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.mk-ios-val {
+  font-size: 0.55em;
+  font-style: normal;
+  color: var(--deck-dim);
+}
+
+.mk-chev {
+  color: rgb(255 255 255 / 0.28);
+  font-size: 0.7em;
+}
+
+.mk-ios-card {
+  display: flex;
+  flex: 1;
+  flex-direction: column;
+  gap: 0.4em;
+  min-height: 0;
+  margin: 0.7em 0.8em;
+  padding: 0.6em;
+  border-radius: 0.6em;
+  background-color: rgb(255 255 255 / 0.045);
+}
+
+.mk-ios-card-h {
+  display: flex;
+  justify-content: space-between;
+  font-size: 0.58em;
+  color: var(--deck-dim);
+}
+.mk-ios-card-h b {
+  color: var(--platform-accent);
+  font-weight: 500;
+}
+
+.mk-bars {
+  display: flex;
+  flex: 1;
+  align-items: flex-end;
+  gap: 0.3em;
+  min-height: 0;
+}
+.mk-bars i {
+  position: relative;
+  flex: 1;
+  border-radius: 0.15em 0.15em 0 0;
+  background-image: linear-gradient(
+    to top,
+    color-mix(in srgb, var(--platform-accent) 30%, transparent),
+    var(--platform-accent)
+  );
+}
+.mk-bars em {
+  position: absolute;
+  left: 0;
+  right: 0;
+  bottom: -1.15em;
+  text-align: center;
+  font-size: 0.42em;
+  font-style: normal;
+  color: var(--deck-dim);
+}
+
+.mk-tabbar {
+  display: grid;
+  grid-template-columns: repeat(5, minmax(0, 1fr));
+  padding: 0.4em 0 0.2em;
+  margin-top: 0.9em;
+  border-top: 1px solid rgb(255 255 255 / 0.07);
+}
+
+.mk-tab-i {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 0.15em;
+  color: var(--deck-dim);
+  font-size: 0.8em;
+}
+.mk-tab-i em {
+  font-size: 0.55em;
+  font-style: normal;
+}
+.mk-tab-i.mk-on {
+  color: var(--platform-accent);
+}
+
+.mk-home-ind {
+  width: 30%;
+  height: 0.18em;
+  margin: 0.35em auto 0.4em;
+  border-radius: 0.1em;
+  background-color: rgb(255 255 255 / 0.4);
+}
